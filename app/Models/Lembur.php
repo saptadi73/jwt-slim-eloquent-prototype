@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasUuid;
+
+class Lembur extends Model
+{
+    use HasUuid;
+
+    protected $table = 'lembur';
+    protected $primaryKey = 'id';
+    protected $fillable = ['tanggal','jam_mulai','jam_selesai','keterangan','pegawai_id'];
+
+    protected $casts = [
+        'tanggal' => 'date',
+        'jam_mulai' => 'datetime:H:i:s',
+        'jam_selesai' => 'datetime:H:i:s',
+    ];
+
+    public function pegawai()
+    {
+        return $this->belongsTo(Pegawai::class, 'pegawai_id');
+    }
+}
