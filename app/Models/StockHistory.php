@@ -17,27 +17,15 @@ class StockHistory extends Model
 
     protected $fillable = [
         'product_id',
-        'change',
-        'type',  // 'penjualan', 'pembelian'
-        'saleorderbarangline_id',
-        'purchasebarangorderline_id',
+        'qty',
+        'satuan',
+        'type',  // 'penjualan', 'pembelian','manual keluar','manual masuk'
+        'order_id',
     ];
 
     // Relasi ke produk
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
-    }
-
-    // Relasi ke saleorderbarangline
-    public function saleOrderBarangLine()
-    {
-        return $this->belongsTo(SaleOrderBarangLine::class, 'saleorderbarangline_id');
-    }
-
-    // Relasi ke purchasebarangorderline
-    public function purchaseOrderBarangLine()
-    {
-        return $this->belongsTo(PurchaseOrderBarangLine::class, 'purchasebarangorderline_id');
     }
 }

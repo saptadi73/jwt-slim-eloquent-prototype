@@ -59,8 +59,10 @@ $tables = [
     'satuan',
     'customers',
     'vendors',
-    'purchaseorders',
+    'purchaseorder',
     'purchaseorderbarangline',
+    'purchaseorderjasaline',
+    'stock_history',
 ];
 
 foreach ($tables as $t) {
@@ -333,6 +335,21 @@ Capsule::schema()->create('purchaseorderjasaline', function (Blueprint $table) {
 });
 echo "Tabel purchaseorderjasaline dibuat.\n";
 
+Capsule::schema()->create('stock_history', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    
+    $table->integer('qty');
+    $table->string('satuan');
+    $table->string('type');  // 'penjualan', 'pembelian','manual keluar','manual masuk'
+    $table->uuid('order_id')->nullable();
+    $table->timestamps();
+
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+});
+echo "Tabel stock_history dibuat.\n";
+
 /* -------------------------------------------------------------
 | 3) PIVOT TABLES (many-to-many)
 | ------------------------------------------------------------- */
@@ -432,6 +449,8 @@ Capsule::schema()->create('saleorder_salejasaorderline', function (Blueprint $ta
     $table->timestamps();
 });
 echo "Tabel saleorder_salejasaorderline dibuat.\n";
+
+
 
 /* -------------------------------------------------------------
 | 4) HR TABLES
