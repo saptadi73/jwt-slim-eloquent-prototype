@@ -63,6 +63,7 @@ $tables = [
     'purchaseorderbarangline',
     'purchaseorderjasaline',
     'stock_history',
+    'manual_transfer',
 ];
 
 foreach ($tables as $t) {
@@ -349,6 +350,21 @@ Capsule::schema()->create('stock_history', function (Blueprint $table) {
     $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
 });
 echo "Tabel stock_history dibuat.\n";
+
+Capsule::schema()->create('manual_transfer', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->date('tanggal');
+    $table->integer('qty');
+    $table->string('satuan');
+    $table->string('keterangan')->nullable();
+    $table->string('type');  // 'masuk' atau 'keluar'
+    $table->timestamps();
+
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+});
+echo "Tabel manual_transfer dibuat.\n";
 
 /* -------------------------------------------------------------
 | 3) PIVOT TABLES (many-to-many)
