@@ -58,6 +58,9 @@ $tables = [
     'groups',
     'satuan',
     'customers',
+    'vendors',
+    'purchaseorders',
+    'purchaseorderbarangline',
 ];
 
 foreach ($tables as $t) {
@@ -84,6 +87,19 @@ Capsule::schema()->create('customers', function (Blueprint $table) {
     $table->timestamps();
 });
 echo "Tabel customers dibuat.\n";
+
+// vendors
+Capsule::schema()->create('vendors', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->string('nama');
+    $table->string('alamat');
+    $table->string('email')->unique()->nullable();
+    $table->string('gambar')->nullable();
+    $table->string('hp');
+    $table->timestamps();
+});
+echo "Tabel vendors dibuat.\n";
 
 // satuan (milik product)
 Capsule::schema()->create('satuan', function (Blueprint $table) {
@@ -264,6 +280,58 @@ Capsule::schema()->create('saleorderjasaline', function (Blueprint $table) {
     $table->timestamps();
 });
 echo "Tabel saleorderjasaline dibuat.\n";
+
+/*--------------------------------------------------------------
+Purchase Order
+---------------------------------------------------------------*/
+// saleorder (header)
+Capsule::schema()->create('purchaseorder', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->string('nopo')->unique();
+    $table->date('tanggal');
+    $table->bigInteger('total')->nullable();
+    $table->bigInteger('diskon')->nullable();
+    $table->bigInteger('grandtotal')->nullable();
+
+    $table->uuid('vendor_id');
+    $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade');
+
+    $table->timestamps();
+});
+echo "Tabel purchaseorder dibuat.\n";
+
+// purchaseorderbarangline (detail barang)
+Capsule::schema()->create('purchaseorderbarangline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->integer('qty')->nullable();
+    $table->bigInteger('harga')->nullable();
+    $table->bigInteger('total')->nullable();
+    $table->string('keterangan')->nullable();
+
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+
+    $table->timestamps();
+});
+echo "Tabel purchaseorderbarangline dibuat.\n";
+
+// purchaseorderjasaline (detail jasa)
+Capsule::schema()->create('purchaseorderjasaline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->integer('qty')->nullable();
+    $table->bigInteger('harga')->nullable();
+    $table->bigInteger('total')->nullable();
+    $table->string('keterangan')->nullable();
+
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+
+    $table->timestamps();
+});
+echo "Tabel purchaseorderjasaline dibuat.\n";
 
 /* -------------------------------------------------------------
 | 3) PIVOT TABLES (many-to-many)

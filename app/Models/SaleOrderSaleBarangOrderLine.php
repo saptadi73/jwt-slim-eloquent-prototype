@@ -8,10 +8,9 @@ class SaleOrderSaleBarangOrderLine extends Pivot
 {
     protected $table = 'saleorder_salebarangorderline';
 
-    // Pivot kamu pakai timestamps di schema
     public $timestamps = true;
 
-    // Tidak ada kolom id; primary key komposit ditangani oleh Pivot
+    // Tidak ada kolom id, jadi primaryKey null
     protected $primaryKey = null;
     public $incrementing = false;
     protected $keyType = 'string';
@@ -19,16 +18,17 @@ class SaleOrderSaleBarangOrderLine extends Pivot
     protected $fillable = [
         'saleorder_id',
         'saleorderbarangline_id',
-        // Tambah atribut pivot lain kalau nanti ada: 'qty_terpakai', 'catatan', dst.
+        // Tambahkan atribut pivot lain jika diperlukan seperti 'qty_terpakai', 'catatan'
     ];
 
-    // Relasi balik
+    // Relasi balik ke SaleOrder
     public function saleorder()
     {
         return $this->belongsTo(SaleOrder::class, 'saleorder_id');
     }
 
-    public function barangLine()
+    // Relasi balik ke SaleOrderBarangLine
+    public function saleOrderBarangLine()
     {
         return $this->belongsTo(SaleOrderBarangLine::class, 'saleorderbarangline_id');
     }
