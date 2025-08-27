@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,9 @@ class Workorder extends Model
 
     protected $table = 'workorders';
     protected $primaryKey = 'id';
+    public $incrementing = false;   // UUID
+    protected $keyType = 'string';
+
     protected $fillable = [
         'nowo','tanggal','keluhan','pengecekan','service','tambahfreon',
         'thermis','bongkar','pasang','bongkarpasang','perbaikan','hasil',
@@ -20,6 +24,7 @@ class Workorder extends Model
         'tanggal' => 'date',
     ];
 
+    // Induknya WO
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
@@ -30,13 +35,25 @@ class Workorder extends Model
         return $this->belongsTo(Group::class, 'group_id');
     }
 
-    public function workorderbarangline()
+    // WO <-> SALE ORDER BARANG LINE: many-to-many via workorder_salebarangorderline
+    public function saleBarangLines()
     {
-        return $this->hasMany(WorkOrderBarangLine::class, 'workorderbarangline_id');
+        return $this->belongsToMany(
+            SaleOrderBarangLine::class,
+            'workorder_salebarangorderline',
+            'workorder_id',            // FK wo di pivot
+            'saleorderbarangline_id'   // FK line barang di pivot
+        )->withTimestamps();
     }
 
-    public function workorderjasaline()
+    // WO <-> SALE ORDER JASA LINE: many-to-many via workorder_salejasaorderline
+    public function saleJasaLines()
     {
-        return $this->hasMany(WorkOrderJasaLine::class, 'workorderjasaline_id');
+        return $this->belongsToMany(
+            SaleOrderJasaLine::class,
+            'workorder_salejasaorderline',
+            'workorder_id',            // FK wo di pivot
+            'saleorderjasaline_id'     // FK line jasa di pivot
+        )->withTimestamps();
     }
 }

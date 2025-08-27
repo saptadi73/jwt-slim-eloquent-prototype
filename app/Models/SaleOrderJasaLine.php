@@ -14,28 +14,39 @@ class SaleOrderJasaLine extends Model
     public $incrementing = false;   // UUID
     protected $keyType = 'string';
 
-    protected $guarded = [];
-    public $timestamps = true;
-
-    protected $casts = [
-        'qty',
-        'harga',
-        'total',
-        'product_id',
-        'saleorder_id'
+    protected $fillable = [
+        'qty', 'harga', 'total', 'keterangan', 'product_id',
     ];
 
-    // -------------------
-    // Relasi
-    // -------------------
+    protected $casts = [
+        // tidak ada tanggal di line, biarkan kosong
+    ];
 
+    // LINE JASA selalu milik satu produk
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    public function saleOrders()
+    // Header SO ke Line Jasa: many-to-many via saleorder_salejasaorderline
+    public function saleorders()
     {
-        return $this->belongsTo(SaleOrder::class, 'saleorder_id');
+        return $this->belongsToMany(
+            SaleOrder::class,
+            'saleorder_salejasaorderline',
+            'saleorderjasaline_id',   // FK ke tabel ini di pivot
+            'saleorder_id'            // FK ke tabel saleorder di pivot
+        )->withTimestamps();
+    }
+
+    // Workorder ke Line Jasa: many-to-many via workorder_salejasaorderline
+    public function workorders()
+    {
+        return $this->belongsToMany(
+            Workorder::class,
+            'workorder_salejasaorderline',
+            'saleorderjasaline_id',   // FK ke tabel ini di pivot
+            'workorder_id'            // FK ke tabel workorders di pivot
+        )->withTimestamps();
     }
 }
