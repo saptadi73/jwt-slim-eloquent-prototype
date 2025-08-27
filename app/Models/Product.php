@@ -12,7 +12,7 @@ class Product extends Model
     protected $table = 'products';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'nama','satuan','deskripsi','kode','type','harga','stok','brand','model','kategori_id'
+        'nama','satuan_id','deskripsi','kode','type','harga','hpp','stok','brand','model','kategori_id'
     ];
 
     public function kategori()
@@ -24,4 +24,10 @@ class Product extends Model
     {
         return $this->hasMany(BiayaWorkorder::class, 'product_id');
     }
+
+    public function satuan()
+    {
+        return $this->belongsTo(Satuan::class, 'satuan_id');
+    }
+
 }

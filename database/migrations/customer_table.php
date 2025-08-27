@@ -1,4 +1,8 @@
 <?php
+/**
+ * database_setup.php
+ * Rebuild skema: drop dengan aman, lalu create semua tabel dengan FK rapi.
+ */
 
 require __DIR__ . '/../../vendor/autoload.php';
 
@@ -20,60 +24,105 @@ $capsule->addConnection([
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
-/*
-|----------------------------------------------------------------------
+/* -------------------------------------------------------------
+| 0) DROP SEMUA TABEL DENGAN AMAN
+|    Matikan FK checks, drop dari tabel paling dependen → induk
+| ------------------------------------------------------------- */
+Capsule::statement('SET FOREIGN_KEY_CHECKS=0');
+
+$tables = [
+    // Pivot
+    'workorder_salebarangorderline',
+    'workorder_salejasaorderline',
+    'saleorder_salebarangorderline',
+    'saleorder_salejasaorderline',
+    // Child transaksi
+    'saleorderbarangline',
+    'saleorderjasaline',
+    'workorders',
+    'customer_assets',
+    'saleorder',
+    // HR
+    'absen',
+    'cuti',
+    'lembur',
+    'ijin',
+    'gaji',
+    'jatah_cuti',
+    // Master dengan FK keluar
+    'products',
+    'pegawai',
+    // Master dasar
+    'departemen',
+    'kategori',
+    'groups',
+    'satuan',
+    'customers',
+];
+
+foreach ($tables as $t) {
+    Capsule::schema()->dropIfExists($t);
+}
+
+Capsule::statement('SET FOREIGN_KEY_CHECKS=1');
+
+echo "Semua tabel lama dihapus (jika ada).\n";
+
+/* -------------------------------------------------------------
 | 1) MASTER / PARENT TABLES (tanpa ketergantungan)
-|----------------------------------------------------------------------
-*/
+| ------------------------------------------------------------- */
 
 // customers
-Capsule::schema()->dropIfExists('customers');
 Capsule::schema()->create('customers', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
     $table->string('nama');
     $table->string('alamat');
+    $table->string('email')->unique()->nullable();
+    $table->string('gambar')->nullable();
     $table->string('hp');
-    $table->string('lokasi')->nullable();
-    $table->string('brand')->nullable();
-    $table->string('model')->nullable();
-    $table->string('freon')->nullable();
-    $table->string('kapasitas')->nullable();
     $table->timestamps();
 });
-echo "Tabel customers berhasil dibuat!\n";
+echo "Tabel customers dibuat.\n";
+
+// satuan (milik product)
+Capsule::schema()->create('satuan', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->string('nama')->nullable();
+    $table->timestamps();
+});
+echo "Tabel satuan dibuat.\n";
 
 // groups
-Capsule::schema()->dropIfExists('groups');
 Capsule::schema()->create('groups', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
     $table->string('nama')->nullable();
     $table->timestamps();
 });
-echo "Tabel groups berhasil dibuat!\n";
+echo "Tabel groups dibuat.\n";
 
 // kategori
-Capsule::schema()->dropIfExists('kategori');
 Capsule::schema()->create('kategori', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
     $table->string('nama')->nullable();
     $table->timestamps();
 });
-echo "Tabel kategori berhasil dibuat!\n";
+echo "Tabel kategori dibuat.\n";
 
 // products
-Capsule::schema()->dropIfExists('products');
 Capsule::schema()->create('products', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
     $table->string('nama');
-    $table->string('satuan');
+    $table->string('gambar')->nullable();
     $table->string('deskripsi')->nullable();
     $table->string('kode')->nullable();
-    $table->string('type'); // 'jasa' atau 'barang'
+    $table->string('tipe'); // 'jasa' atau 'barang'
     $table->bigInteger('harga')->nullable();
+    $table->bigInteger('hpp')->nullable();
     $table->integer('stok')->nullable();
     $table->string('brand')->nullable();
     $table->string('model')->nullable();
@@ -81,22 +130,24 @@ Capsule::schema()->create('products', function (Blueprint $table) {
     $table->uuid('kategori_id')->nullable();
     $table->foreign('kategori_id')->references('id')->on('kategori')->onDelete('set null');
 
+    // FIX: kolom harus nullable jika onDelete set null
+    $table->uuid('satuan')->nullable();
+    $table->foreign('satuan')->references('id')->on('satuan')->onDelete('set null');
+
     $table->timestamps();
 });
-echo "Tabel products berhasil dibuat!\n";
+echo "Tabel products dibuat.\n";
 
 // departemen
-Capsule::schema()->dropIfExists('departemen');
 Capsule::schema()->create('departemen', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
     $table->string('nama')->nullable();
     $table->timestamps();
 });
-echo "Tabel departemen berhasil dibuat!\n";
+echo "Tabel departemen dibuat.\n";
 
 // pegawai
-Capsule::schema()->dropIfExists('pegawai');
 Capsule::schema()->create('pegawai', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -112,16 +163,33 @@ Capsule::schema()->create('pegawai', function (Blueprint $table) {
 
     $table->timestamps();
 });
-echo "Tabel pegawai berhasil dibuat!\n";
+echo "Tabel pegawai dibuat.\n";
 
-/*
-|----------------------------------------------------------------------
+/* -------------------------------------------------------------
 | 2) CHILD TABLES (memiliki FK ke tabel di atas)
-|----------------------------------------------------------------------
-*/
+| ------------------------------------------------------------- */
+
+// asset milik Customer
+Capsule::schema()->create('customer_assets', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->string('tipe');
+    $table->string('keterangan')->nullable();
+    $table->string('gambar')->nullable();
+    $table->string('lokasi')->nullable();
+    $table->string('brand');
+    $table->string('model')->nullable();
+    $table->string('freon')->nullable();
+    $table->string('kapasitas')->nullable();
+
+    $table->uuid('customer_id');
+    $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+
+    $table->timestamps();
+});
+echo "Tabel customer_assets dibuat.\n";
 
 // workorders
-Capsule::schema()->dropIfExists('workorders');
 Capsule::schema()->create('workorders', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -146,29 +214,162 @@ Capsule::schema()->create('workorders', function (Blueprint $table) {
 
     $table->timestamps();
 });
-echo "Tabel workorders berhasil dibuat!\n";
+echo "Tabel workorders dibuat.\n";
 
-// biayaworkorders
-Capsule::schema()->dropIfExists('biayaworkorders');
-Capsule::schema()->create('biayaworkorders', function (Blueprint $table) {
+// saleorder (header)
+Capsule::schema()->create('saleorder', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
-    $table->integer('jumlah')->nullable();
-    $table->bigInteger('harga')->nullable();
+    $table->string('noso')->unique();
+    $table->date('tanggal');
     $table->bigInteger('total')->nullable();
+    $table->bigInteger('diskon')->nullable();
+    $table->bigInteger('grandtotal')->nullable();
 
-    $table->uuid('workorder_id');
-    $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
-
-    $table->uuid('product_id')->nullable();
-    $table->foreign('product_id')->references('id')->on('products')->onDelete('set null');
+    $table->uuid('customer_id');
+    $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
 
     $table->timestamps();
 });
-echo "Tabel biayaworkorders berhasil dibuat!\n";
+echo "Tabel saleorder dibuat.\n";
+
+// saleorderbarangline (detail barang)
+Capsule::schema()->create('saleorderbarangline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->integer('qty')->nullable();
+    $table->bigInteger('harga')->nullable();
+    $table->bigInteger('total')->nullable();
+    $table->string('keterangan')->nullable();
+
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+
+    $table->timestamps();
+});
+echo "Tabel saleorderbarangline dibuat.\n";
+
+// saleorderjasaline (detail jasa)
+Capsule::schema()->create('saleorderjasaline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->integer('qty')->nullable();
+    $table->bigInteger('harga')->nullable();
+    $table->bigInteger('total')->nullable();
+    $table->string('keterangan')->nullable();
+
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+
+    $table->timestamps();
+});
+echo "Tabel saleorderjasaline dibuat.\n";
+
+/* -------------------------------------------------------------
+| 3) PIVOT TABLES (many-to-many)
+| ------------------------------------------------------------- */
+
+// WO <-> SaleOrderBarangLine
+Capsule::schema()->create('workorder_salebarangorderline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+
+    $table->uuid('workorder_id');
+    $table->uuid('saleorderbarangline_id');
+
+    $table->primary(['workorder_id', 'saleorderbarangline_id'], 'pk_wo_sobarline');
+
+    $table->foreign('workorder_id')
+        ->references('id')->on('workorders')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->foreign('saleorderbarangline_id')
+        ->references('id')->on('saleorderbarangline')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->index('workorder_id', 'idx_wo_sobarline_wo');
+    $table->index('saleorderbarangline_id', 'idx_wo_sobarline_line');
+
+    $table->timestamps();
+});
+echo "Tabel workorder_salebarangorderline dibuat.\n";
+
+// WO <-> SaleOrderJasaLine
+Capsule::schema()->create('workorder_salejasaorderline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+
+    $table->uuid('workorder_id');
+    $table->uuid('saleorderjasaline_id');
+
+    $table->primary(['workorder_id', 'saleorderjasaline_id'], 'pk_wo_sojasaline');
+
+    $table->foreign('workorder_id')
+        ->references('id')->on('workorders')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->foreign('saleorderjasaline_id')
+        ->references('id')->on('saleorderjasaline')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->index('workorder_id', 'idx_wo_sojasaline_wo');
+    $table->index('saleorderjasaline_id', 'idx_wo_sojasaline_line');
+
+    $table->timestamps();
+});
+echo "Tabel workorder_salejasaorderline dibuat.\n";
+
+// SaleOrder <-> SaleOrderBarangLine
+Capsule::schema()->create('saleorder_salebarangorderline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+
+    $table->uuid('saleorder_id');
+    $table->uuid('saleorderbarangline_id');
+
+    $table->primary(['saleorder_id', 'saleorderbarangline_id'], 'pk_so_sobarline');
+
+    $table->foreign('saleorder_id')
+        ->references('id')->on('saleorder')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->foreign('saleorderbarangline_id')
+        ->references('id')->on('saleorderbarangline')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->index('saleorder_id', 'idx_so_sobarline_so');
+    $table->index('saleorderbarangline_id', 'idx_so_sobarline_line');
+
+    $table->timestamps();
+});
+echo "Tabel saleorder_salebarangorderline dibuat.\n";
+
+// SaleOrder <-> SaleOrderJasaLine
+Capsule::schema()->create('saleorder_salejasaorderline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+
+    $table->uuid('saleorder_id');
+    $table->uuid('saleorderjasaline_id');
+
+    $table->primary(['saleorder_id', 'saleorderjasaline_id'], 'pk_so_sojasaline');
+
+    $table->foreign('saleorder_id')
+        ->references('id')->on('saleorder')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->foreign('saleorderjasaline_id')
+        ->references('id')->on('saleorderjasaline')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->index('saleorder_id', 'idx_so_sojasaline_so');
+    $table->index('saleorderjasaline_id', 'idx_so_sojasaline_line');
+
+    $table->timestamps();
+});
+echo "Tabel saleorder_salejasaorderline dibuat.\n";
+
+/* -------------------------------------------------------------
+| 4) HR TABLES
+| ------------------------------------------------------------- */
 
 // absen
-Capsule::schema()->dropIfExists('absen');
 Capsule::schema()->create('absen', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -179,10 +380,9 @@ Capsule::schema()->create('absen', function (Blueprint $table) {
 
     $table->timestamps();
 });
-echo "Tabel absen berhasil dibuat!\n";
+echo "Tabel absen dibuat.\n";
 
 // cuti
-Capsule::schema()->dropIfExists('cuti');
 Capsule::schema()->create('cuti', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -195,10 +395,9 @@ Capsule::schema()->create('cuti', function (Blueprint $table) {
 
     $table->timestamps();
 });
-echo "Tabel cuti berhasil dibuat!\n";
+echo "Tabel cuti dibuat.\n";
 
 // lembur
-Capsule::schema()->dropIfExists('lembur');
 Capsule::schema()->create('lembur', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -212,10 +411,9 @@ Capsule::schema()->create('lembur', function (Blueprint $table) {
 
     $table->timestamps();
 });
-echo "Tabel lembur berhasil dibuat!\n";
+echo "Tabel lembur dibuat.\n";
 
 // ijin
-Capsule::schema()->dropIfExists('ijin');
 Capsule::schema()->create('ijin', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -229,10 +427,9 @@ Capsule::schema()->create('ijin', function (Blueprint $table) {
 
     $table->timestamps();
 });
-echo "Tabel ijin berhasil dibuat!\n";
+echo "Tabel ijin dibuat.\n";
 
 // gaji
-Capsule::schema()->dropIfExists('gaji');
 Capsule::schema()->create('gaji', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -244,10 +441,9 @@ Capsule::schema()->create('gaji', function (Blueprint $table) {
 
     $table->timestamps();
 });
-echo "Tabel gaji berhasil dibuat!\n";
+echo "Tabel gaji dibuat.\n";
 
 // jatah_cuti
-Capsule::schema()->dropIfExists('jatah_cuti');
 Capsule::schema()->create('jatah_cuti', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -259,4 +455,6 @@ Capsule::schema()->create('jatah_cuti', function (Blueprint $table) {
 
     $table->timestamps();
 });
-echo "Tabel jatah_cuti berhasil dibuat!\n";
+echo "Tabel jatah_cuti dibuat.\n";
+
+echo "Selesai. Skema database siap dipakai.\n";

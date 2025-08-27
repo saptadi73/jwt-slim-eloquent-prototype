@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -31,8 +30,13 @@ class Workorder extends Model
         return $this->belongsTo(Group::class, 'group_id');
     }
 
-    public function biayaItems()
+    public function workorderbarangline()
     {
-        return $this->hasMany(BiayaWorkorder::class, 'workorder_id');
+        return $this->hasMany(WorkOrderBarangLine::class, 'workorderbarangline_id');
+    }
+
+    public function workorderjasaline()
+    {
+        return $this->hasMany(WorkOrderJasaLine::class, 'workorderjasaline_id');
     }
 }
