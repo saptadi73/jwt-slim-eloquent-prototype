@@ -1,7 +1,7 @@
 <?php
 use Slim\Factory\AppFactory;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use App\Middleware\CorsMiddleware;
+use App\Middlewares\CorsMiddleware;
 
 
 require __DIR__ . '/../vendor/autoload.php';

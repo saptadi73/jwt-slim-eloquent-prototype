@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Service;
+namespace App\Services;
 
-use App\Model\User;
-use App\Model\Role;
+use App\Models\User;
+use App\Models\Role;
 
 class UserService
 {

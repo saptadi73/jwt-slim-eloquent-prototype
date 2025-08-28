@@ -1,12 +1,13 @@
 <?php
 use Slim\App;
-use App\Service\AuthService;
-use App\Service\UserService;
-use App\Service\RoleService; // Tambahkan RoleService jika diperlukan
+use App\Services\AuthService;
+use App\Services\UserService;
+use App\Services\RoleService; // Tambahkan RoleService jika diperlukan
 use App\Support\JsonResponder;
 use App\Support\RequestHelper;
+use App\Services\CheckListService;
 use Firebase\JWT\JWT;
-use App\Middleware\JwtMiddleware;
+use App\Middlewares\JwtMiddleware;
 
 return function (App $app) {
     // Route home
@@ -25,7 +26,7 @@ return function (App $app) {
         }
 
         // Tentukan role_id default (misalnya 'User' dengan id 1)
-        $role = \App\Model\Role::where('name', 'User')->first(); // Sesuaikan dengan role yang ada
+        $role = \App\Models\Role::where('name', 'User')->first(); // Sesuaikan dengan role yang ada
         if (!$role) {
             return JsonResponder::error($response, 'Role not found', 404);
         }
@@ -52,7 +53,7 @@ return function (App $app) {
     // Mengambil profil pengguna
     $app->get('/profile', function ($request, $response) {
         $jwt = $request->getAttribute('jwt');
-        $user = \App\Model\User::find($jwt['sub']); // Ambil user berdasarkan JWT
+        $user = \App\Models\User::find($jwt['sub']); // Ambil user berdasarkan JWT
 
         // Mengambil informasi role
         $role = $user->role;  // Menampilkan role terkait pengguna
@@ -94,4 +95,9 @@ return function (App $app) {
         }
         return JsonResponder::error($response, 'User not found', 404);
     })->add(new JwtMiddleware());
+
+    $app->get('/isichecklist1', function ($request, $response) {
+        $checklist = CheckListService::isiTableTeknisiServiceAC();
+        return JsonResponder::success($response, $checklist, 'Checklist retrieved');
+    });
 };
