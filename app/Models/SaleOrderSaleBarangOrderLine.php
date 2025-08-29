@@ -14,6 +14,9 @@ class SaleOrderSaleBarangOrderLine extends Pivot
     protected $primaryKey = null;
     public $incrementing = false;
     protected $keyType = 'string';
+    
+
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     protected $fillable = [
         'saleorder_id',

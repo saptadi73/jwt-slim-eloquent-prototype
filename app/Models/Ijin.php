@@ -18,6 +18,12 @@ class Ijin extends Model
         'jam_mulai' => 'datetime:H:i:s',
         'jam_selesai' => 'datetime:H:i:s',
     ];
+    protected $keyType = 'string';
+    public $incrementing = false;   // UUID
+
+    public $timestamps = true;
+
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     public function pegawai()
     {

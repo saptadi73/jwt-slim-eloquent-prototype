@@ -9,6 +9,10 @@ class Role extends Model
     protected $table = 'roles';  // Nama tabel
     protected $fillable = ['name', 'label'];  // Kolom yang bisa diisi
     public $timestamps = true;
+    protected $keyType = 'string';
+    public $incrementing = false;   // UUID
+
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     // Relasi Many-to-Many dengan User
     public function users()

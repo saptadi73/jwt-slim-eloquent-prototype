@@ -21,6 +21,8 @@ class PurchaseOrder extends Model
         'diskon',
         'grandtotal',
         'vendor_id',
+        'status',
+        'bukti',
     ];
 
     public $timestamps = true;

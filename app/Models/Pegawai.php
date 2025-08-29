@@ -13,6 +13,13 @@ class Pegawai extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['nama','alamat','hp','departemen_id','group_id'];
 
+    protected $keyType = 'string';
+    public $incrementing = false;   // UUID
+
+    public $timestamps = true;
+
+    protected $dateFormat = 'Y-m-d H:i:s';
+
     public function departemen()
     {
         return $this->belongsTo(Departemen::class, 'departemen_id');

@@ -13,6 +13,13 @@ class Kategori extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['nama'];
 
+    protected $keyType = 'string';
+    public $incrementing = false;   // UUID
+
+    public $timestamps = true;
+
+    protected $dateFormat = 'Y-m-d H:i:s';
+
     public function products()
     {
         return $this->hasMany(Product::class, 'kategori_id');

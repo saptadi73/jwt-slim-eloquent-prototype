@@ -15,6 +15,13 @@ class Product extends Model
         'nama','satuan_id','deskripsi','kode','type','harga','hpp','stok','brand','model','kategori_id'
     ];
 
+    protected $keyType = 'string';
+    public $incrementing = false;   // UUID
+
+    public $timestamps = true;
+
+    protected $dateFormat = 'Y-m-d H:i:s';
+    
     public function kategori()
     {
         return $this->belongsTo(Kategori::class, 'kategori_id');

@@ -27,4 +27,9 @@ class Customer extends Model
     {
         return $this->hasMany(SaleOrder::class, 'customer_id');
     }
+
+    public function jurnals()
+    {
+        return $this->hasMany(Jurnal::class, 'customer_id');
+    }
 }

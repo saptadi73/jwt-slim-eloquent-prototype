@@ -16,6 +16,11 @@ class Absen extends Model
     protected $casts = [
         'tanggal' => 'date',
     ];
+    public $incrementing = false;   // UUID
+
+    public $timestamps = true;
+
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     public function pegawai()
     {

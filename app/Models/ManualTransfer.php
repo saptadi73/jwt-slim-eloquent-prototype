@@ -24,6 +24,7 @@ class ManualTransfer extends Model
         'product_id',
     ];
 
+
     // bigInteger di schema → cast ke integer
     protected $casts = [
         'qty'   => 'integer',

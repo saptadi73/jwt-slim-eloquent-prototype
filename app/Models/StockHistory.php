@@ -23,6 +23,8 @@ class StockHistory extends Model
         'order_id',
     ];
 
+    protected $dateFormat = 'Y-m-d H:i:s';
+
     // Relasi ke produk
     public function product()
     {

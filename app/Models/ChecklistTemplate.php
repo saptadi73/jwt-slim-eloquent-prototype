@@ -15,6 +15,13 @@ class ChecklistTemplate extends Model
         'pic','jenis_workorder','checklist'
     ];
 
+    protected $keyType = 'string';
+    public $incrementing = false;   // UUID
+
+    public $timestamps = true;
+
+    protected $dateFormat = 'Y-m-d H:i:s';
+
     protected $casts = [
         'no_urut' => 'integer',
     ];

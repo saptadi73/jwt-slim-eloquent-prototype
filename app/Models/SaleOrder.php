@@ -24,11 +24,15 @@ class SaleOrder extends Model
         'diskon',
         'grandtotal',
         'customer_id',
+        'status',
+        'bukti',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
     ];
+
+    protected $dateFormat = 'Y-m-d H:i:s';
 
     /* =========================
      * Relasi

@@ -24,6 +24,8 @@ class SaleOrderBarangLine extends Model
         'product_id',
     ];
 
+    protected $dateFormat = 'Y-m-d H:i:s';
+
     // bigInteger di schema → cast ke integer
     protected $casts = [
         'qty'   => 'integer',

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * database_setup.php
  * Rebuild skema: drop dengan aman, lalu create semua tabel dengan FK rapi.
@@ -66,6 +67,8 @@ $tables = [
     'manual_transfer',
     'checklist',
     'checklist_template',
+    'coa',
+    'jurnal',
 ];
 
 foreach ($tables as $t) {
@@ -275,7 +278,7 @@ Capsule::schema()->create('checklist', function (Blueprint $table) {
     // ganti nama biar jelas
     $table->uuid('checklist_template_id')->nullable();
     $table->foreign('checklist_template_id')
-          ->references('id')->on('checklist_template')->onDelete('set null');
+        ->references('id')->on('checklist_template')->onDelete('set null');
 
     $table->timestamps();
 });
@@ -290,6 +293,8 @@ Capsule::schema()->create('saleorder', function (Blueprint $table) {
     $table->bigInteger('total')->nullable();
     $table->bigInteger('diskon')->nullable();
     $table->bigInteger('grandtotal')->nullable();
+    $table->string('status')->nullable(); // received, pending
+    $table->string('bukti')->nullable();
 
     $table->uuid('customer_id');
     $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
@@ -297,6 +302,24 @@ Capsule::schema()->create('saleorder', function (Blueprint $table) {
     $table->timestamps();
 });
 echo "Tabel saleorder dibuat.\n";
+
+//Expense
+Capsule::schema()->create('expense', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->date('tanggal');
+    $table->string('nomor')->unique();
+    $table->bigInteger('jumlah')->nullable();
+    $table->string('keterangan')->nullable();
+    $table->string('status')->nullable(); // received, pending
+    $table->string('bukti')->nullable();
+
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+
+    $table->timestamps();
+});
+echo "Tabel expense dibuat.\n";
 
 // saleorderbarangline (detail barang)
 Capsule::schema()->create('saleorderbarangline', function (Blueprint $table) {
@@ -342,6 +365,8 @@ Capsule::schema()->create('purchaseorder', function (Blueprint $table) {
     $table->bigInteger('total')->nullable();
     $table->bigInteger('diskon')->nullable();
     $table->bigInteger('grandtotal')->nullable();
+    $table->string('status')->nullable(); // received, pending
+    $table->string('bukti')->nullable();
 
     $table->uuid('vendor_id');
     $table->foreign('vendor_id')->references('id')->on('vendors')->onDelete('cascade');
@@ -385,7 +410,7 @@ echo "Tabel purchaseorderjasaline dibuat.\n";
 Capsule::schema()->create('stock_history', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
-    
+
     $table->integer('qty');
     $table->string('satuan');
     $table->string('type');  // 'penjualan', 'pembelian','manual keluar','manual masuk'
@@ -605,5 +630,49 @@ Capsule::schema()->create('jatah_cuti', function (Blueprint $table) {
     $table->timestamps();
 });
 echo "Tabel jatah_cuti dibuat.\n";
+
+/*--------------------------------------------------------------
+Accounting
+----------------------------------------------------------------*/
+
+//Table Chart of Account
+Capsule::schema()->create('coa', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->string('kode')->unique();
+    $table->string('nama');
+    $table->string('tipe'); // Asset, Liability, Equity, Revenue, Expense
+    $table->string('kategori')->nullable(); // Current Asset, Fixed Asset, Current Liability, Long-term Liability, dll
+    $table->timestamps();
+});
+echo "Tabel coa dibuat.\n";
+
+Capsule::schema()->create('jurnal', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->date('tanggal');
+    $table->string('keterangan')->nullable();
+    $table->bigInteger('debit')->nullable();
+    $table->bigInteger('kredit')->nullable();
+
+    $table->uuid('account_id')->nullable();
+    $table->foreign('account_id')
+        ->references('id')->on('coa')
+        ->onDelete('set null');
+
+    $table->uuid('vendor_id')->nullable();
+    $table->foreign('vendor_id')
+        ->references('id')->on('vendors')   // <— perbaiki: vendors
+        ->onDelete('set null');
+
+    $table->uuid('customer_id')->nullable();
+    $table->foreign('customer_id')
+        ->references('id')->on('customers') // <— perbaiki: customers
+        ->onDelete('set null');
+
+    $table->timestamps();
+});
+
+echo "Tabel jurnal dibuat.\n";
 
 echo "Selesai. Skema database siap dipakai.\n";

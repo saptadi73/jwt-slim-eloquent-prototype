@@ -15,6 +15,19 @@ class Checklist extends Model
         'checklist_template_id','workorder_id','pegawai_id'
     ];
 
+    protected $casts = [
+        'jawaban' => 'string',
+        'keterangan' => 'string',
+        'checklist_template_id' => 'string',
+        'workorder_id' => 'string',
+        'pegawai_id' => 'string',
+    ];
+    public $incrementing = false;   // UUID
+
+    public $timestamps = true;
+
+    protected $dateFormat = 'Y-m-d H:i:s';
+
     public function workorder()
     {
         return $this->belongsTo(WorkOrder::class, 'workorder_id');

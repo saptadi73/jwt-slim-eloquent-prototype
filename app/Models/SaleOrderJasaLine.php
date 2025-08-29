@@ -22,6 +22,11 @@ class SaleOrderJasaLine extends Model
         // tidak ada tanggal di line, biarkan kosong
     ];
 
+
+    public $timestamps = true;
+
+    protected $dateFormat = 'Y-m-d H:i:s';
+
     // LINE JASA selalu milik satu produk
     public function product()
     {
