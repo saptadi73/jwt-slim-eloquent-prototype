@@ -69,6 +69,7 @@ $tables = [
     'checklist_template',
     'coa',
     'jurnal',
+    'expense',
 ];
 
 foreach ($tables as $t) {
