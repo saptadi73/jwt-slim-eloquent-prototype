@@ -257,7 +257,7 @@ class ChecklistTemplateSeeder
             'jenis_workorder' => 'Penjualan AC'
         ]);
         ChecklistTemplate::create([
-            'no_urut' => 17,
+            'no_urut' => 18,
             'kode_checklist' => 'B',
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Temperature Kondensor',
