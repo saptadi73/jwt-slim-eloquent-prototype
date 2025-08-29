@@ -100,4 +100,8 @@ return function (App $app) {
         $checklist = CheckListService::isiTableTeknisiServiceAC();
         return JsonResponder::success($response, $checklist, 'Checklist retrieved');
     });
+    $app->get('/isichecklist2', function ($request, $response) {
+        $checklist = CheckListService::isiTableTeknisiServiceAC2();
+        return JsonResponder::success($response, $checklist, 'Checklist retrieved');
+    });
 };
