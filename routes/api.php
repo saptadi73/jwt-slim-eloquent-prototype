@@ -2,14 +2,17 @@
 use Slim\App;
 use App\Services\AuthService;
 use App\Services\UserService;
-use App\Services\RoleService; // Tambahkan RoleService jika diperlukan
 use App\Support\JsonResponder;
 use App\Support\RequestHelper;
 use App\Services\CheckListService;
-use Firebase\JWT\JWT;
 use App\Middlewares\JwtMiddleware;
+use App\Services\CustomerService;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface as Response;
 
 return function (App $app) {
+
+    $container = $app->getContainer();
     // Route home
     $app->get('/', function ($request, $response, $args) {
         $response->getBody()->write("Hello Slim 4 + Eloquent ORM!");
@@ -104,4 +107,25 @@ return function (App $app) {
         $checklist = CheckListService::isiTableTeknisiServiceAC2();
         return JsonResponder::success($response, $checklist, 'Checklist retrieved');
     });
+
+    // Route untuk membuat customer
+    // Route untuk membuat customer (multipart)
+$app->post('/customers', function (Request $request, Response $response) use ($container) {
+        /** @var CustomerService $svc */
+        $svc = $container->get(CustomerService::class);
+
+        $data = $request->getParsedBody() ?? [];
+        $files = $request->getUploadedFiles();
+        // Sesuaikan key file Anda: 'photo', 'file', dsb.
+        $file = $files['file'] ?? ($files['photo'] ?? null);
+
+        // Jika service Anda mengembalikan Response (JsonResponder), langsung return:
+        if (method_exists($svc, 'createCustomerMultipart')) {
+            return $svc->createCustomerMultipart($data, $response, $file);
+        }
+
+        // Fallback sederhana jika method di atas tidak ada:
+        $response->getBody()->write(json_encode(['message' => 'Not Implemented']));
+        return $response->withStatus(501)->withHeader('Content-Type', 'application/json');
+    })->add(new JwtMiddleware()); // Proteksi JWT per-route
 };

@@ -13,14 +13,14 @@ class CustomerAsset extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['tipe','keterangan',
         'lokasi','brand','model','freon','kapasitas',
-        'customer_id'
+        'customer_id','gambar'
     ];
     protected $keyType = 'string';
     public $incrementing = false;   // UUID
 
     public $timestamps = true;
 
-    protected $dateFormat = 'Y-m-d H:i:s';
+   
 
     public function customer()
     {

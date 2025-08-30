@@ -88,6 +88,7 @@ echo "Semua tabel lama dihapus (jika ada).\n";
 Capsule::schema()->create('customers', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
+    $table->string('kode_pelanggan')->unique();
     $table->string('nama');
     $table->string('alamat');
     $table->string('email')->unique()->nullable();
