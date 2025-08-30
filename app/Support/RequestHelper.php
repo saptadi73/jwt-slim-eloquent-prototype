@@ -2,6 +2,7 @@
 namespace App\Support;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UploadedFileInterface;
 
 class RequestHelper
 {
@@ -15,5 +16,19 @@ class RequestHelper
         }
         $data = $request->getParsedBody();
         return is_array($data) ? $data : [];
+    }
+
+     /**
+     * Pilih satu file dari daftar key kandidat, mis. ['file','photo'].
+     */
+    public static function pickUploadedFile(ServerRequestInterface $request, array $keys = ['file','photo']): ? UploadedFileInterface
+    {
+        $files = $request->getUploadedFiles();
+        foreach ($keys as $k) {
+            if (isset($files[$k])) {
+                return $files[$k];
+            }
+        }
+        return null;
     }
 }

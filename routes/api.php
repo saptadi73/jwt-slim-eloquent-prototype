@@ -1,4 +1,5 @@
 <?php
+
 use Slim\App;
 use App\Services\AuthService;
 use App\Services\UserService;
@@ -22,7 +23,7 @@ return function (App $app) {
     // Registrasi pengguna dengan role
     $app->post('/register', function ($request, $response) {
         $data = RequestHelper::getJsonBody($request);
-        
+
         // Validasi input
         if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
             return JsonResponder::error($response, 'Invalid input', 400);
@@ -36,7 +37,7 @@ return function (App $app) {
 
         // Panggil fungsi register untuk membuat user baru
         $user = AuthService::register($data['name'], $data['email'], $data['password'], $role->id);
-        
+
         return JsonResponder::success($response, $user, 'User registered');
     });
 
@@ -110,22 +111,26 @@ return function (App $app) {
 
     // Route untuk membuat customer
     // Route untuk membuat customer (multipart)
-$app->post('/customers', function (Request $request, Response $response) use ($container) {
+    // Route untuk membuat customer (multipart / json) dengan JsonResponder
+    $app->post('/customers', function (Request $request, Response $response) use ($container) {
         /** @var CustomerService $svc */
-        $svc = $container->get(CustomerService::class);
+        $svc  = $container->get(CustomerService::class);
+        $data = RequestHelper::getJsonBody($request);
+        $file = RequestHelper::pickUploadedFile($request, ['file', 'photo']);
 
-        $data = $request->getParsedBody() ?? [];
-        $files = $request->getUploadedFiles();
-        // Sesuaikan key file Anda: 'photo', 'file', dsb.
-        $file = $files['file'] ?? ($files['photo'] ?? null);
-
-        // Jika service Anda mengembalikan Response (JsonResponder), langsung return:
-        if (method_exists($svc, 'createCustomerMultipart')) {
-            return $svc->createCustomerMultipart($data, $response, $file);
+        if (!method_exists($svc, 'createCustomerMultipart')) {
+            return JsonResponder::error($response, 'Service method not implemented', 501);
         }
 
-        // Fallback sederhana jika method di atas tidak ada:
-        $response->getBody()->write(json_encode(['message' => 'Not Implemented']));
-        return $response->withStatus(501)->withHeader('Content-Type', 'application/json');
-    })->add(new JwtMiddleware()); // Proteksi JWT per-route
+        try {
+            // Service Anda sudah mengembalikan Response via JsonResponder::success/error
+            return $svc->createCustomerMultipart($data, $response, $file);
+        } catch (\InvalidArgumentException $e) {
+            return JsonResponder::error($response, $e->getMessage(), 422);
+        } catch (\Throwable $e) {
+            // TODO: log $e jika diperlukan
+            return JsonResponder::error($response, 'Internal server error', 500);
+        }
+    })->add(new JwtMiddleware());
+    // Proteksi JWT per-route
 };
