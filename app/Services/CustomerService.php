@@ -13,87 +13,91 @@ use Slim\Psr7\Response;
 
 final class CustomerService
 {
-    // photo/gambar customer diset oleh upload helper
-    private array $customerFields = ['nama','alamat','hp']; 
-    // image_path asset bila ada mekanisme upload terpisah
-    private array $assetFields    = ['tipe','keterangan','lokasi','brand','model','freon','kapasitas']; 
+    /** Field milik tabel customers */
+    private array $customerFields = ['nama','alamat','hp','gambar'];
+
+    /** Field milik tabel customer_assets */
+    private array $assetFields = ['tipe','keterangan','lokasi','brand','model','freon','kapasitas'];
 
     /**
-     * Endpoint utama pembuatan customer (multipart): validasi, upload (opsional), simpan customer + assets.
+     * Endpoint utama pembuatan customer (multipart):
+     * - validasi
+     * - upload (opsional)
+     * - simpan customer + assets (ATOMIK)
      */
     public function createCustomerMultipart(array $data, Response $response, ?UploadedFileInterface $file = null): Response
     {
         try {
-            // 1) Validasi input dasar
-            $validated = $this->validateCustomerData($data);
+            // 1) Validasi field dasar
+            [$customerData, $assetData] = $this->validateAndSplit($data);
 
-            // 2) Upload foto customer (opsional)
+            // 2) Upload foto (opsional)
             if ($file instanceof UploadedFileInterface && $file->getError() === UPLOAD_ERR_OK) {
-                $validated['gambar'] = Upload::storeImage($file, 'customers'); // simpan path relatif
+                // Simpan path relatif, misal: "customers/2025/08/xyz.jpg"
+                $customerData['gambar'] = Upload::storeImage($file, 'customers');
             }
 
-            // 3) Simpan transaksional
-            $customer = DB::transaction(function () use ($validated, $data) {
+            // 3) Simpan transaksional (customer + asset)
+            [$customer, $customerAsset] = DB::transaction(function () use ($customerData, $assetData) {
                 /** @var Customer $customer */
-                $customer = Customer::create($validated);
+                $customer = Customer::create($customerData);
 
-                // Assets (opsional)
-                if (!empty($data['customer_asset']) && is_array($data['customer_asset'])) {
-                    foreach ($data['customer_asset'] as $idx => $asset) {
-                        $assetPayload = $this->validateAssetData($asset, $idx);
-                        $customer->assets()->create($assetPayload);
-                    }
-                }
+                // Set FK dan buat asset
+                $assetData['customer_id'] = $customer->id;
+                /** @var CustomerAsset $asset */
+                $asset = CustomerAsset::create($assetData);
 
-                return $customer;
+                return [$customer, $asset];
             });
 
+            // Muat relasi setelah keduanya dibuat
             $customer->load('assets');
 
-            return JsonResponder::success($response, $customer, 'Customer created', 201);
+            return JsonResponder::success(
+                $response,
+                [
+                    'customer' => $customer,
+                    'asset'    => $customerAsset,
+                ],
+                'Customer created',
+                201
+            );
 
         } catch (InvalidArgumentException $e) {
             return JsonResponder::error($response, $e->getMessage(), 422);
         } catch (\Throwable $e) {
-            // Anda bisa log detail $e untuk debugging internal
+            // TODO: log $e untuk debugging internal
             return JsonResponder::error($response, 'Internal server error', 500);
         }
     }
 
     /**
-     * Validasi data customer, return payload siap simpan (tanpa gambar).
+     * Validasi & bagi payload menjadi 2 bagian: customers & customer_assets.
+     * @return array{0: array, 1: array}
      * @throws InvalidArgumentException
      */
-    private function validateCustomerData(array $data): array
+    private function validateAndSplit(array $data): array
     {
-        $payload = Arr::only($data, $this->customerFields);
+        // Ambil sesuai domain tabelnya
+        $customer = Arr::only($data, $this->customerFields);
+        $asset    = Arr::only($data, $this->assetFields);
 
+        // Validasi minimum untuk tabel customers
         foreach (['nama','alamat','hp'] as $field) {
-            if (empty($payload[$field]) || !is_string($payload[$field])) {
+            if (empty($customer[$field]) || !is_string($customer[$field])) {
                 throw new InvalidArgumentException("Field '{$field}' wajib diisi");
             }
         }
 
-        // (Opsional) tambahan validasi HP sederhana
-        if (!preg_match('/^[0-9+\s\-()]{6,20}$/', $payload['hp'])) {
+        // Validasi HP sederhana
+        if (!preg_match('/^[0-9+\s\\-()]{6,20}$/', $customer['hp'])) {
             throw new InvalidArgumentException("Format 'hp' tidak valid");
         }
 
-        return $payload;
-    }
+        // (Opsional) Validasi minimal untuk assets
+        // Misal tipe/lokasi wajib jika ingin memaksa perekaman asset
+        // if (empty($asset['tipe'])) { throw new InvalidArgumentException(\"Field 'tipe' wajib diisi\"); }
 
-    /**
-     * Validasi satu baris asset, return payload siap simpan.
-     * @throws InvalidArgumentException
-     */
-    private function validateAssetData(array $asset, int $index = 0): array
-    {
-        $payload = Arr::only($asset, $this->assetFields);
-        foreach ($this->assetFields as $f) {
-            if (!isset($payload[$f]) || $payload[$f] === '') {
-                throw new InvalidArgumentException("Asset[{$index}] field '{$f}' wajib diisi");
-            }
-        }
-        return $payload;
+        return [$customer, $asset];
     }
 }

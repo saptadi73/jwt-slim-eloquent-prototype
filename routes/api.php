@@ -131,6 +131,6 @@ return function (App $app) {
             // TODO: log $e jika diperlukan
             return JsonResponder::error($response, 'Internal server error', 500);
         }
-    })->add(new JwtMiddleware());
+    });
     // Proteksi JWT per-route
 };
