@@ -67,4 +67,14 @@ final class Upload
         $relative = '/uploads/'.trim($subdir, '/\\').'/'.$basename.'.'.$ext;
         return $relative;
     }
+    
+    public static function deleteImage(string $relativePath): bool
+    {
+        $publicRoot = rtrim($_ENV['PUBLIC_PATH'] ?? (dirname(__DIR__, 2).'/public'), '/\\');
+        $fullPath = $publicRoot . '/' . ltrim($relativePath, '/\\');
+        if (is_file($fullPath)) {
+            return unlink($fullPath);
+        }
+        return false;
+    }
 }
