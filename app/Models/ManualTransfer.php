@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class ManualTransfer extends Model
 {
-    use HasUuid;
+
 
     protected $table = 'manual_transfer';
     protected $primaryKey = 'id';
@@ -22,6 +21,7 @@ class ManualTransfer extends Model
         'type',
         'keterangan',
         'product_id',
+        'id',
     ];
 
 

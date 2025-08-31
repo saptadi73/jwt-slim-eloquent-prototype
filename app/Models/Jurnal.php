@@ -3,16 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class Jurnal extends Model
 {
-    use HasUuid;
 
     protected $table = 'jurnal';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'account_id','vendor_id','customer_id','debit','kredit','keterangan','tanggal'];
+        'account_id','vendor_id','customer_id','debit','kredit','keterangan','tanggal','id'];
     protected $casts = [
         'tanggal' => 'date',
         'debit' => 'bigInteger',

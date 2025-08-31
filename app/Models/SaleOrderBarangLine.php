@@ -22,6 +22,7 @@ class SaleOrderBarangLine extends Model
         'total',
         'keterangan',
         'product_id',
+        'id',
     ];
 
     protected $dateFormat = 'Y-m-d H:i:s';

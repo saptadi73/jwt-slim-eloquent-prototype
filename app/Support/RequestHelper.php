@@ -31,4 +31,14 @@ class RequestHelper
         }
         return null;
     }
+    
+    public static function parseMultipart(ServerRequestInterface $request): array
+    {
+        $data = $request->getParsedBody();
+        $files = $request->getUploadedFiles();
+        return [
+            'data' => is_array($data) ? $data : [],
+            'files' => is_array($files) ? $files : []
+        ];
+    }
 }

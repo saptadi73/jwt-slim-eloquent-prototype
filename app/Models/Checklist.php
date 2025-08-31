@@ -3,16 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class Checklist extends Model
 {
-    use HasUuid;
+   
 
     protected $table = 'checklist';
     protected $primaryKey = 'id';
     protected $fillable = ['jawaban','keterangan',
-        'checklist_template_id','workorder_id','pegawai_id'
+        'checklist_template_id','workorder_id','pegawai_id','id'
     ];
 
     protected $casts = [

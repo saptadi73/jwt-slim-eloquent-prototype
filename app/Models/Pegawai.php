@@ -3,15 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
-
 class Pegawai extends Model
 {
-    use HasUuid;
 
     protected $table = 'pegawai';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama','alamat','hp','departemen_id','group_id'];
+    protected $fillable = ['nama','alamat','hp','departemen_id','group_id','email','id'];
 
     protected $keyType = 'string';
     public $incrementing = false;   // UUID

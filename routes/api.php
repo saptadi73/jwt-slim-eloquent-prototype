@@ -117,19 +117,23 @@ return function (App $app) {
         $svc  = $container->get(CustomerService::class);
         $data = RequestHelper::getJsonBody($request);
         $file = RequestHelper::pickUploadedFile($request, ['file', 'photo']);
+        
+        
 
-        if (!method_exists($svc, 'createCustomerMultipart')) {
-            return JsonResponder::error($response, 'Service method not implemented', 501);
-        }
+        // if (!method_exists($svc, 'createCustomerMultipart')) {
+        //     return JsonResponder::error($response, 'Service method not implemented', 501);
+        // }
 
+        
+        
         try {
             // Service Anda sudah mengembalikan Response via JsonResponder::success/error
-            return $svc->createCustomerMultipart($data, $response, $file);
+            return $svc->createCustomerAndAsset($request, $response, $data, $file);
         } catch (\InvalidArgumentException $e) {
             return JsonResponder::error($response, $e->getMessage(), 422);
         } catch (\Throwable $e) {
             // TODO: log $e jika diperlukan
-            return JsonResponder::error($response, 'Internal server error', 500);
+            return JsonResponder::error($response, 'Internal server error gak tahu', 500);
         }
     });
     // Proteksi JWT per-route

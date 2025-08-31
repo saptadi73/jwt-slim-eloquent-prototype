@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class SaleOrderJasaLine extends Model
 {
-    use HasUuid;
 
     protected $table = 'saleorderjasaline';
     protected $primaryKey = 'id';
@@ -15,7 +13,7 @@ class SaleOrderJasaLine extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'qty', 'harga', 'total', 'keterangan', 'product_id',
+        'qty', 'harga', 'total', 'keterangan', 'product_id','id'
     ];
 
     protected $casts = [

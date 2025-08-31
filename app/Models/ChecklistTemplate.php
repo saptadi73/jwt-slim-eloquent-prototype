@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
+
 
 class ChecklistTemplate extends Model
 {
-    use HasUuid;
+    
 
     protected $table = 'checklist_template';
     protected $primaryKey = 'id';

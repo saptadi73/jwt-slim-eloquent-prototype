@@ -3,15 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class Departemen extends Model
 {
-    use HasUuid;
+
 
     protected $table = 'departemen';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama'];
+    protected $fillable = ['nama','id'];
     protected $keyType = 'string';
     public $incrementing = false;   // UUID
 

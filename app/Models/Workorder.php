@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class Workorder extends Model
 {
-    use HasUuid;
 
     protected $table = 'workorders';
     protected $primaryKey = 'id';
@@ -17,7 +15,7 @@ class Workorder extends Model
     protected $fillable = [
         'nowo','tanggal','keluhan','pengecekan','service','tambahfreon',
         'thermis','bongkar','pasang','bongkarpasang','perbaikan','hasil',
-        'customer_id','group_id'
+        'customer_id','group_id','id'
     ];
 
     protected $casts = [

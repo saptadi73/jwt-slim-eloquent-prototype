@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class StockHistory extends Model
 {
-    use HasUuid;
 
     protected $table = 'stock_history';
     protected $primaryKey = 'id';
@@ -21,6 +19,7 @@ class StockHistory extends Model
         'satuan',
         'type',  // 'penjualan', 'pembelian','manual keluar','manual masuk'
         'order_id',
+        'id',
     ];
 
     protected $dateFormat = 'Y-m-d H:i:s';

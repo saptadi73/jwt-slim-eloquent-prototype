@@ -3,15 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class Ijin extends Model
 {
-    use HasUuid;
 
     protected $table = 'ijin';
     protected $primaryKey = 'id';
-    protected $fillable = ['tanggal','jam_mulai','jam_selesai','keterangan','pegawai_id'];
+    protected $fillable = ['tanggal','jam_mulai','jam_selesai','keterangan','pegawai_id','id'];
 
     protected $casts = [
         'tanggal' => 'date',

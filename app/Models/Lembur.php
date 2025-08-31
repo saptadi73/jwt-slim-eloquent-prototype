@@ -3,15 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class Lembur extends Model
 {
-    use HasUuid;
 
     protected $table = 'lembur';
     protected $primaryKey = 'id';
-    protected $fillable = ['tanggal','jam_mulai','jam_selesai','keterangan','pegawai_id'];
+    protected $fillable = ['id','tanggal','jam_mulai','jam_selesai','keterangan','pegawai_id'];
 
     protected $casts = [
         'tanggal' => 'date',

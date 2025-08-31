@@ -3,16 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-class Gaji extends Model
+
+class Brand extends Model
 {
 
-    protected $table = 'gaji';
-    protected $primaryKey = 'id';
-    protected $fillable = ['id','periode','jumlah','pegawai_id'];
 
-    protected $casts = [
-        'periode' => 'date',
-    ];
+    protected $table = 'brand';
+    protected $primaryKey = 'id';
+    protected $fillable = ['nama','id'];
     protected $keyType = 'string';
     public $incrementing = false;   // UUID
 
@@ -20,8 +18,8 @@ class Gaji extends Model
 
     protected $dateFormat = 'Y-m-d H:i:s';
 
-    public function pegawai()
+    public function customerAssets()
     {
-        return $this->belongsTo(Pegawai::class, 'pegawai_id');
+        return $this->hasMany(CustomerAsset::class, 'brand_id');
     }
 }

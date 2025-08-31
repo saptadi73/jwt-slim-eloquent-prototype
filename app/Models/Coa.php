@@ -12,7 +12,7 @@ class Coa extends Model
     protected $table = 'coa';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'nama','kode','tipe','kategori'];
+        'nama','kode','tipe','kategori','id'];
 
     public function jurnals()
     {

@@ -3,15 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class BiayaWorkorder extends Model
 {
-    use HasUuid;
+
 
     protected $table = 'biayaworkorders';
     protected $primaryKey = 'id';
-    protected $fillable = ['jumlah','harga','total','workorder_id','product_id'];
+    protected $fillable = ['jumlah','harga','total','workorder_id','product_id','id'];
     protected $casts = [
         'jumlah' => 'bigInteger',
         'harga' => 'bigInteger',

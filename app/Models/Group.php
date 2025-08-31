@@ -3,15 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
-
 class Group extends Model
 {
-    use HasUuid;
 
     protected $table = 'groups';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama'];
+    protected $fillable = ['id','nama'];
     protected $keyType = 'string';
     public $incrementing = false;   // UUID
 

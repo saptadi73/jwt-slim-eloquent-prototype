@@ -3,11 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
-
 class PurchaseOrderBarangLine extends Model
 {
-    use HasUuid;
 
     protected $table = 'purchaseorderbarangline';
     protected $primaryKey = 'id';
@@ -20,6 +17,8 @@ class PurchaseOrderBarangLine extends Model
         'total',
         'keterangan',
         'product_id',
+        'purchaseorder_id',
+        'id',
     ];
 
     public $timestamps = true;

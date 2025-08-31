@@ -3,15 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class Satuan extends Model
 {
-    use HasUuid;
 
     protected $table = 'satuan';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama'];
+    protected $fillable = ['nama','id'];
 
     public function products()
     {

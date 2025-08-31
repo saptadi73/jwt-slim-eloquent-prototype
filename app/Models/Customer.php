@@ -2,17 +2,24 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class Customer extends Model
 {
-    use HasUuid;
-
+  
     protected $table = 'customers';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'nama','alamat','hp','gambar'];
+        'nama',
+        'alamat',
+        'hp',
+        'gambar',
+        'kode_pelanggan','id'
+    ];
+    public $timestamps = true;
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     public function workorders()
     {

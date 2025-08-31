@@ -3,11 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
 
 class SaleOrder extends Model
 {
-    use HasUuid;
 
     protected $table = 'saleorder';
     protected $primaryKey = 'id';
@@ -26,6 +24,7 @@ class SaleOrder extends Model
         'customer_id',
         'status',
         'bukti',
+        'id',
     ];
 
     protected $casts = [

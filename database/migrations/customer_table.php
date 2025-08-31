@@ -70,6 +70,8 @@ $tables = [
     'coa',
     'jurnal',
     'expense',
+    'brand',
+    'tipe',
 ];
 
 foreach ($tables as $t) {
@@ -110,6 +112,23 @@ Capsule::schema()->create('vendors', function (Blueprint $table) {
     $table->timestamps();
 });
 echo "Tabel vendors dibuat.\n";
+
+
+Capsule::schema()->create('brand', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->string('nama')->nullable();
+    $table->timestamps();
+});
+echo "Tabel brand dibuat.\n";
+
+Capsule::schema()->create('tipe', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->string('nama')->nullable();
+    $table->timestamps();
+});
+echo "Tabel tipe dibuat.\n";
 
 // satuan (milik product)
 Capsule::schema()->create('satuan', function (Blueprint $table) {
@@ -157,8 +176,8 @@ Capsule::schema()->create('products', function (Blueprint $table) {
     $table->foreign('kategori_id')->references('id')->on('kategori')->onDelete('set null');
 
     // FIX: kolom harus nullable jika onDelete set null
-    $table->uuid('satuan')->nullable();
-    $table->foreign('satuan')->references('id')->on('satuan')->onDelete('set null');
+    $table->uuid('satuan_id')->nullable();
+    $table->foreign('satuan_id')->references('id')->on('satuan')->onDelete('set null');
 
     $table->timestamps();
 });
@@ -180,6 +199,7 @@ Capsule::schema()->create('pegawai', function (Blueprint $table) {
     $table->string('nama');
     $table->string('alamat');
     $table->string('hp');
+    $table->string('email')->unique()->nullable();
 
     $table->uuid('departemen_id')->nullable();
     $table->foreign('departemen_id')->references('id')->on('departemen')->onDelete('set null');
@@ -199,11 +219,17 @@ echo "Tabel pegawai dibuat.\n";
 Capsule::schema()->create('customer_assets', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
-    $table->string('tipe');
+
+    $table->uuid('tipe_id');
+    $table->foreign('tipe_id')->references('id')->on('tipe')->onDelete('cascade');
+
     $table->string('keterangan')->nullable();
     $table->string('gambar')->nullable();
     $table->string('lokasi')->nullable();
-    $table->string('brand');
+
+    $table->uuid('brand_id');
+    $table->foreign('brand_id')->references('id')->on('brand')->onDelete('cascade');
+
     $table->string('model')->nullable();
     $table->string('freon')->nullable();
     $table->string('kapasitas')->nullable();

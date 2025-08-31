@@ -31,7 +31,18 @@ $app->addErrorMiddleware($displayError, true, true);
 $app->add(new CorsMiddleware());
 
 $capsule = new Capsule;
-// ... (konfigurasi DB sama seperti sebelumnya)
+$capsule->addConnection([
+    'driver'    => $_ENV['DB_CONNECTION'] ?? 'mysql',
+    'host'      => $_ENV['DB_HOST'] ?? '127.0.0.1',
+    'database'  => $_ENV['DB_DATABASE'] ?? 'forge',
+    'username'  => $_ENV['DB_USERNAME'] ?? 'forge',
+    'password'  => $_ENV['DB_PASSWORD'] ?? '',
+    'charset'   => $_ENV['DB_CHARSET'] ?? 'utf8mb4',
+    'collation' => $_ENV['DB_COLLATION'] ?? 'utf8mb4_unicode_ci',
+    'prefix'    => $_ENV['DB_PREFIX'] ?? '',
+]);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
 
 (require __DIR__ . '/../routes/api.php')($app);
 return $app;

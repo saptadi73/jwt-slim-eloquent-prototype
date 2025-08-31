@@ -6,10 +6,9 @@ use Illuminate\Support\Str;
 
 trait HasUuid
 {
-    public static function bootHasUuid()
+    protected static function bootHasUuid()
     {
         static::creating(function ($model) {
-            // Isi UUID hanya jika belum diset
             if (empty($model->{$model->getKeyName()})) {
                 $model->{$model->getKeyName()} = (string) Str::uuid();
             }

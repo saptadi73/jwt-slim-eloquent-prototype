@@ -2,16 +2,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\HasUuid;
-
 class Expense extends Model
 {
-    use HasUuid;
 
     protected $table = 'expenses';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'tanggal','product_id','nomor','keterangan','jumlah','status','bukti'];
+        'tanggal','product_id','nomor','keterangan','jumlah','status','bukti','id'];
     protected $casts = [
         'tanggal' => 'date',
         'jumlah' => 'bigInteger',
