@@ -12,7 +12,7 @@ class ChecklistTemplate extends Model
     protected $table = 'checklist_template';
     protected $primaryKey = 'id';
     protected $fillable = ['no_urut','kode_checklist','title',
-        'pic','jenis_workorder','checklist'
+        'pic','jenis_id','checklist'
     ];
 
     protected $keyType = 'string';
@@ -25,5 +25,10 @@ class ChecklistTemplate extends Model
     protected $casts = [
         'no_urut' => 'integer',
     ];
+
+    public function jenis()
+    {
+        return $this->belongsTo(JenisWorkorder::class, 'jenis_id');
+    }
 
 }

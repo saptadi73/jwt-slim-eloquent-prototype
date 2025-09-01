@@ -5,6 +5,7 @@ use Slim\Factory\AppFactory;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use App\Middlewares\CorsMiddleware;
 use App\Services\CustomerService;
+use App\Services\WorkOrderService;
 use Dotenv\Dotenv;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -15,20 +16,26 @@ if (file_exists(__DIR__ . '/../.env')) {
 }
 
 $pimple = new PimpleContainer();
-$pimple[CustomerService::class] = function ($c) {
-    return new CustomerService();
-};
+$pimple[CustomerService::class] = fn($c) => new CustomerService();
+$pimple[WorkOrderService::class] = fn($c) => new WorkOrderService();
+// (opsional) $pimple[CorsMiddleware::class] = fn($c) => new CorsMiddleware();
 
 $container = new Psr11Container($pimple);
 
 AppFactory::setContainer($container);
-$app = AppFactory::create();
+$app = AppFactory::createFromContainer($container);
 
 $app->addRoutingMiddleware();
+$app->addBodyParsingMiddleware();
+
 $displayError = ($_ENV['APP_DEBUG'] ?? 'false') === 'true';
 $app->addErrorMiddleware($displayError, true, true);
 
-$app->add(new CorsMiddleware());
+// Preflight CORS (optional but helpful)
+$app->options('/{routes:.+}', fn($req, $res) => $res);
+
+// CORS
+$app->add(new CorsMiddleware()); // atau $app->add(CorsMiddleware::class);
 
 $capsule = new Capsule;
 $capsule->addConnection([
@@ -43,6 +50,8 @@ $capsule->addConnection([
 ]);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
+
+date_default_timezone_set($_ENV['APP_TZ'] ?? 'Asia/Jakarta');
 
 (require __DIR__ . '/../routes/api.php')($app);
 return $app;

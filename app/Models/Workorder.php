@@ -15,7 +15,7 @@ class Workorder extends Model
     protected $fillable = [
         'nowo','tanggal','keluhan','pengecekan','service','tambahfreon',
         'thermis','bongkar','pasang','bongkarpasang','perbaikan','hasil',
-        'customer_id','group_id','id'
+        'customer_id','group_id','id','jenis_id','status'
     ];
 
     protected $casts = [
@@ -53,5 +53,10 @@ class Workorder extends Model
             'workorder_id',            // FK wo di pivot
             'saleorderjasaline_id'     // FK line jasa di pivot
         )->withTimestamps();
+    }
+
+    public function jenis()
+    {
+        return $this->belongsTo(JenisWorkorder::class, 'jenis_id');
     }
 }

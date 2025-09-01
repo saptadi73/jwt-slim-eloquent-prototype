@@ -72,6 +72,7 @@ $tables = [
     'expense',
     'brand',
     'tipe',
+    'jenis_workorder',
 ];
 
 foreach ($tables as $t) {
@@ -156,6 +157,14 @@ Capsule::schema()->create('kategori', function (Blueprint $table) {
     $table->timestamps();
 });
 echo "Tabel kategori dibuat.\n";
+
+Capsule::schema()->create('jenis_workorder', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->string('nama')->nullable();
+    $table->timestamps();
+});
+echo "Tabel jenis_workorder dibuat.\n";
 
 // products
 Capsule::schema()->create('products', function (Blueprint $table) {
@@ -257,12 +266,17 @@ Capsule::schema()->create('workorders', function (Blueprint $table) {
     $table->string('bongkarpasang')->nullable();
     $table->string('perbaikan')->nullable();
     $table->string('hasil')->nullable();
+    $table->string('jenis')->nullable(); // 'service' atau 'installasi' atau 'maintenance'
+    $table->string('status')->nullable(); // 'open', 'in_progress', 'closed'
 
     $table->uuid('customer_id');
     $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
 
     $table->uuid('group_id')->nullable();
     $table->foreign('group_id')->references('id')->on('groups')->onDelete('set null');
+
+    $table->uuid('jenis_id')->nullable();
+    $table->foreign('jenis_id')->references('id')->on('jenis_workorder')->onDelete('set null'); 
 
     $table->timestamps();
 });
@@ -286,6 +300,10 @@ Capsule::schema()->create('checklist_template', function (Blueprint $table) {
     $table->text('checklist')->nullable();
     $table->string('pic')->nullable();
     $table->string('jenis_workorder')->nullable();
+
+    $table->uuid('jenis_id')->nullable();
+    $table->foreign('jenis_id')->references('id')->on('jenis_workorder')->onDelete('set null');
+
     $table->timestamps();
 });
 echo "Tabel checklist_template dibuat.\n";
