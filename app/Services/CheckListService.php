@@ -11,8 +11,9 @@ use Carbon\Carbon;
 
 class CheckListService
 {
-    public static function isiBrand(): void
+    public static function isiBrand()
     {
+        $now  = Carbon::now();
         $brands = [
             ['nama' => 'Samsung'],
             ['nama' => 'Mitsubishi'],
@@ -26,20 +27,40 @@ class CheckListService
             ['nama' => 'Toshiba'],
             ['nama' => 'Flife'],
         ];
-        Brand::insert($brands);
+        $brands = array_map(function ($r) use ($now) {
+            return $r + [
+                'id'         => (string) Str::uuid(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }, $brands);
+
+        Brand::query()->insert($brands);
+        return Brand::all(); // kembalikan seluruh data brand
     }
 
-    public static function isiTableJenisWorkorder(): void {
+    public static function isiTableJenisWorkorder() {
+        $now  = Carbon::now();
         $jenisWorkorder = [
             ['nama' => 'Jasa/Service AC'],
             ['nama' => 'Penjualan AC'],
             ['nama' => 'Penyewaan AC'],
         ];
-        JenisWorkorder::insert($jenisWorkorder);
+        $jenisWorkorder = array_map(function ($r) use ($now) {
+            return $r + [
+                'id'         => (string) Str::uuid(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }, $jenisWorkorder);
+
+        JenisWorkorder::query()->insert($jenisWorkorder);
+        return JenisWorkorder::all();
     }
 
-    Public static function isiTableTipe(): void
+    public static function isiTableTipe()
     {
+        $now  = Carbon::now();
         $tipe = [
             ['nama' => 'Split'],
             ['nama' => 'Windows'],
@@ -51,10 +72,19 @@ class CheckListService
             ['nama' => 'VRF/VRV'],
             ['nama' => 'Central Chiller'],
         ];
-        Tipe::insert($tipe);
+        $tipe = array_map(function ($r) use ($now) {
+            return $r + [
+                'id'         => (string) Str::uuid(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }, $tipe);
+
+        Tipe::query()->insert($tipe);
+        return Tipe::all();
     }
 
-    public static function isiTableTeknisiServiceAC(): void
+    public static function isiTableTeknisiServiceAC()
     {
         $now  = Carbon::now();
         $rows = [
@@ -64,7 +94,7 @@ class CheckListService
                 'title' => 'Bagian Indoor',
                 'checklist' => 'Evaporator',
                 'pic' => 'teknisi',
-                'jenis_workorder' => 'Jasa/Service AC'
+                'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
                 'no_urut' => 2,
@@ -72,7 +102,7 @@ class CheckListService
                 'title' => 'Bagian Indoor',
                 'checklist' => 'Fan/Blower Indoor',
                 'pic' => 'teknisi',
-                'jenis_workorder' => 'Jasa/Service AC'
+                'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 3,
@@ -80,7 +110,7 @@ class CheckListService
             'title' => 'Bagian Indoor',
             'checklist' => 'Kondisi Swing',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 4,
@@ -88,7 +118,7 @@ class CheckListService
             'title' => 'Bagian Indoor',
             'checklist' => 'Tegangan Input',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
         ],
             [
             'no_urut' => 5,
@@ -96,7 +126,7 @@ class CheckListService
             'title' => 'Bagian Indoor',
             'checklist' => 'Thermis/Temp Sensor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 6,
@@ -104,7 +134,7 @@ class CheckListService
             'title' => 'Bagian Indoor',
             'checklist' => 'Check temperature',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 7,
@@ -112,7 +142,7 @@ class CheckListService
             'title' => 'Bagian Indoor',
             'checklist' => 'Lain-lain',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 8,
@@ -120,7 +150,7 @@ class CheckListService
             'title' => 'Bagian Outdoor',
             'checklist' => 'Kondensor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 9,
@@ -128,7 +158,7 @@ class CheckListService
             'title' => 'Bagian Outdoor',
             'checklist' => 'Fan Outdoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 10,
@@ -136,7 +166,7 @@ class CheckListService
             'title' => 'Bagian Outdoor',
             'checklist' => 'Capasitor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 11,
@@ -144,7 +174,7 @@ class CheckListService
             'title' => 'Bagian Outdoor',
             'checklist' => 'Tekanan Freon',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 12,
@@ -152,7 +182,7 @@ class CheckListService
             'title' => 'Bagian Outdoor',
             'checklist' => 'Arus/Amperer',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 13,
@@ -160,7 +190,7 @@ class CheckListService
             'title' => 'Bagian Outdoor',
             'checklist' => 'Check Temperatur',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
             [
             'no_urut' => 14,
@@ -168,7 +198,7 @@ class CheckListService
             'title' => 'Bagian Outdoor',
             'checklist' => 'Lain-lain',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Jasa/Service AC'
+            'jenis_id' => '2c052542-a1e5-411b-8dba-e8afe943c4ea'
             ],
         ];
 
@@ -194,7 +224,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Unit Indoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 2,
@@ -202,7 +232,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Unit Outdoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 3,
@@ -210,7 +240,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Pipa AC',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 4,
@@ -218,7 +248,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Selang Buangan',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 5,
@@ -226,7 +256,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Bracket Outdoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 6,
@@ -234,7 +264,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Kabel Listrik',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 7,
@@ -242,7 +272,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Stop Kontak dan Plug',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 8,
@@ -250,7 +280,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Dinabolt dan Fisher',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 9,
@@ -258,7 +288,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Unit Indoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 10,
@@ -266,7 +296,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Unit Outdoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 11,
@@ -274,7 +304,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Kelistrikan',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 12,
@@ -282,7 +312,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Pipa AC',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 13,
@@ -290,7 +320,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Buangan Air',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 14,
@@ -298,7 +328,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Vaccum',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 15,
@@ -306,7 +336,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Tekanan Freon',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 16,
@@ -314,7 +344,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Arus(Ampere)',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 17,
@@ -322,7 +352,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Temperature Evaporator',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 18,
@@ -330,7 +360,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Temperature Kondensor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penjualan AC'
+            'jenis_id' => 'b11bfa6c-c21d-4ca3-b8bc-48633b2d5a13'
             ],
             [
             'no_urut' => 1,
@@ -338,7 +368,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Unit Indoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 2,
@@ -346,7 +376,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Unit Outdoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 3,
@@ -354,7 +384,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Pipa AC',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 4,
@@ -362,7 +392,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Selang Buangan',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 5,
@@ -370,7 +400,7 @@ class CheckListService
             'title' => 'Unit AC & accessories',
             'checklist' => 'Kabel Listrik dan Accessories',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 6,
@@ -378,7 +408,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Unit Indoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 7,
@@ -386,7 +416,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Unit Outdoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 8,
@@ -394,7 +424,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Kelistrikan',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 9,
@@ -402,7 +432,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Pipa AC',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 10,
@@ -410,7 +440,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Instalasi Buangan Air',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 11,
@@ -418,7 +448,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Vaccum',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 12,
@@ -426,7 +456,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Tekanan Freon',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 13,
@@ -434,7 +464,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Arus(Ampere)',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 14,
@@ -442,7 +472,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Temperature Evaporator',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 15,
@@ -450,7 +480,7 @@ class CheckListService
             'title' => 'Pekerjaan Pemasangan AC',
             'checklist' => 'Cek Temperature Kondensor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 16,
@@ -458,7 +488,7 @@ class CheckListService
             'title' => 'Pekerjaan Bongkar AC',
             'checklist' => 'Unit Indoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 17,
@@ -466,7 +496,7 @@ class CheckListService
             'title' => 'Pekerjaan Bongkar AC',
             'checklist' => 'Unit Outdoor',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 18,
@@ -474,7 +504,7 @@ class CheckListService
             'title' => 'Pekerjaan Bongkar AC',
             'checklist' => 'Pipa AC',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 19,
@@ -482,7 +512,7 @@ class CheckListService
             'title' => 'Pekerjaan Bongkar AC',
             'checklist' => 'Selang Buangan',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
             [
             'no_urut' => 20,
@@ -490,7 +520,7 @@ class CheckListService
             'title' => 'Pekerjaan Bongkar AC',
             'checklist' => 'Kabel Listrik dan Accessories',
             'pic' => 'teknisi',
-            'jenis_workorder' => 'Penyewaan AC'
+            'jenis_id' => 'e3dd352d-7746-4362-960a-2aeea6f21b56'
             ],
         ];
 

@@ -17,10 +17,25 @@ return function (App $app) {
             $payload = CheckListService::isiTableTeknisiServiceAC2();
             return JsonResponder::success($response, $payload, 'Checklist retrieved');
         });
-
-        // contoh seed lain (brand/tipe/jenisworkorder bila memang seed):
-        // $check->get('/brand', ...);
-        // $check->get('/tipe', ...);
-        // $check->get('/jenisworkorder', ...);
+        $check->get('/tipe', function (Request $request, Response $response) {
+            try {
+                $payload = CheckListService::isiTableTipe();
+                return JsonResponder::success($response, $payload, 'Checklist retrieved');
+            } catch (\Throwable $e) {
+                return JsonResponder::error($response, $e->getMessage(), 500);
+            }
+        });
+        $check->get('/jenisworkorder', function (Request $request, Response $response) {
+            $payload = CheckListService::isiTableJenisWorkorder();
+            return JsonResponder::success($response, $payload, 'Checklist retrieved');
+        });
+        $check->get('/brand', function (Request $request, Response $response) {
+            try {
+                $payload = CheckListService::isiBrand();
+                return JsonResponder::success($response, $payload, 'Brand retrieved');
+            } catch (\Throwable $e) {
+                return JsonResponder::error($response, $e->getMessage(), 500);
+            }
+        });
     });
 };

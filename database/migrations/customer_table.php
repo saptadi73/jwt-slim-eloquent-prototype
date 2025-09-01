@@ -299,7 +299,6 @@ Capsule::schema()->create('checklist_template', function (Blueprint $table) {
     $table->string('title')->nullable();
     $table->text('checklist')->nullable();
     $table->string('pic')->nullable();
-    $table->string('jenis_workorder')->nullable();
 
     $table->uuid('jenis_id')->nullable();
     $table->foreign('jenis_id')->references('id')->on('jenis_workorder')->onDelete('set null');
