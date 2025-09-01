@@ -1,4 +1,5 @@
 <?php
+
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use App\Services\CustomerService;
@@ -14,7 +15,7 @@ return function (App $app) {
     $app->group('/customers', function (RouteCollectorProxy $cust) use ($container) {
 
         // Create customer (multipart/json)
-        $cust->post('', function (Request $request, Response $response) use ($container) {
+        $cust->post('/new', function (Request $request, Response $response) use ($container) {
             /** @var CustomerService $svc */
             $svc  = $container->get(CustomerService::class);
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
@@ -26,6 +27,49 @@ return function (App $app) {
                 return JsonResponder::error($response, $e->getMessage(), 422);
             } catch (\Throwable $e) {
                 return JsonResponder::error($response, 'Internal server error', 500);
+            }
+        });
+
+        $cust->get('/assets/{id}', function (Request $request, Response $response, array $args) use ($container) {
+            /** @var CustomerService $svc */
+
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->getCustomerWithAsset($response, $args['id']);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to retrieve Customer with Asset: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $cust->get('/all', function (Request $request, Response $response) use ($container) {
+
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->listCustomers($response);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to retrieve customers: ' . $th->getMessage(), 500);
+            }
+        });
+        $cust->get('/brand', function (Request $request, Response $response) use ($container) {
+
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->listBrand($response);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to retrieve brands: ' . $th->getMessage(), 500);
+            }
+        });
+        $cust->get('/tipe', function (Request $request, Response $response) use ($container) {
+
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->listTipe($response);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to retrieve types: ' . $th->getMessage(), 500);
             }
         });
 

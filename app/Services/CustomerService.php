@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Customer;
@@ -19,8 +20,8 @@ class CustomerService
     public function createCustomerAndAsset(Request $request, Response $response, array $data, File $file)
     {
         $data['kode_pelanggan'] = 'CUST-' . str_pad((string)(Customer::max('id') + 1), 5, '0', STR_PAD_LEFT);
-        $customer_data=Arr::only($data, ['nama', 'alamat', 'hp', 'kode_pelanggan']);
-        $asset_data=Arr::only($data, ['tipe_id','keterangan','lokasi','brand_id','model','freon','kapasitas']);
+        $customer_data = Arr::only($data, ['nama', 'alamat', 'hp', 'kode_pelanggan']);
+        $asset_data = Arr::only($data, ['tipe_id', 'keterangan', 'lokasi', 'brand_id', 'model', 'freon', 'kapasitas']);
 
         try {
             $customer_data['id'] = Str::uuid();
@@ -32,14 +33,14 @@ class CustomerService
                 $filename = Upload::storeImage($file, 'customers');
                 $customer->gambar = $filename;
                 $customer->save();
-            }else{
+            } else {
                 $customer->gambar = null;
                 $customer->save();
                 $msg_file = $file ? 'File upload error code: ' . $file->getError() : 'No file uploaded';
             }
             return JsonResponder::success($response, $customer, 'Customer and Asset created' . ($msg_file ?? ''));
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to create Customer and Asset: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to create Customer and Asset: ' . $th->getMessage(), 500);
         }
     }
 
@@ -50,8 +51,8 @@ class CustomerService
 
     public function updateCustomerAndAsset(Request $request, Response $response, Customer $customer, array $data, ?File $file)
     {
-        $customer_data=Arr::only($data, ['nama', 'alamat', 'hp']);
-        $asset_data=Arr::only($data, ['tipe_id','keterangan','lokasi','brand_id','model','freon','kapasitas']);
+        $customer_data = Arr::only($data, ['nama', 'alamat', 'hp']);
+        $asset_data = Arr::only($data, ['tipe_id', 'keterangan', 'lokasi', 'brand_id', 'model', 'freon', 'kapasitas']);
 
         try {
             $customer->update($customer_data);
@@ -75,7 +76,7 @@ class CustomerService
             }
             return JsonResponder::success($response, $customer, 'Customer and Asset updated' . ($msg_file ?? ''));
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to update Customer and Asset: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to update Customer and Asset: ' . $th->getMessage(), 500);
         }
     }
 
@@ -94,16 +95,22 @@ class CustomerService
             $customer->delete();
             return JsonResponder::success($response, null, 'Customer and Asset deleted');
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to delete Customer and Asset: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to delete Customer and Asset: ' . $th->getMessage(), 500);
         }
     }
 
     public function getCustomerWithAsset(Response $response, string $customerId)
     {
-        $data = Customer::with('asset')->find($customerId);
 
-        return JsonResponder::success($response, $data, 'Customer with Asset retrieved');
+        try {
+            print_r($customerId); // Debug: pastikan ID diterima dengan benar
+            $data = Customer::with('customerassets')->find($customerId);
 
+            return JsonResponder::success($response, $data, 'Customer with Asset retrieved');
+        } catch (\Throwable $th) {
+            //throw $th;
+            return JsonResponder::error($response, 'Failed to retrieve Customer with Asset: ' . $th->getMessage(), 500);
+        }
     }
 
     public function createTipe(Response $response, Request $request, array $data)
@@ -113,7 +120,7 @@ class CustomerService
             $tipe = Tipe::create($data);
             return JsonResponder::success($response, $tipe, 'Tipe created');
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to create Tipe: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to create Tipe: ' . $th->getMessage(), 500);
         }
     }
 
@@ -124,7 +131,7 @@ class CustomerService
             $brand = Brand::create($data);
             return JsonResponder::success($response, $brand, 'Brand created');
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to create Brand: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to create Brand: ' . $th->getMessage(), 500);
         }
     }
 
@@ -159,7 +166,7 @@ class CustomerService
             $tipe->delete();
             return JsonResponder::success($response, null, 'Tipe deleted');
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to delete Tipe: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to delete Tipe: ' . $th->getMessage(), 500);
         }
     }
 
@@ -173,7 +180,7 @@ class CustomerService
             $brand->delete();
             return JsonResponder::success($response, null, 'Brand deleted');
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to delete Brand: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to delete Brand: ' . $th->getMessage(), 500);
         }
     }
 
@@ -187,7 +194,7 @@ class CustomerService
             $tipe->update($data);
             return JsonResponder::success($response, $tipe, 'Tipe updated');
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to update Tipe: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to update Tipe: ' . $th->getMessage(), 500);
         }
     }
 
@@ -201,10 +208,17 @@ class CustomerService
             $brand->update($data);
             return JsonResponder::success($response, $brand, 'Brand updated');
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to update Brand: '. $th->getMessage(), 500);
+            return JsonResponder::error($response, 'Failed to update Brand: ' . $th->getMessage(), 500);
         }
     }
 
+    public function getAllCustomers(Response $response)
+    {
+        try {
+            $data = Customer::with('customerassets')->get();
+            return JsonResponder::success($response, $data, 'All Customers retrieved');
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to retrieve Customers: ' . $th->getMessage(), 500);
+        }
+    }
 }
-
-?>

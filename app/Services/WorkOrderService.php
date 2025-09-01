@@ -96,17 +96,7 @@ class WorkOrderService
         return JsonResponder::success($response, $jenisWorkorders);
     }
 
-    public function getAllTipe(Response $response)
-    {
-        $tipe = Tipe::all();
-        return JsonResponder::success($response, $tipe);
-    }
-
-    public function getAllBrand(Response $response)
-    {
-        $brand = Brand::all();
-        return JsonResponder::success($response, $brand);
-    }
+    
 
 }
 
