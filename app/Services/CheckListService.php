@@ -3,11 +3,57 @@
 namespace App\Services;
 
 use App\Models\ChecklistTemplate;
+use App\Models\JenisWorkorder;
+use App\Models\Tipe;
+use App\Models\Brand;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class CheckListService
 {
+    public static function isiBrand(): void
+    {
+        $brands = [
+            ['nama' => 'Samsung'],
+            ['nama' => 'Mitsubishi'],
+            ['nama' => 'Panasonic'],
+            ['nama' => 'Sharp'],
+            ['nama' => 'Gree'],
+            ['nama' => 'BestLife'],
+            ['nama' => 'Changhong'],
+            ['nama' => 'Polytron'],
+            ['nama' => 'Midea'],
+            ['nama' => 'Toshiba'],
+            ['nama' => 'Flife'],
+        ];
+        Brand::insert($brands);
+    }
+
+    public static function isiTableJenisWorkorder(): void {
+        $jenisWorkorder = [
+            ['nama' => 'Jasa/Service AC'],
+            ['nama' => 'Penjualan AC'],
+            ['nama' => 'Penyewaan AC'],
+        ];
+        JenisWorkorder::insert($jenisWorkorder);
+    }
+
+    Public static function isiTableTipe(): void
+    {
+        $tipe = [
+            ['nama' => 'Split'],
+            ['nama' => 'Windows'],
+            ['nama' => 'Standing'],
+            ['nama' => 'Portable'],
+            ['nama' => 'Cassette'],
+            ['nama' => 'Ducting'],
+            ['nama' => 'Floor Standing'],
+            ['nama' => 'VRF/VRV'],
+            ['nama' => 'Central Chiller'],
+        ];
+        Tipe::insert($tipe);
+    }
+
     public static function isiTableTeknisiServiceAC(): void
     {
         $now  = Carbon::now();

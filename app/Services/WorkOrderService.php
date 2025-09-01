@@ -7,6 +7,9 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use App\Models\Checklist;
 use App\Models\ChecklistTemplate;
+use App\Models\JenisWorkorder;
+use App\Models\Brand;
+use App\Models\Tipe;
 
 class WorkOrderService
 {
@@ -85,6 +88,24 @@ class WorkOrderService
     {
         $checklists = Checklist::where('workorder_id', $workorderId)->with(['checklist', 'pegawai','checklist_template'])->get();
         return JsonResponder::success($response, $checklists);
+    }
+
+    public function getAllJenisWorkorders(Response $response)
+    {
+        $jenisWorkorders = JenisWorkorder::all();
+        return JsonResponder::success($response, $jenisWorkorders);
+    }
+
+    public function getAllTipe(Response $response)
+    {
+        $tipe = Tipe::all();
+        return JsonResponder::success($response, $tipe);
+    }
+
+    public function getAllBrand(Response $response)
+    {
+        $brand = Brand::all();
+        return JsonResponder::success($response, $brand);
     }
 
 }

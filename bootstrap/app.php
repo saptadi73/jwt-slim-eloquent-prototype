@@ -53,5 +53,5 @@ $capsule->bootEloquent();
 
 date_default_timezone_set($_ENV['APP_TZ'] ?? 'Asia/Jakarta');
 
-(require __DIR__ . '/../routes/api.php')($app);
+(require __DIR__ . '/../routes/index.php')($app);
 return $app;
