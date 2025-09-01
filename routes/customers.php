@@ -62,6 +62,26 @@ return function (App $app) {
                 return JsonResponder::error($response, 'Failed to retrieve brands: ' . $th->getMessage(), 500);
             }
         });
+        $cust->get('/brand/delete/{id}', function (Request $request, Response $response, array $args) use ($container) {
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->deleteBrand($response, $args['id']);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to delete brand: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $cust->get('/tipe/delete/{id}', function (Request $request, Response $response, array $args) use ($container) {
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->deleteTipe($response, $args['id']);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to delete type: ' . $th->getMessage(), 500);
+            }
+        });
+
         $cust->get('/tipe', function (Request $request, Response $response) use ($container) {
 
             try {
@@ -70,6 +90,28 @@ return function (App $app) {
             } catch (\Throwable $th) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to retrieve types: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $cust->post('/tipe/update/{id}', function (Request $request, Response $response, array $args) use ($container) {
+            $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->updateTipe($response, $args['id'], $data);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to update type: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $cust->post('/brand/update/{id}', function (Request $request, Response $response, array $args) use ($container) {
+            $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->updateBrand($response, $args['id'], $data);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to update brand: ' . $th->getMessage(), 500);
             }
         });
 
