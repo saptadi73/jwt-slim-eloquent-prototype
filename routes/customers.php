@@ -39,7 +39,7 @@ return function (App $app) {
             }
         });
 
-        $cust->get('/assets/{id}', function (Request $request, Response $response, array $args) use ($container) {
+        $cust->get('/assets/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             /** @var CustomerService $svc */
 
             try {
@@ -55,7 +55,7 @@ return function (App $app) {
 
             try {
                 $svc = $container->get(CustomerService::class);
-                return $svc->listCustomers($response);
+                return $svc->getAllCustomers($response);
             } catch (\Throwable $th) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to retrieve customers: ' . $th->getMessage(), 500);
@@ -71,7 +71,7 @@ return function (App $app) {
                 return JsonResponder::error($response, 'Failed to retrieve brands: ' . $th->getMessage(), 500);
             }
         });
-        $cust->get('/brand/delete/{id}', function (Request $request, Response $response, array $args) use ($container) {
+        $cust->get('/brand/delete/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             try {
                 $svc = $container->get(CustomerService::class);
                 return $svc->deleteBrand($response, $args['id']);
@@ -81,7 +81,7 @@ return function (App $app) {
             }
         });
 
-        $cust->get('/tipe/delete/{id}', function (Request $request, Response $response, array $args) use ($container) {
+        $cust->get('/tipe/delete/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             try {
                 $svc = $container->get(CustomerService::class);
                 return $svc->deleteTipe($response, $args['id']);
@@ -102,7 +102,7 @@ return function (App $app) {
             }
         });
 
-        $cust->post('/tipe/update/{id}', function (Request $request, Response $response, array $args) use ($container) {
+        $cust->post('/tipe/update/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
             try {
                 $svc = $container->get(CustomerService::class);
@@ -113,7 +113,7 @@ return function (App $app) {
             }
         });
 
-        $cust->post('/brand/update/{id}', function (Request $request, Response $response, array $args) use ($container) {
+        $cust->post('/brand/update/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
             try {
                 $svc = $container->get(CustomerService::class);
@@ -121,6 +121,27 @@ return function (App $app) {
             } catch (\Throwable $th) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to update brand: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $cust->post('/assets/new', function (Request $request, Response $response) use ($container) {
+            /** @var CustomerService $svc */
+            $svc  = $container->get(CustomerService::class);
+            $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
+            $file = RequestHelper::pickUploadedFile($request, ['file', 'photo']);
+
+            try {
+                return $svc->createCustomerAsset($request, $response, $data, $file);
+
+            } catch (\InvalidArgumentException $e) {
+                return JsonResponder::error($response, $e->getMessage(), 422);
+            } catch (\Throwable $e) {
+                return JsonResponder::error($response, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $data,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
             }
         });
 

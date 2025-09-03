@@ -22,7 +22,7 @@ class CustomerService
         $prefix = 'CUST-';
 
         $last = Customer::where('kode_pelanggan', 'like', $prefix . '%')
-            ->orderBy('kode_pelanggan', 'desc')   // aman jika 5 digit zero-pad
+            ->orderBy('kode_pelanggan')   // aman jika 5 digit zero-pad
             ->value('kode_pelanggan');
 
         $next = 1;
@@ -59,9 +59,20 @@ class CustomerService
         }
     }
 
-    public function createCustomerAsset(array $data): CustomerAsset
+    public function createCustomerAsset(Request $request, Response $response, array $data, ?File $file)
     {
-        return CustomerAsset::create($data);
+        try {
+            $data['id'] = Str::uuid();
+            $asset = CustomerAsset::create($data);
+            if ($file && $file->getError() === UPLOAD_ERR_OK) {
+                $filename = Upload::storeImage($file, 'assets');
+                $asset->gambar = $filename;
+                $asset->save();
+            }
+            return JsonResponder::success($response, $asset, 'Customer Asset created');
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to create Customer Asset: ' . $th->getMessage(), 500);
+        }
     }
 
     public function updateCustomerAndAsset(Request $request, Response $response, Customer $customer, array $data, ?File $file)
