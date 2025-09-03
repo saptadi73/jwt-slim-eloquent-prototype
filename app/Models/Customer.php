@@ -15,6 +15,7 @@ class Customer extends Model
         'alamat',
         'hp',
         'gambar',
+        'email',
         'kode_pelanggan','id'
     ];
     public $timestamps = true;

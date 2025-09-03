@@ -9,34 +9,41 @@ use Firebase\JWT\JWT;
 class AuthService
 {
     // Fungsi login
+    // Fungsi login
     public static function login($email, $password)
     {
-        // Mencari user berdasarkan email
-        $user = User::where('email', $email)->first();
+        $user = User::where('email', $email)->with('roles')->first();
 
-        // Cek apakah user ditemukan dan password cocok
         if ($user && password_verify($password, $user->password)) {
-            $key = $_ENV['JWT_SECRET'] ?? null;  // Mengambil secret key untuk JWT dari environment
+            $key = $_ENV['JWT_SECRET'] ?? null;
             if (!$key) {
                 throw new \Exception('JWT_SECRET not set in environment');
             }
 
-            // Payload untuk JWT token
             $payload = [
-                'sub' => $user->id,  // ID user yang login
+                'sub' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'iat' => time(),  // Waktu token dibuat
-                'exp' => time() + 3600 // Waktu token kadaluarsa (1 jam)
+                'iat' => time(),
+                'exp' => time() + (12 * 3600)
             ];
 
-            // Membuat JWT token
             $jwt = JWT::encode($payload, $key, 'HS256');
 
             return [
                 'success' => true,
                 'token' => $jwt,
-                'user' => $user
+                'user' => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                    'roles' => $user->roles->map(function ($role) {
+                        return [
+                            'name'  => $role->name,
+                            'label' => $role->label,
+                        ];
+                    })
+                ]
             ];
         }
 
@@ -45,6 +52,7 @@ class AuthService
             'message' => 'Invalid credentials'
         ];
     }
+
 
     // Fungsi registrasi
     public static function register($name, $email, $password, $role_id = null)

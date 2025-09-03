@@ -9,12 +9,15 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
 return function (App $app) {
-    $app->group('/users', function (RouteCollectorProxy $users) {
+    $container = $app->getContainer();
+
+    $app->group('/users', function (RouteCollectorProxy $users) use ($container) {
         // Update user
-        $users->put('/{id}', function (Request $request, Response $response, array $args) {
+        $users->put('/{id}', function (Request $request, Response $response, array $args) use ($container) {
             $id   = $args['id'];
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
-            $user = UserService::update($id, $data);
+            $svc = $container->get(UserService::class);
+            $user = $svc->update($id, $data);
             if ($user) return JsonResponder::success($response, $user, 'User updated');
             return JsonResponder::error($response, 'User not found', 404);
         });
@@ -24,6 +27,14 @@ return function (App $app) {
             $id      = $args['id'];
             $deleted = UserService::delete($id);
             if ($deleted) return JsonResponder::success($response, [], 'User deleted');
+            return JsonResponder::error($response, 'User not found', 404);
+        });
+
+        $users->post('/update/role', function (Request $request, Response $response) use ($container) {
+            $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
+            $svc = $container->get(UserService::class);
+            $result = $svc->updateRole((array) $data);
+            if ($result) return JsonResponder::success($response, $result, 'User role updated');
             return JsonResponder::error($response, 'User not found', 404);
         });
     })->add(new JwtMiddleware());

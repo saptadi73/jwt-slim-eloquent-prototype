@@ -9,6 +9,12 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
 return function (App $app) {
+
+    $app->get('/ping', function (Request $request, Response $response) {
+        $response->getBody()->write(json_encode(['message' => 'pong']));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+
     $app->group('/auth', function (RouteCollectorProxy $auth) {
         // Register
         $auth->post('/register', function (Request $request, Response $response) {
@@ -35,6 +41,7 @@ return function (App $app) {
             }
             $email = $data['email']    ?? null;
             $pass  = $data['password'] ?? null;
+            
             if (!$email || !$pass) {
                 return JsonResponder::error($response, 'Invalid input', 400);
             }
@@ -42,7 +49,7 @@ return function (App $app) {
             try {
                 $result = AuthService::login($email, $pass);
                 if (!empty($result['success'])) {
-                    return JsonResponder::success($response, ['token' => $result['token']], 'Login success');
+                    return JsonResponder::success($response, ['token' => $result['token'],'role' => $result['user']['roles'][0]['name']], 'Login success');
                 }
                 return JsonResponder::error($response, $result['message'] ?? 'Unauthorized', 401);
             } catch (\Throwable $e) {

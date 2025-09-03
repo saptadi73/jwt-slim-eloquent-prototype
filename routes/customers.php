@@ -22,11 +22,20 @@ return function (App $app) {
             $file = RequestHelper::pickUploadedFile($request, ['file', 'photo']);
 
             try {
+                // return JsonResponder::error($response, $data, 501);
                 return $svc->createCustomerAndAsset($request, $response, $data, $file);
             } catch (\InvalidArgumentException $e) {
                 return JsonResponder::error($response, $e->getMessage(), 422);
             } catch (\Throwable $e) {
-                return JsonResponder::error($response, 'Internal server error', 500);
+                // return JsonResponder::error($response, 'Internal server error', 500);
+                return JsonResponder::error($response, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $data,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                    // hati-hati: trace bisa panjang
+                    // 'trace' => $e->getTrace()
+                ], 500);
             }
         });
 

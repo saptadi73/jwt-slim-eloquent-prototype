@@ -77,4 +77,23 @@ class UserService
         }
         return false;
     }
+
+    public function updateRole(array $data) {
+        $id     = $data['id']      ?? null;
+        $role_id = $data['role_id'] ?? null;
+
+        $user = self::findById($id);
+        if ($user) {
+            // Memastikan role yang dimaksud valid
+            $role = Role::find($role_id);
+            if (!$role) {
+                return ['success' => false, 'message' => 'Role not found'];
+            }
+
+            // Memperbarui relasi di tabel pivot
+            $user->roles()->sync([$role_id]);
+            return $user;
+        }
+        return null;
+    }
 }

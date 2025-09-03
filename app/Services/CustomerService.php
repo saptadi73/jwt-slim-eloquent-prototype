@@ -17,10 +17,25 @@ use App\Models\Tipe;
 
 class CustomerService
 {
+    private function nextCustomerCode(): string
+    {
+        $prefix = 'CUST-';
+
+        $last = Customer::where('kode_pelanggan', 'like', $prefix . '%')
+            ->orderBy('kode_pelanggan', 'desc')   // aman jika 5 digit zero-pad
+            ->value('kode_pelanggan');
+
+        $next = 1;
+        if ($last && preg_match('/^' . preg_quote($prefix, '/') . '(\d{5})$/', $last, $m)) {
+            $next = ((int)$m[1]) + 1;
+        }
+
+        return $prefix . str_pad((string)$next, 5, '0', STR_PAD_LEFT);
+    }
     public function createCustomerAndAsset(Request $request, Response $response, array $data, File $file)
     {
-        $data['kode_pelanggan'] = 'CUST-' . str_pad((string)(Customer::max('id') + 1), 5, '0', STR_PAD_LEFT);
-        $customer_data = Arr::only($data, ['nama', 'alamat', 'hp', 'kode_pelanggan']);
+        $data['kode_pelanggan'] = $this->nextCustomerCode();
+        $customer_data = Arr::only($data, ['nama', 'alamat', 'hp', 'kode_pelanggan', 'email']);
         $asset_data = Arr::only($data, ['tipe_id', 'keterangan', 'lokasi', 'brand_id', 'model', 'freon', 'kapasitas']);
 
         try {

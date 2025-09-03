@@ -1,4 +1,5 @@
 <?php
+
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use App\Services\WorkOrderService;
@@ -12,6 +13,14 @@ return function (App $app) {
     $container = $app->getContainer();
 
     $app->group('/wo', function (RouteCollectorProxy $wo) use ($container) {
+        $wo->get('/ping', function (Request $req, Response $res) use ($container) {
+            try {
+                $svc = $container->get(\App\Services\WorkOrderService::class);
+                return JsonResponder::success($res, 'ok', 200);
+            } catch (\Throwable $e) {
+                return JsonResponder::error($res, 'Container error: ' . $e->getMessage(), 500);
+            }
+        });
         // Create brand
         $wo->post('/new', function (Request $request, Response $response) use ($container) {
             /** @var WorkOrderService $svc */
@@ -27,17 +36,8 @@ return function (App $app) {
             }
         });
 
-        $wo->get('/{id}', function (Request $request, Response $response, array $args) use ($container) {
-            /** @var WorkOrderService $svc */
+        
 
-            try {
-                $svc = $container->get(WorkOrderService::class);
-                return $svc->getWorkOrderById($response, $args['id']);
-            } catch (\Throwable $th) {
-                //throw $th;
-                return JsonResponder::error($response, 'Failed to retrieve Work Order: ' . $th->getMessage(), 500);
-            }
-        });
 
         $wo->get('/all', function (Request $request, Response $response) use ($container) {
 
@@ -61,16 +61,7 @@ return function (App $app) {
             }
         });
 
-        $wo->get('/checklistwo/{id}', function (Request $request, Response $response, array $args) use ($container) {
-
-            try {
-                $svc = $container->get(WorkOrderService::class);
-                return $svc->getChecklistForWorkOrder($response, $args['id']);
-            } catch (\Throwable $th) {
-                //throw $th;
-                return JsonResponder::error($response, 'Failed to retrieve Checklist for Work Order: ' . $th->getMessage(), 500);
-            }
-        });
+        
 
         $wo->post('/jenistitle/', function (Request $request, Response $response) use ($container) {
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
@@ -83,7 +74,9 @@ return function (App $app) {
             }
         });
 
-        $wo->post('/wo/checklist/input', function (Request $request, Response $response) use ($container) {
+        
+
+        $wo->post('/checklist/input', function (Request $request, Response $response) use ($container) {
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
             try {
                 $svc = $container->get(WorkOrderService::class);
@@ -94,17 +87,10 @@ return function (App $app) {
             }
         });
 
-        $wo->get('/delete/{id}', function (Request $request, Response $response, array $args) use ($container) {
-            try {
-                $svc = $container->get(WorkOrderService::class);
-                return $svc->deleteWorkOrder($request, $response, $args['id']);
-            } catch (\Throwable $th) {
-                //throw $th;
-                return JsonResponder::error($response, 'Failed to delete Work Order: ' . $th->getMessage(), 500);
-            }
-        });
 
-        $wo->post('/update/{id}', function (Request $request, Response $response, array $args) use ($container) {
+        
+
+        $wo->post('/update/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
             try {
                 $svc = $container->get(WorkOrderService::class);
@@ -115,7 +101,34 @@ return function (App $app) {
             }
         });
 
-        // Tambahkan endpoint lain terkait WorkOrder di sini…
-        // $wo->get('/jenisworkorder', ...)
-    })->add(new JwtMiddleware());
+        $wo->get('/delete/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->deleteWorkOrder($request, $response, $args['id']);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to delete Work Order: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $wo->get('/checklistwo/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
+
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->getChecklistForWorkOrder($response, $args['id']);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to retrieve Checklist for Work Order: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $wo->get('/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->getWorkOrderById($response, $args['id']);
+            } catch (\Throwable $th) {
+                return JsonResponder::error($response, 'Failed to retrieve Work Order: ' . $th->getMessage(), 500);
+            }
+        });
+    })->addMiddleware(new JwtMiddleware());
 };
