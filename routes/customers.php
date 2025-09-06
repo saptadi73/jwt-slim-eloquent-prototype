@@ -143,6 +143,15 @@ return function (App $app) {
                     'file'    => $e->getFile() . ':' . $e->getLine(),
                 ], 500);
             }
+            
+        });
+        $cust->get('/assets/all', function (Request $request, Response $response) use ($container) {
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->listCustomerAssetsAll($response);
+            } catch (\Throwable $th) {
+                return JsonResponder::error($response, 'Failed to retrieve customer assets: ' . $th->getMessage(), 500);
+            }
         });
 
         // Tambah endpoints lain: index/show/update/delete kalau diperlukan

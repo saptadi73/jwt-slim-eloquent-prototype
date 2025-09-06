@@ -37,5 +37,29 @@ return function (App $app) {
                 return JsonResponder::error($response, $e->getMessage(), 500);
             }
         });
+        $check->get('/group', function (Request $request, Response $response) {
+            try {
+                $payload = CheckListService::isiGroup();
+                return JsonResponder::success($response, $payload, 'Group retrieved');
+            } catch (\Throwable $e) {
+                return JsonResponder::error($response, $e->getMessage(), 500);
+            }
+        });
+        $check->get('/departemen', function (Request $request, Response $response) {
+            try {
+                $payload = CheckListService::isiDepartemen();
+                return JsonResponder::success($response, $payload, 'Departemen retrieved');
+            } catch (\Throwable $e) {
+                return JsonResponder::error($response, $e->getMessage(), 500);
+            }
+        });
+        $check->get('/pegawai', function (Request $request, Response $response) {
+            try {
+                $payload = CheckListService::isiPegawai();
+                return JsonResponder::success($response, $payload, 'Pegawai retrieved');
+            } catch (\Throwable $e) {
+                return JsonResponder::error($response, $e->getMessage(), 500);
+            }
+        });
     });
 };

@@ -16,7 +16,8 @@ class Customer extends Model
         'hp',
         'gambar',
         'email',
-        'kode_pelanggan','id'
+        'kode_pelanggan','id',
+        'jenis'
     ];
     public $timestamps = true;
     public $incrementing = false;

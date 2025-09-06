@@ -14,7 +14,7 @@ class Workorder extends Model
 
     protected $fillable = [
         'nowo','tanggal','keluhan','pengecekan','service','tambahfreon',
-        'thermis','bongkar','pasang','bongkarpasang','perbaikan','hasil',
+        'isifreon','bongkar','pasang','bongkarpasang','perbaikan','perbaikan',
         'customer_id','group_id','id','jenis_id','status'
     ];
 

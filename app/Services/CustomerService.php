@@ -35,7 +35,7 @@ class CustomerService
     public function createCustomerAndAsset(Request $request, Response $response, array $data, File $file)
     {
         $data['kode_pelanggan'] = $this->nextCustomerCode();
-        $customer_data = Arr::only($data, ['nama', 'alamat', 'hp', 'kode_pelanggan', 'email']);
+        $customer_data = Arr::only($data, ['nama','jenis','alamat', 'hp', 'kode_pelanggan', 'email']);
         $asset_data = Arr::only($data, ['tipe_id', 'keterangan', 'lokasi', 'brand_id', 'model', 'freon', 'kapasitas']);
 
         try {
@@ -180,6 +180,41 @@ class CustomerService
             return JsonResponder::error($response, 'Customer not found', 404);
         }
         return JsonResponder::success($response, $customer->asset, 'List of Customer Assets retrieved');
+    }
+
+    public function listCustomerAssetsAll(Response $response)
+    {
+        $customerassets = Customer::select(
+            'customers.id',
+            'customers.kode_pelanggan',
+            'customers.nama',
+            'customers.gambar as gambar_customer',
+            'customers.hp',
+            'brand.nama as brand',
+            'tipe.nama as tipe',
+            'customer_assets.gambar as gambar_ac',
+            'customer_assets.model',
+            'customer_assets.kapasitas',
+            'customer_assets.lastService',
+            'customer_assets.nextService',
+            'customer_assets.freon',
+            'customer_assets.status',
+            'customer_assets.lokasi'
+        )
+            ->join('customer_assets', 'customers.id', '=', 'customer_assets.customer_id')
+            ->join('brand', 'customer_assets.brand_id', '=', 'brand.id')
+            ->join('tipe', 'customer_assets.tipe_id', '=', 'tipe.id')
+            ->get();
+        if (!$customerassets) {
+            return JsonResponder::error($response, 'Customer Assets not found', 404);
+        }
+        return JsonResponder::success($response, $customerassets, 'List of Customer Assets retrieved');
+    }
+
+    public function listCustomer(Response $response)
+    {
+        $data = Customer::all();
+        return JsonResponder::success($response, $data, 'List of Customer retrieved');
     }
 
     public function deleteTipe(Response $response, string $tipeId)

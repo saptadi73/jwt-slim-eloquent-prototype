@@ -97,6 +97,7 @@ Capsule::schema()->create('customers', function (Blueprint $table) {
     $table->string('email')->unique()->nullable();
     $table->string('gambar')->nullable();
     $table->string('hp');
+    $table->string('jenis')->nullable(); // 'personal' atau 'company'
     $table->timestamps();
 });
 echo "Tabel customers dibuat.\n";
@@ -235,6 +236,9 @@ Capsule::schema()->create('customer_assets', function (Blueprint $table) {
     $table->string('keterangan')->nullable();
     $table->string('gambar')->nullable();
     $table->string('lokasi')->nullable();
+    $table->date('lastService')->nullable();
+    $table->date('nextService')->nullable();
+    $table->string('status')->nullable(); // aktif, non-aktif
 
     $table->uuid('brand_id');
     $table->foreign('brand_id')->references('id')->on('brand')->onDelete('cascade');

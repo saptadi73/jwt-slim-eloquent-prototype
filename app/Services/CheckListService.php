@@ -6,11 +6,161 @@ use App\Models\ChecklistTemplate;
 use App\Models\JenisWorkorder;
 use App\Models\Tipe;
 use App\Models\Brand;
+use App\Models\Departemen;
+use App\Models\Group;
+use App\Models\Pegawai;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class CheckListService
 {
+    public static function isiDepartemen() {
+        $now= Carbon::now();
+        $departemen = [
+            ['nama' => 'HRD'],
+            ['nama' => 'Teknisi'],
+            ['nama' => 'Finance'],
+            ['nama' => 'Sales/Marketing'],
+        ];
+        $departemen = array_map(function ($r) use ($now) {
+            return $r + [
+                'id'         => (string) Str::uuid(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }, $departemen);
+
+        Departemen::query()->insert($departemen);
+        return Departemen::all();
+    }
+
+    public static function isiGroup() {
+        $now= Carbon::now();
+        $group = [
+            ['nama' => 'Teknisi Group A'],
+            ['nama' => 'Teknisi Group B'],
+            ['nama' => 'Teknisi Group C'],
+            ['nama' => 'Teknisi Group D'],
+            ['nama' => 'Finance'],
+            ['nama' => 'HRD'],
+            ['nama' => 'Sales/Marketing'],
+        ];
+        $group = array_map(function ($r) use ($now) {
+            return $r + [
+                'id'         => (string) Str::uuid(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }, $group);
+
+        Group::query()->insert($group);
+        return Group::all();
+    }
+
+    public static function isiPegawai() {
+        $now = Carbon::now();
+        $pegawai = [
+            [
+                'nama' => 'Andi',
+                'email' => 'andi@example.com',
+                'group_id' => 'e6fe16ea-ebac-4d2e-9f4f-b5c15706c724',
+                'alamat' => 'Jl. Andi No. 1',
+                'hp' => '081234567890',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+            ],
+            [
+                'nama' => 'Budi',
+                'email' => 'budi@example.com',
+                'group_id' => 'e6fe16ea-ebac-4d2e-9f4f-b5c15706c724',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'alamat' => 'Jl. Budi No. 2',
+                'hp' => '081234567891',
+            ],
+            [
+                'nama' => 'Cici',
+                'email' => 'cici@example.com',
+                'group_id' => '620e4e4a-caf3-4118-9da0-08e967c469ac',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'alamat' => 'Jl. Cici No. 3',
+                'hp' => '081234567892',
+            ],
+            [
+                'nama' => 'Parto',
+                'email' => 'parto@example.com',
+                'group_id' => '620e4e4a-caf3-4118-9da0-08e967c469ac',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'alamat' => 'Jl. Parto No. 4',
+                'hp' => '081234567893',
+            ],
+            [
+                'nama' => 'Bambang',
+                'email' => 'bambang@example.com',
+                'group_id' => 'e107661f-a4cb-4e74-8024-c7f6e5a06fe6',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'alamat' => 'Jl. Bambang No. 5',
+                'hp' => '081234567894',
+            ],
+            [
+                'nama' => 'Sadiran',
+                'email' => 'sadiran@example.com',
+                'group_id' => 'e107661f-a4cb-4e74-8024-c7f6e5a06fe6',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'alamat' => 'Jl. Sadiran No. 4',
+                'hp' => '081234567893',
+            ],
+            [
+                'nama' => 'Danang',
+                'email' => 'danang@example.com',
+                'group_id' => '694e2383-96b8-40c1-9c1a-599dcaa3887e',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'alamat' => 'Jl. Danang No. 5',
+                'hp' => '0812345237897',
+            ],
+            [
+                'nama' => 'Atmajaya',
+                'email' => 'atmajaya@example.com',
+                'group_id' => '694e2383-96b8-40c1-9c1a-599dcaa3887e',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'alamat' => 'Jl. Atmajaya No. 4',
+                'hp' => '081234562293',
+            ],
+            [
+                'nama' => 'Dodi',
+                'email' => 'dodi@example.com',
+                'group_id' => '3cf66ee2-f08f-49b7-bf9b-4a89c3cfac21',
+                'departemen_id' => 'ac49343f-b616-4a05-b4b3-d399b7419c15',
+                'alamat' => 'Jl. Dodi No. 4',
+                'hp' => '081234567893',
+            ],
+            [
+                'nama' => 'Eka',
+                'email' => 'eka@example.com',
+                'group_id' => 'f6811f2d-9f98-49bc-bfa0-1fe57bb6b18f',
+                'departemen_id' => '894cd210-420f-47cb-be57-f6eeb27d8622',
+                'alamat' => 'Jl. Eka No. 5',
+                'hp' => '081234567894',
+            ],
+            [
+                'nama' => 'Fajar',
+                'email' => 'fajar@example.com',
+                'group_id' => '620e4e4a-caf3-4118-9da0-08e967c469ac',
+                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'alamat' => 'Jl. Fajar No. 6',
+                'hp' => '081234567895',
+            ],
+        ];
+        $pegawai = array_map(function ($r) use ($now) {
+            return $r + [
+                'id'         => (string) Str::uuid(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }, $pegawai);
+
+        Pegawai::query()->insert($pegawai);
+        return Pegawai::all();
+    }
+
     public static function isiBrand()
     {
         $now  = Carbon::now();

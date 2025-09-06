@@ -13,7 +13,11 @@ class CustomerAsset extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['tipe_id','keterangan',
         'lokasi','brand_id','model','freon','kapasitas',
-        'customer_id','gambar','id'
+        'customer_id','gambar','id','lasService','nextService','status'
+    ];
+    protected $casts = [
+        'last_service' => 'datetime',
+        'next_service' => 'datetime',
     ];
     public $incrementing = false;
     protected $keyType = 'string';
