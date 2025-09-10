@@ -23,7 +23,7 @@ return function (App $app) {
                 return JsonResponder::error($response, 'Invalid input', 400);
             }
 
-            $role = \App\Models\Role::where('name', 'User')->first();
+            $role = \App\Models\Role::where('name', 'user')->first();
             if (!$role) {
                 return JsonResponder::error($response, 'Role not found', 404);
             }

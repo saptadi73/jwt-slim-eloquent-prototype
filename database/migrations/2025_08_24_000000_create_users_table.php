@@ -6,16 +6,19 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Schema\Blueprint;
 
 // Konfigurasi database (samakan dengan public/index.php)
+
+// Koneksi langsung ke PostgreSQL
 $capsule = new Capsule;
 $capsule->addConnection([
-    'driver'    => 'mysql',
+    'driver'    => 'pgsql',
     'host'      => '127.0.0.1',
-    'database'  => 'erpmini', // Ganti sesuai database
-    'username'  => 'root',
-    'password'  => '',
+    'database'  => 'erpmini',
+    'username'  => 'openpg',
+    'password'  => 'openpgpwd',
     'charset'   => 'utf8',
-    'collation' => 'utf8_unicode_ci',
     'prefix'    => '',
+    'schema'    => 'public',
+    'port'      => 5432,
 ]);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();

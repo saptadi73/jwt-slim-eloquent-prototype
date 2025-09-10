@@ -37,7 +37,7 @@ return function (App $app) {
                     // 'trace' => $e->getTrace()
                 ], 500);
             }
-        });
+        })->add(new JwtMiddleware());
 
         $cust->get('/assets/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             /** @var CustomerService $svc */
@@ -79,7 +79,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to delete brand: ' . $th->getMessage(), 500);
             }
-        });
+        })->add(new JwtMiddleware());
 
         $cust->get('/tipe/delete/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             try {
@@ -89,7 +89,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to delete type: ' . $th->getMessage(), 500);
             }
-        });
+        })->add(new JwtMiddleware());
 
         $cust->get('/tipe', function (Request $request, Response $response) use ($container) {
 
@@ -111,7 +111,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to update type: ' . $th->getMessage(), 500);
             }
-        });
+        })->add(new JwtMiddleware());
 
         $cust->post('/brand/update/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
@@ -122,7 +122,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to update brand: ' . $th->getMessage(), 500);
             }
-        });
+        })->add(new JwtMiddleware());
 
         $cust->post('/assets/new', function (Request $request, Response $response) use ($container) {
             /** @var CustomerService $svc */
@@ -144,7 +144,7 @@ return function (App $app) {
                 ], 500);
             }
             
-        });
+        })->add(new JwtMiddleware());
         $cust->get('/assets/all', function (Request $request, Response $response) use ($container) {
             try {
                 $svc = $container->get(CustomerService::class);
@@ -158,5 +158,5 @@ return function (App $app) {
         // $cust->get('',  [CustomerController::class, 'index']);
         // $cust->get('/{id}', [CustomerController::class, 'show']);
         // dst...
-    })->add(new JwtMiddleware());
+    });
 };

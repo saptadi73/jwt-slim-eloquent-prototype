@@ -10,6 +10,9 @@ require __DIR__ . '/../../vendor/autoload.php';
 use Illuminate\Database\Capsule\Manager as Capsule;
 use Illuminate\Database\Schema\Blueprint;
 
+
+// Koneksi ke MySQL (default, dikomentari)
+/*
 $capsule = new Capsule;
 $capsule->addConnection([
     'driver'    => 'mysql',
@@ -21,7 +24,23 @@ $capsule->addConnection([
     'collation' => 'utf8_unicode_ci',
     'prefix'    => '',
 ]);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
+*/
 
+// Koneksi ke PostgreSQL (aktif, gunakan ENV)
+$capsule = new Capsule;
+$capsule->addConnection([
+    'driver'    => 'pgsql',
+    'host'      => '127.0.0.1',
+    'database'  => 'erpmini',
+    'username'  => 'openpg',
+    'password'  => 'openpgpwd',
+    'charset'   => 'utf8',
+    'prefix'    => '',
+    'schema'    => 'public',
+    'port'      => 5432,
+]);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
@@ -29,7 +48,7 @@ $capsule->bootEloquent();
 | 0) DROP SEMUA TABEL DENGAN AMAN
 |    Matikan FK checks, drop dari tabel paling dependen → induk
 | ------------------------------------------------------------- */
-Capsule::statement('SET FOREIGN_KEY_CHECKS=0');
+
 
 $tables = [
     // Pivot
@@ -79,7 +98,7 @@ foreach ($tables as $t) {
     Capsule::schema()->dropIfExists($t);
 }
 
-Capsule::statement('SET FOREIGN_KEY_CHECKS=1');
+
 
 echo "Semua tabel lama dihapus (jika ada).\n";
 

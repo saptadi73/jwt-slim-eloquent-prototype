@@ -36,9 +36,6 @@ return function (App $app) {
             }
         });
 
-        
-
-
         $wo->get('/all', function (Request $request, Response $response) use ($container) {
 
             try {

@@ -6,6 +6,9 @@ $dotenv->safeLoad();
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
+
+// Koneksi ke MySQL (default, dikomentari)
+/*
 $c = new Capsule();
 $c->addConnection([
     'driver' => $_ENV['DB_DRIVER'] ?? 'mysql',
@@ -17,6 +20,23 @@ $c->addConnection([
     'collation' => $_ENV['DB_COLLATION'] ?? 'utf8mb4_unicode_ci',
     'prefix' => '',
     'port' => (int)($_ENV['DB_PORT'] ?? 3306),
+]);
+$c->setAsGlobal();
+$c->bootEloquent();
+*/
+
+// Koneksi ke PostgreSQL (langsung, tanpa ENV)
+$c = new Capsule();
+$c->addConnection([
+    'driver'    => 'pgsql',
+    'host'      => '127.0.0.1',
+    'database'  => 'erpmini',
+    'username'  => 'openpg',
+    'password'  => 'openpgpwd',
+    'charset'   => 'utf8',
+    'prefix'    => '',
+    'schema'    => 'public',
+    'port'      => 5432,
 ]);
 $c->setAsGlobal();
 $c->bootEloquent();
@@ -80,9 +100,9 @@ if (!$schema->hasTable('auth_tokens')) {
 }
 
 // Seed role dasar
-$admin = \App\Model\Role::firstOrCreate(['name' => 'admin'], ['label' => 'Administrator']);
-$teknisi = \App\Model\Role::firstOrCreate(['name' => 'teknisi'], ['label' => 'Teknisi']);
-$userRole = \App\Model\Role::firstOrCreate(['name' => 'user'], ['label' => 'User']);
+$admin = \App\Models\Role::firstOrCreate(['name' => 'admin'], ['label' => 'Administrator']);
+$teknisi = \App\Models\Role::firstOrCreate(['name' => 'teknisi'], ['label' => 'Teknisi']);
+$userRole = \App\Models\Role::firstOrCreate(['name' => 'user'], ['label' => 'User']);
 
 // Set ID default untuk role
 $admin->id = 1; // ID untuk admin
@@ -95,7 +115,7 @@ $teknisi->save();
 $userRole->save();
 
 // jika ada user id=1, jadikan admin
-$first = \App\Model\User::find(1);
+$first = \App\Models\User::find(1);
 if ($first) {
     $first->roles()->syncWithoutDetaching([$admin->id]); // Mengaitkan user dengan role admin
 }
