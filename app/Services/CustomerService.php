@@ -20,22 +20,18 @@ class CustomerService
     private function nextCustomerCode(): string
     {
         $prefix = 'CUST-';
+        // Ambil angka terbesar dari kode_pelanggan yang sudah ada
+        $max = Customer::where('kode_pelanggan', 'like', $prefix . '%')
+            ->selectRaw("MAX(CAST(SUBSTRING(kode_pelanggan, LENGTH(?) + 1) AS INTEGER)) as max_code", [$prefix])
+            ->value('max_code');
 
-        $last = Customer::where('kode_pelanggan', 'like', $prefix . '%')
-            ->orderBy('kode_pelanggan')   // aman jika 5 digit zero-pad
-            ->value('kode_pelanggan');
-
-        $next = 1;
-        if ($last && preg_match('/^' . preg_quote($prefix, '/') . '(\d{5})$/', $last, $m)) {
-            $next = ((int)$m[1]) + 1;
-        }
-
+        $next = ((int)$max) + 1;
         return $prefix . str_pad((string)$next, 5, '0', STR_PAD_LEFT);
     }
     public function createCustomerAndAsset(Request $request, Response $response, array $data, File $file)
     {
         $data['kode_pelanggan'] = $this->nextCustomerCode();
-        $customer_data = Arr::only($data, ['nama','jenis','alamat', 'hp', 'kode_pelanggan', 'email']);
+        $customer_data = Arr::only($data, ['nama', 'jenis', 'alamat', 'hp', 'kode_pelanggan', 'email']);
         $asset_data = Arr::only($data, ['tipe_id', 'keterangan', 'lokasi', 'brand_id', 'model', 'freon', 'kapasitas']);
 
         try {
@@ -129,8 +125,30 @@ class CustomerService
     {
 
         try {
-            print_r($customerId); // Debug: pastikan ID diterima dengan benar
-            $data = Customer::with('customerassets')->find($customerId);
+
+            $data = Customer::join('customer_assets', 'customers.id', '=', 'customer_assets.customer_id')
+                ->where('customers.id', $customerId)
+                ->select('customers.*', 'customer_assets.*')
+                ->get();
+
+            return JsonResponder::success($response, $data, 'Customer with Asset retrieved');
+        } catch (\Throwable $th) {
+            //throw $th;
+            return JsonResponder::error($response, 'Failed to retrieve Customer with Asset: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function getCustomerAssetWithCustomer(Response $response, string $customerAssetId)
+    {
+
+        try {
+
+            $data = CustomerAsset::join('customers', 'customer_assets.customer_id', '=', 'customers.id')
+                ->join('brand', 'customer_assets.brand_id', '=', 'brand.id')
+                ->join('tipe', 'customer_assets.tipe_id', '=', 'tipe.id')
+                ->where('customer_assets.id', $customerAssetId)
+                ->select('customer_assets.*','brand.nama as brand','tipe.nama as tipe' ,'customers.nama as customer_nama', 'customers.hp as customer_hp', 'customers.alamat as customer_alamat', 'customers.gambar as customer_gambar','customers.jenis as customer_jenis','customers.email as customer_email','customers.kode_pelanggan as customer_kode_pelanggan')
+                ->first();
 
             return JsonResponder::success($response, $data, 'Customer with Asset retrieved');
         } catch (\Throwable $th) {

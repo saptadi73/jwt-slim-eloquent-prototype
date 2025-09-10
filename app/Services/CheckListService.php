@@ -61,92 +61,103 @@ class CheckListService
         $now = Carbon::now();
         $pegawai = [
             [
-                'nama' => 'Andi',
+                'nama' => 'Andi Setiawan',
                 'email' => 'andi@example.com',
-                'group_id' => 'e6fe16ea-ebac-4d2e-9f4f-b5c15706c724',
+                'group_id' => '29017fcf-cfb2-4800-9263-b7d0e4504d9d',
                 'alamat' => 'Jl. Andi No. 1',
                 'hp' => '081234567890',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'tanda_tangan' => 'uploads/signatures/ttd1.png'
             ],
             [
-                'nama' => 'Budi',
+                'nama' => 'Budi Arie',
                 'email' => 'budi@example.com',
-                'group_id' => 'e6fe16ea-ebac-4d2e-9f4f-b5c15706c724',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'group_id' => '29017fcf-cfb2-4800-9263-b7d0e4504d9d',
+                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
                 'alamat' => 'Jl. Budi No. 2',
                 'hp' => '081234567891',
+                'tanda_tangan' => 'uploads/signatures/ttd2.png'
             ],
             [
-                'nama' => 'Cici',
+                'nama' => 'Cici Faramida Suciati',
                 'email' => 'cici@example.com',
-                'group_id' => '620e4e4a-caf3-4118-9da0-08e967c469ac',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'group_id' => 'a3f55254-e5a3-4b31-985b-553bc0d927b4',
+                'departemen_id' => '76ff3e21-45ec-4644-9246-468c45142465',
                 'alamat' => 'Jl. Cici No. 3',
                 'hp' => '081234567892',
+                'tanda_tangan' => 'uploads/signatures/ttd3.png'
             ],
             [
-                'nama' => 'Parto',
+                'nama' => 'Parto Sumitro',
                 'email' => 'parto@example.com',
-                'group_id' => '620e4e4a-caf3-4118-9da0-08e967c469ac',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'group_id' => 'e85b91ef-f97c-4e8a-badb-b1849c16dd03',
+                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
                 'alamat' => 'Jl. Parto No. 4',
                 'hp' => '081234567893',
+                'tanda_tangan' => 'uploads/signatures/ttd4.png'
             ],
             [
-                'nama' => 'Bambang',
+                'nama' => 'Bambang Pacul',
                 'email' => 'bambang@example.com',
-                'group_id' => 'e107661f-a4cb-4e74-8024-c7f6e5a06fe6',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'group_id' => 'e85b91ef-f97c-4e8a-badb-b1849c16dd03',
+                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
                 'alamat' => 'Jl. Bambang No. 5',
                 'hp' => '081234567894',
+                'tanda_tangan' => 'uploads/signatures/ttd5.png'
             ],
             [
                 'nama' => 'Sadiran',
                 'email' => 'sadiran@example.com',
-                'group_id' => 'e107661f-a4cb-4e74-8024-c7f6e5a06fe6',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'group_id' => '1ea166fb-6f7c-4da3-99f7-ce6e757e06e1',
+                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
                 'alamat' => 'Jl. Sadiran No. 4',
                 'hp' => '081234567893',
+                'tanda_tangan' => 'uploads/signatures/ttd6.png'
             ],
             [
-                'nama' => 'Danang',
+                'nama' => 'Danang Sutawijaya',
                 'email' => 'danang@example.com',
-                'group_id' => '694e2383-96b8-40c1-9c1a-599dcaa3887e',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'group_id' => '1ea166fb-6f7c-4da3-99f7-ce6e757e06e1',
+                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
                 'alamat' => 'Jl. Danang No. 5',
                 'hp' => '0812345237897',
+                'tanda_tangan' => 'uploads/signatures/ttd7.png'
             ],
             [
-                'nama' => 'Atmajaya',
+                'nama' => 'Atmajaya Badar',
                 'email' => 'atmajaya@example.com',
-                'group_id' => '694e2383-96b8-40c1-9c1a-599dcaa3887e',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'group_id' => 'a1a2643d-fec3-4f62-85ac-2969c4897595',
+                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
                 'alamat' => 'Jl. Atmajaya No. 4',
                 'hp' => '081234562293',
+                'tanda_tangan' => 'uploads/signatures/ttd8.png'
             ],
             [
-                'nama' => 'Dodi',
+                'nama' => 'Dodi Pangestu',
                 'email' => 'dodi@example.com',
-                'group_id' => '3cf66ee2-f08f-49b7-bf9b-4a89c3cfac21',
-                'departemen_id' => 'ac49343f-b616-4a05-b4b3-d399b7419c15',
+                'group_id' => 'a1a2643d-fec3-4f62-85ac-2969c4897595',
+                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
                 'alamat' => 'Jl. Dodi No. 4',
                 'hp' => '081234567893',
+                'tanda_tangan' => 'uploads/signatures/ttd7.png'
             ],
             [
-                'nama' => 'Eka',
+                'nama' => 'Eka Suciwati',
                 'email' => 'eka@example.com',
-                'group_id' => 'f6811f2d-9f98-49bc-bfa0-1fe57bb6b18f',
-                'departemen_id' => '894cd210-420f-47cb-be57-f6eeb27d8622',
+                'group_id' => 'ef989250-5ec6-4036-ad7d-d3a46388f839',
+                'departemen_id' => '5afbe90c-550c-4ffe-ad07-b2f019ed8657',
                 'alamat' => 'Jl. Eka No. 5',
                 'hp' => '081234567894',
+                'tanda_tangan' => 'uploads/signatures/ttd6.png'
             ],
             [
-                'nama' => 'Fajar',
+                'nama' => 'Fajar Dewanto',
                 'email' => 'fajar@example.com',
-                'group_id' => '620e4e4a-caf3-4118-9da0-08e967c469ac',
-                'departemen_id' => '1610b297-df74-42ae-9ca0-469cd3e17b1e',
+                'group_id' => 'f483a59a-fd50-4e2f-870f-d3393a220e4a',
+                'departemen_id' => 'f2f95c50-4bba-4f3f-a97c-a99f6e17d055',
                 'alamat' => 'Jl. Fajar No. 6',
                 'hp' => '081234567895',
+                'tanda_tangan' => 'uploads/signatures/ttd5.png'
             ],
         ];
         $pegawai = array_map(function ($r) use ($now) {

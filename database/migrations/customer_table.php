@@ -228,6 +228,7 @@ Capsule::schema()->create('pegawai', function (Blueprint $table) {
     $table->string('nama');
     $table->string('alamat');
     $table->string('hp');
+    $table->string('tanda_tangan')->nullable();
     $table->string('email')->unique()->nullable();
 
     $table->uuid('departemen_id')->nullable();

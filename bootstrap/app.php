@@ -5,6 +5,7 @@ use Slim\Factory\AppFactory;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use App\Middlewares\CorsMiddleware;
 use App\Services\CustomerService;
+use App\Services\OrganisasiService;
 use App\Services\WorkOrderService;
 use Dotenv\Dotenv;
 
@@ -18,6 +19,7 @@ if (file_exists(__DIR__ . '/../.env')) {
 $pimple = new PimpleContainer();
 $pimple[CustomerService::class] = fn($c) => new CustomerService();
 $pimple[WorkOrderService::class] = fn($c) => new WorkOrderService();
+$pimple[OrganisasiService::class] = fn($c) => new OrganisasiService();
 // (opsional) $pimple[CorsMiddleware::class] = fn($c) => new CorsMiddleware();
 
 $container = new Psr11Container($pimple);

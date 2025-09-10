@@ -44,10 +44,21 @@ return function (App $app) {
 
             try {
                 $svc = $container->get(CustomerService::class);
-                return $svc->getCustomerWithAsset($response, $args['id']);
+                return $svc->getCustomerAssetWithCustomer($response, $args['id']);
             } catch (\Throwable $th) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to retrieve Customer with Asset: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $cust->get('/customers/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
+
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->getCustomerWithAsset($response, $args['id']);
+            } catch (\Throwable $th) {
+                //throw $th;
+                return JsonResponder::error($response, 'Failed to retrieve customer: ' . $th->getMessage(), 500);
             }
         });
 

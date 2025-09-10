@@ -40,6 +40,19 @@ class OrganisasiService
             return JsonResponder::error($response, $th);
         }
     }
+
+    public function getPegawai(Response $response)
+    {
+        try {
+            $pegawai = Pegawai::join('departemen', 'pegawai.departemen_id', '=', 'departemen.id')
+                ->join('groups', 'pegawai.group_id', '=', 'groups.id')
+                ->select('pegawai.*', 'departemen.nama as departemen_nama', 'groups.nama as group_nama')
+                ->get();
+            return JsonResponder::success($response, $pegawai);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, $th);
+        }
+    }
 }
 
 ?>

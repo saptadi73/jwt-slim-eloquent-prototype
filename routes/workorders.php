@@ -3,6 +3,7 @@
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use App\Services\WorkOrderService;
+use App\Services\OrganisasiService;
 use App\Support\RequestHelper;
 use App\Support\JsonResponder;
 use App\Middlewares\JwtMiddleware;
@@ -34,7 +35,7 @@ return function (App $app) {
             } catch (\Throwable $e) {
                 return JsonResponder::error($response, 'Internal server error', 500);
             }
-        });
+        })->addMiddleware(new JwtMiddleware());
 
         $wo->get('/all', function (Request $request, Response $response) use ($container) {
 
@@ -45,7 +46,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to retrieve Work Orders: ' . $th->getMessage(), 500);
             }
-        });
+        })->addMiddleware(new JwtMiddleware());
 
         $wo->get('/jenisworkorder', function (Request $request, Response $response) use ($container) {
 
@@ -56,7 +57,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to retrieve Jenis Work Orders: ' . $th->getMessage(), 500);
             }
-        });
+        })->addMiddleware(new JwtMiddleware());
 
         
 
@@ -69,7 +70,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to retrieve Checklist Template: ' . $th->getMessage(), 500);
             }
-        });
+        })->addMiddleware(new JwtMiddleware());
 
         
 
@@ -82,7 +83,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to input Checklist for Work Order: ' . $th->getMessage(), 500);
             }
-        });
+        })->addMiddleware(new JwtMiddleware());
 
 
         
@@ -96,7 +97,7 @@ return function (App $app) {
                 //throw $th;
                 return JsonResponder::error($response, 'Failed to update Work Order: ' . $th->getMessage(), 500);
             }
-        });
+        })->addMiddleware(new JwtMiddleware());
 
         $wo->get('/delete/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
             try {
@@ -127,5 +128,14 @@ return function (App $app) {
                 return JsonResponder::error($response, 'Failed to retrieve Work Order: ' . $th->getMessage(), 500);
             }
         });
-    })->addMiddleware(new JwtMiddleware());
+
+        $wo->get('/pegawai', function (Request $request, Response $response) use ($container) {
+            try {
+                $svc = $container->get(OrganisasiService::class);
+                return $svc->getPegawai($response);
+            } catch (\Throwable $th) {
+                return JsonResponder::error($response, 'Failed to retrieve Pegawai: ' . $th->getMessage(), 500);
+            }
+        });
+    });
 };

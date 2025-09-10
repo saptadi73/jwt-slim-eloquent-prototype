@@ -8,7 +8,7 @@ class Pegawai extends Model
 
     protected $table = 'pegawai';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama','alamat','hp','departemen_id','group_id','email','id'];
+    protected $fillable = ['nama','alamat','hp','departemen_id','group_id','email','id','tanda_tangan'];
 
     protected $keyType = 'string';
     public $incrementing = false;   // UUID
