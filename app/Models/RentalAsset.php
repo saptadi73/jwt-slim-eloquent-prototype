@@ -13,23 +13,17 @@ class RentalAsset extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['tipe_id','keterangan',
         'lokasi','brand_id','model','freon','kapasitas',
-        'gambar','id','status'
+        'gambar','id','status','harga_perolehan','harga_sewa','sisa_harga_sekarang',
     ];
     protected $casts = [
-        'last_service' => 'datetime',
-        'next_service' => 'datetime',
+        'harga_perolehan' => 'integer',
+        'harga_sewa' => 'integer',
+        'sisa_harga_sekarang' => 'integer',
     ];
     public $incrementing = false;
     protected $keyType = 'string';
 
     public $timestamps = true;
-
-   
-
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class, 'customer_id');
-    }
 
     public function brand()
     {

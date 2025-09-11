@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class WorkOrderPenyewaan extends Model
+{
+    protected $table = 'workorder_penyewaan'; // Nama tabel
+
+    protected $fillable = [
+        'customer_asset_id',
+        'teknisi_id',
+        'tanda_tangan_teknisi',
+        'tanda_tangan_pelanggan',
+        'hasil_pekerjaan',
+        'checkIndoor',
+        'keteranganIndoor',
+        'checkOutdoor',
+        'keteranganOutdoor',
+        'checkPipa',
+        'keteranganPipa',
+        'checkSelang',
+        'keteranganSelang',
+        'checkKabel',
+        'keteranganKabel',
+        'checkInstIndoor',
+        'keteranganInstIndoor',
+        'checkInstOutdoor',
+        'keteranganInstOutdoor',
+        'checkInstListrik',
+        'keteranganInstListrik',
+        'checkInstPipa',
+        'keteranganInstPipa',
+        'checkBuangan',
+        'keteranganBuangan',
+        'checkVaccum',
+        'keteranganVaccum',
+        'checkFreon',
+        'keteranganFreon',
+        'checkArus',
+        'keteranganArus',
+        'checkEva',
+        'keteranganEva',
+        'checkKondensor',
+        'keteranganKondensor',
+        'tanda_tangan_pelanggan',
+        'status',
+    ];
+
+    // Relasi dengan customer asset
+    public function customerAsset()
+    {
+        return $this->belongsTo(CustomerAsset::class, 'customer_asset_id'); // Relasi dengan customer_asset
+    }
+
+    public function pegawai()
+    {
+        return $this->belongsTo(Pegawai::class,'teknisi_id');
+    }
+}

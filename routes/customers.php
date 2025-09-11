@@ -166,7 +166,7 @@ return function (App $app) {
             }
         });
 
-        $cust->post('/rental_assets/new', function (Request $request, Response $response) use ($container) {
+        $cust->post('/rentalassets/new', function (Request $request, Response $response) use ($container) {
             /** @var CustomerService $svc */
             $svc  = $container->get(CustomerService::class);
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
@@ -188,10 +188,10 @@ return function (App $app) {
             
         })->add(new JwtMiddleware());
 
-       $cust->get('/rental_assets/all', function (Request $request, Response $response) use ($container) {
+       $cust->get('/rentalassets/all', function (Request $request, Response $response) use ($container) {
             try {
                 $svc = $container->get(CustomerService::class);
-                return $svc->listRentalAssetsAll($response);
+                return $svc->listRentalAssets($response);
             } catch (\Throwable $th) {
                 return JsonResponder::error($response, 'Failed to retrieve rental assets: ' . $th->getMessage(), 500);
             }
@@ -201,7 +201,7 @@ return function (App $app) {
             /** @var CustomerService $svc */
             $svc  = $container->get(CustomerService::class);
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
-
+            $file = RequestHelper::pickUploadedFile($request, ['file', 'photo']);
             try {
                 return $svc->createCustomerOnly($request, $response, $data, $file ?? null);
             } catch (\InvalidArgumentException $e) {

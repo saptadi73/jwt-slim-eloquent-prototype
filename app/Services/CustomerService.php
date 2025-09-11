@@ -344,7 +344,10 @@ class CustomerService
     public function listRentalAssets(Response $response)
     {
         try {
-            $assets = RentalAsset::with(['customer', 'brand', 'tipe'])->get();
+            $assets = RentalAsset::join('brand', 'rental_assets.brand_id', '=', 'brand.id')
+                ->join('tipe', 'rental_assets.tipe_id', '=', 'tipe.id')
+                ->select('rental_assets.*', 'brand.nama as brand', 'tipe.nama as tipe')
+                ->get();
             return JsonResponder::success($response, $assets, 'List of Rental Assets retrieved');
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Failed to retrieve Rental Assets: ' . $th->getMessage(), 500);
