@@ -22,4 +22,9 @@ class Brand extends Model
     {
         return $this->hasMany(CustomerAsset::class, 'brand_id');
     }
+
+    public function rentalAssets()
+    {
+        return $this->hasMany(RentalAsset::class, 'brand_id');
+    }
 }

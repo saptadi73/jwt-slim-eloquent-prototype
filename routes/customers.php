@@ -6,6 +6,7 @@ use App\Services\CustomerService;
 use App\Support\JsonResponder;
 use App\Support\RequestHelper;
 use App\Middlewares\JwtMiddleware;
+use Illuminate\Support\Facades\File;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -164,6 +165,56 @@ return function (App $app) {
                 return JsonResponder::error($response, 'Failed to retrieve customer assets: ' . $th->getMessage(), 500);
             }
         });
+
+        $cust->post('/rental_assets/new', function (Request $request, Response $response) use ($container) {
+            /** @var CustomerService $svc */
+            $svc  = $container->get(CustomerService::class);
+            $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
+            $file = RequestHelper::pickUploadedFile($request, ['file', 'photo']);
+
+            try {
+                return $svc->createRentalAsset($request, $response, $data, $file);
+
+            } catch (\InvalidArgumentException $e) {
+                return JsonResponder::error($response, $e->getMessage(), 422);
+            } catch (\Throwable $e) {
+                return JsonResponder::error($response, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $data,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+            
+        })->add(new JwtMiddleware());
+
+       $cust->get('/rental_assets/all', function (Request $request, Response $response) use ($container) {
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->listRentalAssetsAll($response);
+            } catch (\Throwable $th) {
+                return JsonResponder::error($response, 'Failed to retrieve rental assets: ' . $th->getMessage(), 500);
+            }
+        });
+
+        $cust->post('/only/new', function (Request $request, Response $response) use ($container) {
+            /** @var CustomerService $svc */
+            $svc  = $container->get(CustomerService::class);
+            $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
+
+            try {
+                return $svc->createCustomerOnly($request, $response, $data, $file ?? null);
+            } catch (\InvalidArgumentException $e) {
+                return JsonResponder::error($response, $e->getMessage(), 422);
+            } catch (\Throwable $e) {
+                return JsonResponder::error($response, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $data,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        })->add(new JwtMiddleware());
 
         // Tambah endpoints lain: index/show/update/delete kalau diperlukan
         // $cust->get('',  [CustomerController::class, 'index']);

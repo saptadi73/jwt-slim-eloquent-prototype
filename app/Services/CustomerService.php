@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Models\CustomerAsset;
+use App\Models\RentalAsset;
 use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -298,6 +299,55 @@ class CustomerService
             return JsonResponder::success($response, $data, 'All Customers retrieved');
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Failed to retrieve Customers: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function createCustomerOnly(Request $request, Response $response, array $data, ?File $file)
+    {
+        $data['kode_pelanggan'] = $this->nextCustomerCode();
+        $customer_data = Arr::only($data, ['nama', 'jenis', 'alamat', 'hp', 'kode_pelanggan', 'email']);
+
+        try {
+            $customer_data['id'] = Str::uuid();
+            $customer = Customer::create($customer_data);
+            if ($file && $file->getError() === UPLOAD_ERR_OK) {
+                $filename = Upload::storeImage($file, 'customers');
+                $customer->gambar = $filename;
+                $customer->save();
+            } else {
+                $customer->gambar = null;
+                $customer->save();
+                $msg_file = $file ? 'File upload error code: ' . $file->getError() : 'No file uploaded';
+            }
+            return JsonResponder::success($response, $customer, 'Customer created' . ($msg_file ?? ''));
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to create Customer: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function createRentalAsset(Request $request, Response $response, array $data, ?File $file)
+    {
+        try {
+            $data['id'] = Str::uuid();
+            $asset = RentalAsset::create($data);
+            if ($file && $file->getError() === UPLOAD_ERR_OK) {
+                $filename = Upload::storeImage($file, 'rental_assets');
+                $asset->gambar = $filename;
+                $asset->save();
+            }
+            return JsonResponder::success($response, $asset, 'Rental Asset created');
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to create Rental Asset: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function listRentalAssets(Response $response)
+    {
+        try {
+            $assets = RentalAsset::with(['customer', 'brand', 'tipe'])->get();
+            return JsonResponder::success($response, $assets, 'List of Rental Assets retrieved');
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to retrieve Rental Assets: ' . $th->getMessage(), 500);
         }
     }
 }

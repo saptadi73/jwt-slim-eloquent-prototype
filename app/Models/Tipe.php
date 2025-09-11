@@ -22,4 +22,9 @@ class Tipe extends Model
     {
         return $this->hasMany(CustomerAsset::class, 'tipe_id');
     }
+
+    public function rentalAssets()
+    {
+        return $this->hasMany(RentalAsset::class, 'tipe_id');
+    }
 }

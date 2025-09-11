@@ -5,15 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 
-class CustomerAsset extends Model
+class RentalAsset extends Model
 {
 
 
-    protected $table = 'customer_assets';
+    protected $table = 'rental_assets';
     protected $primaryKey = 'id';
     protected $fillable = ['tipe_id','keterangan',
         'lokasi','brand_id','model','freon','kapasitas',
-        'customer_id','gambar','id','lastService','nextService','status'
+        'gambar','id','status'
     ];
     protected $casts = [
         'last_service' => 'datetime',

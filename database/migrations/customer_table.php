@@ -92,6 +92,7 @@ $tables = [
     'brand',
     'tipe',
     'jenis_workorder',
+    'rental_assets',
 ];
 
 foreach ($tables as $t) {
@@ -273,6 +274,32 @@ Capsule::schema()->create('customer_assets', function (Blueprint $table) {
     $table->timestamps();
 });
 echo "Tabel customer_assets dibuat.\n";
+
+Capsule::schema()->create('rental_assets', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+
+    $table->uuid('tipe_id');
+    $table->foreign('tipe_id')->references('id')->on('tipe')->onDelete('cascade');
+
+    $table->string('keterangan')->nullable();
+    $table->string('gambar')->nullable();
+    $table->string('lokasi')->nullable();
+    $table->string('status')->nullable(); // aktif, non-aktif
+
+    $table->uuid('brand_id');
+    $table->foreign('brand_id')->references('id')->on('brand')->onDelete('cascade');
+
+    $table->string('model')->nullable();
+    $table->string('freon')->nullable();
+    $table->string('kapasitas')->nullable();
+
+    $table->uuid('customer_id');
+    $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+
+    $table->timestamps();
+});
+echo "Tabel rental_assets dibuat.\n";
 
 // workorders
 Capsule::schema()->create('workorders', function (Blueprint $table) {
