@@ -179,14 +179,6 @@ Capsule::schema()->create('kategori', function (Blueprint $table) {
 });
 echo "Tabel kategori dibuat.\n";
 
-Capsule::schema()->create('jenis_workorder', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-    $table->uuid('id')->primary();
-    $table->string('nama')->nullable();
-    $table->timestamps();
-});
-echo "Tabel jenis_workorder dibuat.\n";
-
 // products
 Capsule::schema()->create('products', function (Blueprint $table) {
     $table->engine = 'InnoDB';
@@ -307,9 +299,7 @@ Capsule::schema()->create('workorders', function (Blueprint $table) {
     $table->uuid('id')->primary();
     $table->string('nowo')->unique();
     $table->date('tanggal');
-
-    $table->uuid('jenis_id')->nullable();
-    $table->foreign('jenis_id')->references('id')->on('jenis_workorder')->onDelete('set null'); 
+    $table->string('jenis')->nullable();
 
     $table->timestamps();
 });
@@ -322,46 +312,6 @@ Check List Work Order
 /*------------------------------------------------------------
 Check List Work Order
 -------------------------------------------------------------*/
-
-// 1) Buat template dulu
-Capsule::schema()->create('checklist_template', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-    $table->uuid('id')->primary();
-    $table->integer('no_urut');
-    $table->string('kode_checklist')->unique();
-    $table->string('title')->nullable();
-    $table->text('checklist')->nullable();
-    $table->string('pic')->nullable();
-
-    $table->uuid('jenis_id')->nullable();
-    $table->foreign('jenis_id')->references('id')->on('jenis_workorder')->onDelete('set null');
-
-    $table->timestamps();
-});
-echo "Tabel checklist_template dibuat.\n";
-
-// 2) Baru tabel checklist yang punya FK ke template
-Capsule::schema()->create('checklist', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-    $table->uuid('id')->primary();
-    $table->boolean('jawaban');
-    $table->string('keterangan')->nullable();
-
-    $table->uuid('workorder_id');
-    $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
-
-    $table->uuid('pegawai_id')->nullable();
-    $table->foreign('pegawai_id')->references('id')->on('pegawai')->onDelete('set null');
-
-    // ganti nama biar jelas
-    $table->uuid('checklist_template_id')->nullable();
-    $table->foreign('checklist_template_id')
-        ->references('id')->on('checklist_template')->onDelete('set null');
-
-    $table->timestamps();
-});
-echo "Tabel checklist dibuat.\n";
-
 // saleorder (header)
 Capsule::schema()->create('saleorder', function (Blueprint $table) {
     $table->engine = 'InnoDB';

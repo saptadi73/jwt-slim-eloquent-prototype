@@ -2,6 +2,12 @@
 namespace App\Services;
 
 use App\Models\Workorder;
+use App\Models\WorkOrderAcService;
+use App\Models\WorkOrderPenyewaan;
+use App\Models\Pegawai;
+use App\Models\Customer;
+use App\Models\CustomerAsset;
+use App\Models\WorkorderPenjualan;
 use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -13,17 +19,19 @@ use App\Models\Tipe;
 
 class WorkOrderService
 {
-    public static function nextWorkOrderNumber()
+    private function nextWoCode(): string
     {
-        $lastWorkOrder = Workorder::orderBy('id', 'desc')->first();
-        if ($lastWorkOrder) {
-            $lastNumber = (int) substr($lastWorkOrder->workorder_number, -4);
-            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $nextNumber = '0001';
-        }
-        return 'WO-' . date('Ymd') . '-' . $nextNumber;
+        $prefix = 'WO-';
+        // Ambil angka terbesar dari nowo yang sudah ada
+        $max = Workorder::where('nowo', 'like', $prefix . '%')
+            ->selectRaw("MAX(CAST(SUBSTRING(nowo, LENGTH(?) + 1) AS INTEGER)) as max_code", [$prefix])
+            ->value('max_code');
+
+        $next = ((int)$max) + 1;
+        return $prefix . str_pad((string)$next, 5, '0', STR_PAD_LEFT);
     }
+
+    
 
 }
 

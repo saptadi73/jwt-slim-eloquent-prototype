@@ -18,10 +18,6 @@ class JenisWorkorder extends Model
 
     protected $dateFormat = 'Y-m-d H:i:s';
 
-    public function workorders()
-    {
-        return $this->hasMany(Workorder::class, 'jenis_id');
-    }
     public function checklistTemplates()
     {
         return $this->hasMany(ChecklistTemplate::class, 'jenis_id');

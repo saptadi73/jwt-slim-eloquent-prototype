@@ -13,7 +13,7 @@ class Workorder extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'nowo','tanggal','jenis_id'
+        'nowo','tanggal','jenis'
     ];
 
     protected $casts = [
@@ -42,8 +42,4 @@ class Workorder extends Model
         )->withTimestamps();
     }
 
-    public function jenis()
-    {
-        return $this->belongsTo(JenisWorkorder::class, 'jenis_id');
-    }
 }

@@ -172,7 +172,7 @@ Capsule::schema()->create('workorder_penjualan', function (Blueprint $table) {
     $table->foreign('customer_asset_id')->references('id')->on('customer_assets')->onDelete('cascade');
     $table->foreign('teknisi_id')->references('id')->on('pegawai')->onDelete('cascade');
 });
-echo 'Workorder Penjualan was created';
+echo "Workorder Penjualan was created.\n";
 
 Capsule::schema()->dropIfExists('workorder_penyewaan');
 Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
@@ -221,3 +221,4 @@ Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     // Foreign key untuk teknisi_id jika ada teknisi
     $table->foreign('teknisi_id')->references('id')->on('pegawai')->onDelete('set null');
 });
+echo "Tabel workorder_penyewaan dibuat.\n";
