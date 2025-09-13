@@ -13,25 +13,12 @@ class Workorder extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'nowo','tanggal','keluhan','pengecekan','service','tambahfreon',
-        'isifreon','bongkar','pasang','bongkarpasang','perbaikan','perbaikan',
-        'customer_id','group_id','id','jenis_id','status'
+        'nowo','tanggal','jenis_id'
     ];
 
     protected $casts = [
         'tanggal' => 'date',
     ];
-
-    // Induknya WO
-    public function customer()
-    {
-        return $this->belongsTo(Customer::class, 'customer_id');
-    }
-
-    public function group()
-    {
-        return $this->belongsTo(Group::class, 'group_id');
-    }
 
     // WO <-> SALE ORDER BARANG LINE: many-to-many via workorder_salebarangorderline
     public function saleBarangLines()

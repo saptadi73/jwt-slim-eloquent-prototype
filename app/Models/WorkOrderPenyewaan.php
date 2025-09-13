@@ -46,6 +46,7 @@ class WorkOrderPenyewaan extends Model
         'keteranganKondensor',
         'tanda_tangan_pelanggan',
         'status',
+        'workorder_id'
     ];
 
     // Relasi dengan customer asset
@@ -57,5 +58,10 @@ class WorkOrderPenyewaan extends Model
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class,'teknisi_id');
+    }
+    // Relasi dengan workorder
+    public function workorder()
+    {
+        return $this->belongsTo(Workorder::class, 'workorder_id'); // Relasi dengan workorder
     }
 }

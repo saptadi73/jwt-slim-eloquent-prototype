@@ -16,11 +16,6 @@ class Group extends Model
 
     protected $dateFormat = 'Y-m-d H:i:s';
 
-    public function workorders()
-    {
-        return $this->hasMany(Workorder::class, 'group_id');
-    }
-
     public function pegawai()
     {
         return $this->hasMany(Pegawai::class, 'group_id');

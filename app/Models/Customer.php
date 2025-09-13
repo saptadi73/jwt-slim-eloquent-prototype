@@ -23,10 +23,6 @@ class Customer extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    public function workorders()
-    {
-        return $this->hasMany(Workorder::class, 'customer_id');
-    }
     public function customerassets()
     {
         return $this->hasMany(CustomerAsset::class, 'customer_id');

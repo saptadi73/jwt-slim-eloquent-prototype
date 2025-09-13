@@ -307,24 +307,6 @@ Capsule::schema()->create('workorders', function (Blueprint $table) {
     $table->uuid('id')->primary();
     $table->string('nowo')->unique();
     $table->date('tanggal');
-    $table->string('keluhan');
-    $table->string('pengecekan')->nullable();
-    $table->string('service')->nullable();
-    $table->string('tambahfreon')->nullable();
-    $table->string('thermis')->nullable();
-    $table->string('bongkar')->nullable();
-    $table->string('pasang')->nullable();
-    $table->string('bongkarpasang')->nullable();
-    $table->string('perbaikan')->nullable();
-    $table->string('hasil')->nullable();
-    $table->string('jenis')->nullable(); // 'service' atau 'installasi' atau 'maintenance'
-    $table->string('status')->nullable(); // 'open', 'in_progress', 'closed'
-
-    $table->uuid('customer_id');
-    $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-
-    $table->uuid('group_id')->nullable();
-    $table->foreign('group_id')->references('id')->on('groups')->onDelete('set null');
 
     $table->uuid('jenis_id')->nullable();
     $table->foreign('jenis_id')->references('id')->on('jenis_workorder')->onDelete('set null'); 

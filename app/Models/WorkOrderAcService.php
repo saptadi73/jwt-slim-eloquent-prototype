@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WorkOrderService extends Model
+class WorkOrderAcService extends Model
 {
     protected $table = 'workorder_service'; // Nama tabel
 
@@ -52,6 +52,7 @@ class WorkOrderService extends Model
         'hasil_pekerjaan',
         'tanda_tangan_pelanggan',
         'status',
+        'workorder_id'
     ];
 
     // Relasi dengan tabel customer
@@ -64,5 +65,10 @@ class WorkOrderService extends Model
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'teknisi_id'); // Relasi dengan user sebagai teknisi
+    }
+    // Relasi dengan workorder
+    public function workorder()
+    {
+        return $this->belongsTo(Workorder::class, 'workorder_id'); // Relasi dengan workorder
     }
 }

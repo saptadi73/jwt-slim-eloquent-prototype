@@ -76,10 +76,8 @@ Capsule::schema()->dropIfExists('workorder_service');
 Capsule::schema()->create('workorder_service', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
-
-    $table->id();
-    $table->unsignedBigInteger('customer_asset_id');
-    $table->unsignedBigInteger('teknisi_id');
+    $table->uuid('customer_asset_id');
+    $table->uuid('teknisi_id')->nullable();
     $table->string('keluhan');
     $table->string('keterangan');
     $table->string('pengecekan');
@@ -125,7 +123,7 @@ Capsule::schema()->create('workorder_service', function (Blueprint $table) {
 
     // Foreign key untuk customer
     $table->foreign('customer_asset_id')->references('id')->on('customer_assets')->onDelete('cascade');
-    $table->foreign('teknisi_id')->references('id')->on('teknisis')->onDelete('cascade');
+    $table->foreign('teknisi_id')->references('id')->on('pegawai')->onDelete('cascade');
 }); // Hapus tabel jika ada, untuk rebuild
 echo "Tabel workorder_service dibuat.\n";
 
@@ -133,9 +131,8 @@ Capsule::schema()->dropIfExists('workorder_penjualan');
 Capsule::schema()->create('workorder_penjualan', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
-
-    $table->unsignedBigInteger('customer_asset_id');
-    $table->unsignedBigInteger('teknisi_id');
+    $table->uuid('customer_asset_id');
+    $table->uuid('teknisi_id')->nullable();
     $table->boolean('check_indoor')->default(false);
     $table->string('keterangan_indoor')->nullable();
     $table->boolean('check_outdoor')->default(false);
@@ -181,8 +178,8 @@ Capsule::schema()->dropIfExists('workorder_penyewaan');
 Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
-    $table->unsignedBigInteger('customer_asset_id');
-    $table->unsignedBigInteger('teknisi_id')->nullable();
+    $table->uuid('customer_asset_id');
+    $table->uuid('teknisi_id')->nullable();
     $table->string('tanda_tangan_teknisi')->nullable();
     $table->string('tanda_tangan_pelanggan')->nullable();
     $table->string('hasil_pekerjaan')->nullable();

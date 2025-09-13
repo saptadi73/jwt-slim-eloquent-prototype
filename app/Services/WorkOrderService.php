@@ -13,90 +13,17 @@ use App\Models\Tipe;
 
 class WorkOrderService
 {
-    public function createWorkOrder(Request $request, Response $response, array $data)
+    public static function nextWorkOrderNumber()
     {
-        try {
-            $data['id'] = \Illuminate\Support\Str::uuid();
-            $workorder = Workorder::create($data);
-            return JsonResponder::success($response, $workorder, 'Work Order created');
-        } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to create Work Order: '. $th->getMessage(), 500);
+        $lastWorkOrder = Workorder::orderBy('id', 'desc')->first();
+        if ($lastWorkOrder) {
+            $lastNumber = (int) substr($lastWorkOrder->workorder_number, -4);
+            $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $nextNumber = '0001';
         }
+        return 'WO-' . date('Ymd') . '-' . $nextNumber;
     }
-
-    public function getWorkOrderById(Response $response, string $id)
-    {
-        $workorder = Workorder::with(['customer', 'group', 'saleBarangLines', 'saleJasaLines'])->find($id);
-        if (!$workorder) {
-            return JsonResponder::error($response, 'Work Order not found', 404);
-        }
-        return JsonResponder::success($response, $workorder);
-    }
-
-    public function updateWorkOrder(Request $request, Response $response, string $id, array $data)
-    {
-        try {
-            $workorder = Workorder::find($id);
-            if (!$workorder) {
-                return JsonResponder::error($response, 'Work Order not found', 404);
-            }
-            $workorder->update($data);
-            return JsonResponder::success($response, $workorder, 'Work Order updated');
-        } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to update Work Order: '. $th->getMessage(), 500);
-        }
-    }
-
-    public function deleteWorkOrder(Request $request, Response $response, string $id)
-    {
-        try {
-            $workorder = Workorder::find($id);
-            if (!$workorder) {
-                return JsonResponder::error($response, 'Work Order not found', 404);
-            }
-            $workorder->delete();
-            return JsonResponder::success($response, null, 'Work Order deleted');
-        } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to delete Work Order: '. $th->getMessage(), 500);
-        }
-    }
-
-    public function getAllWorkOrders(Response $response)
-    {
-        $workorders = Workorder::with(['customer', 'group', 'saleBarangLines', 'saleJasaLines'])->get();
-        return JsonResponder::success($response, $workorders);
-    }
-
-    public function getChecklistTemplateByJenisTitle(Response $response, array $data)
-    {
-        $checklistTemplates = ChecklistTemplate::where('jenis_id', $data['jenis_id'])->where('title', 'like', '%'.$data['title'].'%')->get();
-        return JsonResponder::success($response, $checklistTemplates);
-
-    }
-
-    public function inputChecklist(Request $request, Response $response, array $data)
-    {
-        try {
-            $checklist = Checklist::create($data);
-            return JsonResponder::success($response, $checklist, 'Checklist created');
-        } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Failed to create Checklist: '. $th->getMessage(), 500);
-        }
-    }
-
-    public function getChecklistsByWorkOrder(Response $response, string $workorderId)
-    {
-        $checklists = Checklist::where('workorder_id', $workorderId)->with(['checklist', 'pegawai','checklist_template'])->get();
-        return JsonResponder::success($response, $checklists);
-    }
-
-    public function getAllJenisWorkorders(Response $response)
-    {
-        $jenisWorkorders = JenisWorkorder::all();
-        return JsonResponder::success($response, $jenisWorkorders);
-    }
-
-    
 
 }
 
