@@ -78,16 +78,16 @@ Capsule::schema()->create('workorder_service', function (Blueprint $table) {
     $table->uuid('id')->primary();
     $table->uuid('customer_asset_id');
     $table->uuid('teknisi_id')->nullable();
-    $table->string('keluhan');
-    $table->string('keterangan');
-    $table->string('pengecekan');
-    $table->string('service');
-    $table->boolean('tambah_freon')->default(false);
-    $table->boolean('isi_freon')->default(false);
-    $table->boolean('bongkar')->default(false);
-    $table->boolean('pasang')->default(false);
-    $table->boolean('bongkar_pasang')->default(false);
-    $table->boolean('perbaikan')->default(false);
+    $table->string('keluhan')->nullable();
+    $table->string('keterangan')->nullable();
+    $table->string('pengecekan')->nullable();
+    $table->string('service')->nullable();
+    $table->string('tambah_freon')->nullable();
+    $table->string('isi_freon')->nullable();
+    $table->string('bongkar')->nullable();
+    $table->string('pasang')->nullable();
+    $table->string('bongkar_pasang')->nullable();
+    $table->string('perbaikan')->nullable();
     $table->boolean('check_evaporator')->default(false);
     $table->string('keterangan_evaporator')->nullable();
     $table->boolean('check_fan_indoor')->default(false);
@@ -119,11 +119,13 @@ Capsule::schema()->create('workorder_service', function (Blueprint $table) {
     $table->string('hasil_pekerjaan')->nullable();
     $table->string('tanda_tangan_pelanggan')->nullable();
     $table->string('status')->nullable()->default('open');
+    $table->uuid('workorder_id')->nullable();
     $table->timestamps();
 
     // Foreign key untuk customer
     $table->foreign('customer_asset_id')->references('id')->on('customer_assets')->onDelete('cascade');
     $table->foreign('teknisi_id')->references('id')->on('pegawai')->onDelete('cascade');
+    $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
 }); // Hapus tabel jika ada, untuk rebuild
 echo "Tabel workorder_service dibuat.\n";
 
@@ -166,11 +168,13 @@ Capsule::schema()->create('workorder_penjualan', function (Blueprint $table) {
     $table->string('hasil_pekerjaan')->nullable();
     $table->string('tanda_tangan_pelanggan')->nullable();
     $table->string('status')->nullable()->default('open');
+    $table->uuid('workorder_id')->nullable();
     $table->timestamps();
 
     // Foreign key untuk customer
     $table->foreign('customer_asset_id')->references('id')->on('customer_assets')->onDelete('cascade');
     $table->foreign('teknisi_id')->references('id')->on('pegawai')->onDelete('cascade');
+    $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
 });
 echo "Workorder Penjualan was created.\n";
 
@@ -214,11 +218,13 @@ Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->boolean('checkKondensor')->default(false);
     $table->string('keteranganKondensor')->nullable();
     $table->string('status')->nullable()->default('open');
+    $table->uuid('workorder_id')->nullable();
     $table->timestamps();
 
     // Foreign key untuk customer_asset_id
     $table->foreign('customer_asset_id')->references('id')->on('customer_assets')->onDelete('cascade');
     // Foreign key untuk teknisi_id jika ada teknisi
     $table->foreign('teknisi_id')->references('id')->on('pegawai')->onDelete('set null');
+    $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
 });
 echo "Tabel workorder_penyewaan dibuat.\n";

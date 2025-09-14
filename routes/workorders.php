@@ -30,8 +30,8 @@ return function (App $app) {
             }
             try {
                 $svc = $container->get(WorkOrderService::class);
-                $workorder = $svc->createWorkorderPemeliharaan($res, $data);
-                return JsonResponder::success($res, $workorder , 201);
+                return $svc->createWorkorderPemeliharaan($res, $data);
+                
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
@@ -49,8 +49,7 @@ return function (App $app) {
             }
             try {
                 $svc = $container->get(WorkOrderService::class);
-                $workorder = $svc->createWorkOrderPenjualan($res, $data);
-                return JsonResponder::success($res, $workorder , 201);
+                return $svc->createWorkOrderPenjualan($res, $data);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
@@ -68,8 +67,7 @@ return function (App $app) {
             }
             try {
                 $svc = $container->get(WorkOrderService::class);
-                $workorder = $svc->createWorkorderPenyewaan($res, $data);
-                return JsonResponder::success($res, $workorder , 201);
+                return $svc->createWorkorderPenyewaan($res, $data);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
@@ -84,6 +82,20 @@ return function (App $app) {
             try {
                 $svc = $container->get(WorkOrderService::class);
                 return $svc->getWorkOrderById($res, $args);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $workorder ?? null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
+
+        $wo->get('/pegawai/list', function (Request $req, Response $res) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->getPegawaiList($res);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),

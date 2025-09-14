@@ -13,7 +13,7 @@ class Workorder extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'nowo','tanggal','jenis'
+        'nowo','tanggal','jenis','id'
     ];
 
     protected $casts = [

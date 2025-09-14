@@ -7,8 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class WorkOrderPenyewaan extends Model
 {
     protected $table = 'workorder_penyewaan'; // Nama tabel
+    protected $primaryKey = 'id';
+    public $incrementing = false;   // UUID
+    protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'customer_asset_id',
         'teknisi_id',
         'tanda_tangan_teknisi',
