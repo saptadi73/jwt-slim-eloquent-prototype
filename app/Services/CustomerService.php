@@ -212,6 +212,7 @@ class CustomerService
             'brand.nama as brand',
             'tipe.nama as tipe',
             'customer_assets.gambar as gambar_ac',
+            'customer_assets.id as asset_id',
             'customer_assets.model',
             'customer_assets.kapasitas',
             'customer_assets.lastService',

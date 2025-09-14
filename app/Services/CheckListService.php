@@ -63,17 +63,17 @@ class CheckListService
             [
                 'nama' => 'Andi Setiawan',
                 'email' => 'andi@example.com',
-                'group_id' => '29017fcf-cfb2-4800-9263-b7d0e4504d9d',
+                'group_id' => '6a620ea4-936f-4ab3-a945-512ad19cc774',
                 'alamat' => 'Jl. Andi No. 1',
                 'hp' => '081234567890',
-                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'departemen_id' => 'd1ee2662-99f0-4ac1-ba52-b5c14990af38',
                 'tanda_tangan' => 'uploads/signatures/ttd1.png'
             ],
             [
                 'nama' => 'Budi Arie',
                 'email' => 'budi@example.com',
-                'group_id' => '29017fcf-cfb2-4800-9263-b7d0e4504d9d',
-                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'group_id' => '6a620ea4-936f-4ab3-a945-512ad19cc774',
+                'departemen_id' => 'd1ee2662-99f0-4ac1-ba52-b5c14990af38',
                 'alamat' => 'Jl. Budi No. 2',
                 'hp' => '081234567891',
                 'tanda_tangan' => 'uploads/signatures/ttd2.png'
@@ -81,8 +81,8 @@ class CheckListService
             [
                 'nama' => 'Cici Faramida Suciati',
                 'email' => 'cici@example.com',
-                'group_id' => 'a3f55254-e5a3-4b31-985b-553bc0d927b4',
-                'departemen_id' => '76ff3e21-45ec-4644-9246-468c45142465',
+                'group_id' => '120fb1b9-ebb3-41cc-b8b7-be9b47c43dac',
+                'departemen_id' => 'dfe75975-2fb8-4233-a35e-f27632d8f5bd',
                 'alamat' => 'Jl. Cici No. 3',
                 'hp' => '081234567892',
                 'tanda_tangan' => 'uploads/signatures/ttd3.png'
@@ -90,8 +90,8 @@ class CheckListService
             [
                 'nama' => 'Parto Sumitro',
                 'email' => 'parto@example.com',
-                'group_id' => 'e85b91ef-f97c-4e8a-badb-b1849c16dd03',
-                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'group_id' => '492ed3f1-2ca8-4f97-a5e6-4e70a639bca6',
+                'departemen_id' => 'd1ee2662-99f0-4ac1-ba52-b5c14990af38',
                 'alamat' => 'Jl. Parto No. 4',
                 'hp' => '081234567893',
                 'tanda_tangan' => 'uploads/signatures/ttd4.png'
@@ -99,8 +99,8 @@ class CheckListService
             [
                 'nama' => 'Bambang Pacul',
                 'email' => 'bambang@example.com',
-                'group_id' => 'e85b91ef-f97c-4e8a-badb-b1849c16dd03',
-                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'group_id' => '492ed3f1-2ca8-4f97-a5e6-4e70a639bca6',
+                'departemen_id' => 'd1ee2662-99f0-4ac1-ba52-b5c14990af38',
                 'alamat' => 'Jl. Bambang No. 5',
                 'hp' => '081234567894',
                 'tanda_tangan' => 'uploads/signatures/ttd5.png'
@@ -108,8 +108,8 @@ class CheckListService
             [
                 'nama' => 'Sadiran',
                 'email' => 'sadiran@example.com',
-                'group_id' => '1ea166fb-6f7c-4da3-99f7-ce6e757e06e1',
-                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'group_id' => '5495aea8-f7af-4949-85de-2febe9266d32',
+                'departemen_id' => 'd1ee2662-99f0-4ac1-ba52-b5c14990af38',
                 'alamat' => 'Jl. Sadiran No. 4',
                 'hp' => '081234567893',
                 'tanda_tangan' => 'uploads/signatures/ttd6.png'
@@ -117,8 +117,8 @@ class CheckListService
             [
                 'nama' => 'Danang Sutawijaya',
                 'email' => 'danang@example.com',
-                'group_id' => '1ea166fb-6f7c-4da3-99f7-ce6e757e06e1',
-                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'group_id' => '5495aea8-f7af-4949-85de-2febe9266d32',
+                'departemen_id' => 'd1ee2662-99f0-4ac1-ba52-b5c14990af38',
                 'alamat' => 'Jl. Danang No. 5',
                 'hp' => '0812345237897',
                 'tanda_tangan' => 'uploads/signatures/ttd7.png'
@@ -126,8 +126,8 @@ class CheckListService
             [
                 'nama' => 'Atmajaya Badar',
                 'email' => 'atmajaya@example.com',
-                'group_id' => 'a1a2643d-fec3-4f62-85ac-2969c4897595',
-                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'group_id' => '29fc5a18-ef36-4294-966d-37691ee009cc',
+                'departemen_id' => 'd1ee2662-99f0-4ac1-ba52-b5c14990af38',
                 'alamat' => 'Jl. Atmajaya No. 4',
                 'hp' => '081234562293',
                 'tanda_tangan' => 'uploads/signatures/ttd8.png'
@@ -135,8 +135,8 @@ class CheckListService
             [
                 'nama' => 'Dodi Pangestu',
                 'email' => 'dodi@example.com',
-                'group_id' => 'a1a2643d-fec3-4f62-85ac-2969c4897595',
-                'departemen_id' => 'd03be3ed-ac2a-4cfc-bbd4-8209ff64bc76',
+                'group_id' => '29fc5a18-ef36-4294-966d-37691ee009cc',
+                'departemen_id' => 'd1ee2662-99f0-4ac1-ba52-b5c14990af38',
                 'alamat' => 'Jl. Dodi No. 4',
                 'hp' => '081234567893',
                 'tanda_tangan' => 'uploads/signatures/ttd7.png'
@@ -144,8 +144,8 @@ class CheckListService
             [
                 'nama' => 'Eka Suciwati',
                 'email' => 'eka@example.com',
-                'group_id' => 'ef989250-5ec6-4036-ad7d-d3a46388f839',
-                'departemen_id' => '5afbe90c-550c-4ffe-ad07-b2f019ed8657',
+                'group_id' => 'cbe4ddcf-19c1-488e-97cf-f1c5295c927c',
+                'departemen_id' => 'ee9ba10e-36ee-4446-b36f-49014f949793',
                 'alamat' => 'Jl. Eka No. 5',
                 'hp' => '081234567894',
                 'tanda_tangan' => 'uploads/signatures/ttd6.png'
@@ -153,8 +153,8 @@ class CheckListService
             [
                 'nama' => 'Fajar Dewanto',
                 'email' => 'fajar@example.com',
-                'group_id' => 'f483a59a-fd50-4e2f-870f-d3393a220e4a',
-                'departemen_id' => 'f2f95c50-4bba-4f3f-a97c-a99f6e17d055',
+                'group_id' => '9507f2dd-115e-44f1-8112-2e1831b36e2b',
+                'departemen_id' => 'b0e8d3cd-e102-4a03-821e-75b5b391d870',
                 'alamat' => 'Jl. Fajar No. 6',
                 'hp' => '081234567895',
                 'tanda_tangan' => 'uploads/signatures/ttd5.png'
