@@ -33,7 +33,12 @@ return function (App $app) {
                 $workorder = $svc->createWorkorderPemeliharaan($res, $data);
                 return JsonResponder::success($res, $workorder , 201);
             } catch (\Exception $e) {
-                return JsonResponder::error($res, 'Error: ' . $e->getMessage(), 500);
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $workorder ?? null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
             }
         })->add(new JwtMiddleware());
 
@@ -47,7 +52,12 @@ return function (App $app) {
                 $workorder = $svc->createWorkOrderPenjualan($res, $data);
                 return JsonResponder::success($res, $workorder , 201);
             } catch (\Exception $e) {
-                return JsonResponder::error($res, 'Error: ' . $e->getMessage(), 500);
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $workorder ?? null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
             }
         })->add(new JwtMiddleware());
 
@@ -61,7 +71,12 @@ return function (App $app) {
                 $workorder = $svc->createWorkorderPenyewaan($res, $data);
                 return JsonResponder::success($res, $workorder , 201);
             } catch (\Exception $e) {
-                return JsonResponder::error($res, 'Error: ' . $e->getMessage(), 500);
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $workorder ?? null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
             }
         })->add(new JwtMiddleware());
 
@@ -70,7 +85,12 @@ return function (App $app) {
                 $svc = $container->get(WorkOrderService::class);
                 return $svc->getWorkOrderById($res, $args);
             } catch (\Exception $e) {
-                return JsonResponder::error($res, 'Error: ' . $e->getMessage(), 500);
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $workorder ?? null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
             }
         });
     });
