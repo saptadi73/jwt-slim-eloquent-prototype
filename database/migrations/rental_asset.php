@@ -217,6 +217,16 @@ Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->string('keteranganEva')->nullable();
     $table->boolean('checkKondensor')->default(false);
     $table->string('keteranganKondensor')->nullable();
+    $table->boolean('checkIndoorB')->default(false);
+    $table->string('keteranganIndoorB')->nullable();
+    $table->boolean('checkOutdoorB')->default(false);
+    $table->string('keteranganOutdoorB')->nullable();
+    $table->boolean('checkPipaB')->default(false);
+    $table->string('keteranganPipaB')->nullable();
+    $table->boolean('checkSelangB')->default(false);
+    $table->string('keteranganSelangB')->nullable();
+    $table->boolean('checkKabelB')->default(false);
+    $table->string('keteranganKabelB')->nullable();
     $table->string('status')->nullable()->default('open');
     $table->uuid('workorder_id')->nullable();
     $table->timestamps();

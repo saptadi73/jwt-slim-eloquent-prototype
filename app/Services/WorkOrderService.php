@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Workorder;
@@ -32,10 +33,11 @@ class WorkOrderService
         return $prefix . str_pad((string)$next, 5, '0', STR_PAD_LEFT);
     }
 
-    public function createWorkorderPemeliharaan(Response $response, array $data): Response{
+    public function createWorkorderPemeliharaan(Response $response, array $data): Response
+    {
         $nowo = $this->nextWoCode();
         $workorder = Workorder::create([
-            'id'=>Str::uuid(),
+            'id' => Str::uuid(),
             'nowo' => $nowo,
             'jenis' => 'pemeliharaan',
             'tanggal' => date('Y-m-d'),
@@ -43,7 +45,7 @@ class WorkOrderService
 
         try {
             // Buat entri di workorder_service
-            $WorkOrderAcService=WorkOrderAcService::create([
+            $WorkOrderAcService = WorkOrderAcService::create([
                 'workorder_id' => $workorder->id,
                 'id' => Str::uuid(),
                 'status' => 'baru',
@@ -64,7 +66,7 @@ class WorkOrderService
                 'keterangan_evaporator' => $data['keterangan_evaporator'] ?? null,
                 'check_fan_indoor' => $data['check_fan_indoor'] ?? null,
                 'keterangan_fan_indoor' => $data['keterangan_fan_indoor'] ?? null,
-                'check_swing' => $data['check_swing'] ?? null,  
+                'check_swing' => $data['check_swing'] ?? null,
                 'keterangan_swing' => $data['keterangan_swing'] ?? null,
                 'check_tegangan_input' => $data['check_tegangan_input'] ?? null,
                 'keterangan_tegangan_input' => $data['keterangan_tegangan_input'] ?? null,
@@ -97,10 +99,11 @@ class WorkOrderService
         }
     }
 
-    public function createWorkOrderPenjualan(Response $response, array $data): Response{
+    public function createWorkOrderPenjualan(Response $response, array $data): Response
+    {
         $nowo = $this->nextWoCode();
         $workorder = Workorder::create([
-            'id'=>Str::uuid(),
+            'id' => Str::uuid(),
             'nowo' => $nowo,
             'jenis' => 'penjualan',
             'tanggal' => date('Y-m-d'),
@@ -108,7 +111,7 @@ class WorkOrderService
 
         try {
             // Buat entri di workorder_penjualan
-            WorkorderPenjualan::create([
+            $workorderpenjualan = WorkorderPenjualan::create([
                 'workorder_id' => $workorder->id,
                 'id' => Str::uuid(),
                 'status' => 'baru',
@@ -148,16 +151,17 @@ class WorkOrderService
                 'hasil_pekerjaan' => $data['hasil_pekerjaan'] ?? null,
                 'tanda_tangan_pelanggan' => $data['tanda_tangan_pelanggan'] ?? null,
             ]);
-            return JsonResponder::success($response, $workorder, 201);
+            return JsonResponder::success($response, $workorderpenjualan, "Berhasil membuat workorder", 201);
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Gagal membuat workorder: ' . $th->getMessage(), 500);
         }
     }
 
-    public function createWorkorderPenyewaan(Response $response, array $data): Response{
+    public function createWorkorderPenyewaan(Response $response, array $data): Response
+    {
         $nowo = $this->nextWoCode();
         $workorder = Workorder::create([
-            'id'=>Str::uuid(),
+            'id' => Str::uuid(),
             'nowo' => $nowo,
             'jenis' => 'penyewaan',
             'tanggal' => date('Y-m-d'),
@@ -172,19 +176,47 @@ class WorkOrderService
                 'nowo' => $nowo,
                 'customer_asset_id' => $data['customer_asset_id'],
                 'teknisi_id' => $data['teknisi_id'],
-                'check_unit' => $data['check_unit'] ?? null,
-                'keterangan_unit' => $data['keterangan_unit'] ?? null,
-                'check_remote' => $data['check_remote'] ?? null,
-                'keterangan_remote' => $data['keterangan_remote'] ?? null,
-                'check_pipa' => $data['check_pipa'] ?? null,
-                'keterangan_pipa' => $data['keterangan_pipa'] ?? null,
-                'check_selang' => $data['check_selang'] ?? null,
-                'keterangan_selang' => $data['keterangan_selang'] ?? null,
-                'check_kabel' => $data['check_kabel'] ?? null,
-                'keterangan_kabel' ?? null,
-                'check_drainase' => $data['check_drainase'] ?? null,
-                'keterangan_drainase' => $data['keterangan_drainase'] ?? null,
                 'hasil_pekerjaan' => $data['hasil_pekerjaan'] ?? null,
+                'checkIndoor' => $data['checkIndoor'] ?? null,
+                'keteranganIndoor' => $data['keteranganIndoor'] ?? null,
+                'checkOutdoor' => $data['checkOutdoor'] ?? null,
+                'keteranganOutdoor' => $data['keteranganOutdoor'] ?? null,
+                'checkPipa' => $data['checkPipa'] ?? null,
+                'keteranganPipa' => $data['keteranganPipa'] ?? null,
+                'checkSelang' => $data['checkSelang'] ?? null,
+                'keteranganSelang' => $data['keteranganSelang'] ?? null,
+                'checkKabel' => $data['checkKabel'] ?? null,
+                'keteranganKabel' => $data['keteranganKabel'] ?? null,
+                'checkInstIndoor' => $data['checkInstIndoor'] ?? null,
+                'keteranganInstIndoor' => $data['keteranganInstIndoor'] ?? null,
+                'checkInstOutdoor' => $data['checkInstOutdoor'] ?? null,
+                'keteranganInstOutdoor' => $data['keteranganInstOutdoor'] ?? null,
+                'checkInstListrik' => $data['checkInstListrik'] ?? null,
+                'keteranganInstListrik' => $data['keteranganInstListrik'] ?? null,
+                'checkInstPipa' => $data['checkInstPipa'] ?? null,
+                'keteranganInstPipa' => $data['keteranganInstPipa'] ?? null,
+                'checkBuangan' => $data['checkBuangan'] ?? null,
+                'keteranganBuangan' => $data['keteranganBuangan'] ?? null,
+                'checkVaccum' => $data['checkVaccum'] ?? null,
+                'keteranganVaccum' => $data['keteranganVaccum'] ?? null,
+                'checkFreon' => $data['checkFreon'] ?? null,
+                'keteranganFreon' => $data['keteranganFreon'] ?? null,
+                'checkArus' => $data['checkArus'] ?? null,
+                'keteranganArus' => $data['keteranganArus'] ?? null,
+                'checkEva' => $data['checkEva'] ?? null,
+                'keteranganEva' => $data['keteranganEva'] ?? null,
+                'checkKondensor' => $data['checkKondensor'] ?? null,
+                'keteranganKondensor' => $data['keteranganKondensor'] ?? null,
+                'checkIndoorB' => $data['checkIndoorB'] ?? false,
+                'keteranganIndoorB' => $data['keteranganIndoorB'] ?? '',
+                'checkOutdoorB' => $data['checkOutdoorB'] ?? false,
+                'keteranganOutdoorB' => $data['keteranganOutdoorB'] ?? '',
+                'checkPipaB' => $data['checkPipaB'] ?? false,
+                'keteranganPipaB' => $data['keteranganPipaB'] ?? '',
+                'checkSelangB' => $data['checkSelangB'] ?? false,
+                'keteranganSelangB' => $data['keteranganSelangB'] ?? '',
+                'checkKabelB' => $data['checkKabelB'] ?? false,
+                'keteranganKabelB' => $data['keteranganKabelB'] ?? '',
                 'tanda_tangan_pelanggan' => $data['tanda_tangan_pelanggan'] ?? null,
             ]);
             return JsonResponder::success($response, $workorder, 201);
@@ -193,7 +225,8 @@ class WorkOrderService
         }
     }
 
-    public function getWorkOrderById(Response $response, array $args): Response{
+    public function getWorkOrderById(Response $response, array $args): Response
+    {
         $workorder = Workorder::with(['workOrderAcService', 'workorderPenyewaan', 'workorderPenjualan'])->find($args['id']);
         if (!$workorder) {
             return JsonResponder::error($response, 'Workorder tidak ditemukan', 404);
@@ -201,16 +234,15 @@ class WorkOrderService
         return JsonResponder::success($response, $workorder);
     }
 
-    public function listWorkOrders(Response $response): Response{
+    public function listWorkOrders(Response $response): Response
+    {
         $workorders = Workorder::with(['workOrderAcService', 'workorderPenyewaan', 'workorderPenjualan'])->orderBy('created_at', 'desc')->get();
         return JsonResponder::success($response, $workorders);
     }
 
-    public function getPegawaiList(Response $response): Response{
+    public function getPegawaiList(Response $response): Response
+    {
         $pegawai = Pegawai::all();
         return JsonResponder::success($response, $pegawai);
     }
-
 }
-
-?>

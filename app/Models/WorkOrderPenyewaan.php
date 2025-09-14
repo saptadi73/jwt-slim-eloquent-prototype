@@ -48,6 +48,16 @@ class WorkOrderPenyewaan extends Model
         'keteranganEva',
         'checkKondensor',
         'keteranganKondensor',
+        'checkIndoorB',
+        'keteranganIndoorB',
+        'checkOutdoorB',
+        'keteranganOutdoorB',
+        'checkPipaB',
+        'keteranganPipaB',
+        'checkSelangB',
+        'keteranganSelangB',
+        'checkKabelB',
+        'keteranganKabelB',
         'tanda_tangan_pelanggan',
         'status',
         'workorder_id'
@@ -61,7 +71,7 @@ class WorkOrderPenyewaan extends Model
 
     public function pegawai()
     {
-        return $this->belongsTo(Pegawai::class,'teknisi_id');
+        return $this->belongsTo(Pegawai::class, 'teknisi_id');
     }
     // Relasi dengan workorder
     public function workorder()
