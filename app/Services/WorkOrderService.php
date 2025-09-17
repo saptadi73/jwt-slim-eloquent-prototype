@@ -169,13 +169,14 @@ class WorkOrderService
 
         try {
             // Buat entri di workorder_penyewaan
-            WorkOrderPenyewaan::create([
+           $workOrderPenyewaan = WorkOrderPenyewaan::create([
                 'workorder_id' => $workorder->id,
                 'id' => Str::uuid(),
                 'status' => 'baru',
                 'nowo' => $nowo,
-                'customer_asset_id' => $data['customer_asset_id'],
+                'rental_asset_id' => $data['rental_asset_id'],
                 'teknisi_id' => $data['teknisi_id'],
+                'customer_id' => $data['customer_id'],
                 'hasil_pekerjaan' => $data['hasil_pekerjaan'] ?? null,
                 'checkIndoor' => $data['checkIndoor'] ?? null,
                 'keteranganIndoor' => $data['keteranganIndoor'] ?? null,
@@ -219,7 +220,7 @@ class WorkOrderService
                 'keteranganKabelB' => $data['keteranganKabelB'] ?? '',
                 'tanda_tangan_pelanggan' => $data['tanda_tangan_pelanggan'] ?? null,
             ]);
-            return JsonResponder::success($response, $workorder, 201);
+            return JsonResponder::success($response, $workOrderPenyewaan, 'Workorder Penyewaan Berhasil dibuat',201);
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Gagal membuat workorder: ' . $th->getMessage(), 500);
         }
@@ -231,18 +232,18 @@ class WorkOrderService
         if (!$workorder) {
             return JsonResponder::error($response, 'Workorder tidak ditemukan', 404);
         }
-        return JsonResponder::success($response, $workorder);
+        return JsonResponder::success($response, $workorder,'Berhasil mengambil workorder', 200);
     }
 
     public function listWorkOrders(Response $response): Response
     {
         $workorders = Workorder::with(['workOrderAcService', 'workorderPenyewaan', 'workorderPenjualan'])->orderBy('created_at', 'desc')->get();
-        return JsonResponder::success($response, $workorders);
+        return JsonResponder::success($response, $workorders, 'Berhasil mengambil daftar workorder', 200);
     }
 
     public function getPegawaiList(Response $response): Response
     {
         $pegawai = Pegawai::all();
-        return JsonResponder::success($response, $pegawai);
+        return JsonResponder::success($response, $pegawai, 'Berhasil mengambil daftar pegawai', 200);
     }
 }

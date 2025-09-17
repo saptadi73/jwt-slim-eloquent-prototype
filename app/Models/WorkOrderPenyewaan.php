@@ -13,7 +13,8 @@ class WorkOrderPenyewaan extends Model
 
     protected $fillable = [
         'id',
-        'customer_asset_id',
+        'customer_id',
+        'rental_asset_id',
         'teknisi_id',
         'tanda_tangan_teknisi',
         'tanda_tangan_pelanggan',
@@ -64,14 +65,19 @@ class WorkOrderPenyewaan extends Model
     ];
 
     // Relasi dengan customer asset
-    public function customerAsset()
+    public function rentalAsset()
     {
-        return $this->belongsTo(CustomerAsset::class, 'customer_asset_id'); // Relasi dengan customer_asset
+        return $this->belongsTo(rentalAsset::class, 'rental_asset_id'); // Relasi dengan customer_asset
     }
 
     public function pegawai()
     {
         return $this->belongsTo(Pegawai::class, 'teknisi_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id'); // Relasi dengan customer
     }
     // Relasi dengan workorder
     public function workorder()

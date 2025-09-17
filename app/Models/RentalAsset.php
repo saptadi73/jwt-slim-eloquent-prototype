@@ -29,6 +29,12 @@ class RentalAsset extends Model
     {
         return $this->belongsTo(Brand::class, 'brand_id');
     }
+
+    public function workorderPenyewaans()
+    {
+        return $this->hasMany(WorkOrderPenyewaan::class, 'rental_asset_id');
+    }
+
     public function tipe()
     {
         return $this->belongsTo(Tipe::class, 'tipe_id');

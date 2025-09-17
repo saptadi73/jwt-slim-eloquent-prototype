@@ -182,7 +182,8 @@ Capsule::schema()->dropIfExists('workorder_penyewaan');
 Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
-    $table->uuid('customer_asset_id');
+    $table->uuid('rental_asset_id');
+    $table->uuid('customer_id');
     $table->uuid('teknisi_id')->nullable();
     $table->string('tanda_tangan_teknisi')->nullable();
     $table->string('tanda_tangan_pelanggan')->nullable();
@@ -232,7 +233,8 @@ Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->timestamps();
 
     // Foreign key untuk customer_asset_id
-    $table->foreign('customer_asset_id')->references('id')->on('customer_assets')->onDelete('cascade');
+    $table->foreign('rental_asset_id')->references('id')->on('rental_assets')->onDelete('cascade');
+    $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
     // Foreign key untuk teknisi_id jika ada teknisi
     $table->foreign('teknisi_id')->references('id')->on('pegawai')->onDelete('set null');
     $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
