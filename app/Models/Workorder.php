@@ -42,4 +42,18 @@ class Workorder extends Model
         )->withTimestamps();
     }
 
+    public function workOrderAcService()
+    {
+        return $this->hasOne(\App\Models\WorkOrderAcService::class, 'workorder_id', 'id');
+    }
+
+    public function workorderPenyewaan()
+    {
+        return $this->hasOne(\App\Models\WorkOrderPenyewaan::class, 'workorder_id', 'id');
+    }
+
+    public function workorderPenjualan()
+    {
+        return $this->hasOne(\App\Models\WorkorderPenjualan::class, 'workorder_id', 'id');
+    }
 }

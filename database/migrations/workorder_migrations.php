@@ -45,34 +45,26 @@ $capsule->setAsGlobal();
 $capsule->bootEloquent();
 
 date_default_timezone_set('Asia/Jakarta');
-Capsule::schema()->dropIfExists('rental_assets'); // Hapus tabel jika ada, untuk rebuild
-Capsule::schema()->create('rental_assets', function (Blueprint $table) {
+
+// DROP SEMUA TABEL CHILD DULU, BARU PARENT
+Capsule::schema()->dropIfExists('workorder_service');
+Capsule::schema()->dropIfExists('workorder_penjualan');
+Capsule::schema()->dropIfExists('workorder_penyewaan');
+Capsule::schema()->dropIfExists('workorders');
+
+// ...tabel lain yang punya FK ke workorders juga didrop sebelum workorders...
+
+// CREATE PARENT DULU, BARU CHILD
+Capsule::schema()->create('workorders', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
-
-    $table->uuid('tipe_id');
-    $table->foreign('tipe_id')->references('id')->on('tipe')->onDelete('cascade');
-
-    $table->string('keterangan')->nullable();
-    $table->string('gambar')->nullable();
-    $table->string('lokasi')->nullable();
-    $table->string('status')->nullable(); // aktif, non-aktif
-    $table->bigInteger('harga_perolehan')->nullable();
-    $table->bigInteger('harga_sewa')->nullable();
-    $table->bigInteger('sisa_harga_sekarang')->nullable();
-
-    $table->uuid('brand_id');
-    $table->foreign('brand_id')->references('id')->on('brand')->onDelete('cascade');
-
-    $table->string('model')->nullable();
-    $table->string('freon')->nullable();
-    $table->string('kapasitas')->nullable();
-
+    $table->string('nowo')->unique();
+    $table->date('tanggal');
+    $table->string('jenis')->nullable();
     $table->timestamps();
 });
-echo "Tabel rental_assets dibuat.\n";
+echo "Tabel workorders dibuat.\n";
 
-Capsule::schema()->dropIfExists('workorder_service');
 Capsule::schema()->create('workorder_service', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -129,7 +121,6 @@ Capsule::schema()->create('workorder_service', function (Blueprint $table) {
 }); // Hapus tabel jika ada, untuk rebuild
 echo "Tabel workorder_service dibuat.\n";
 
-Capsule::schema()->dropIfExists('workorder_penjualan');
 Capsule::schema()->create('workorder_penjualan', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -176,9 +167,8 @@ Capsule::schema()->create('workorder_penjualan', function (Blueprint $table) {
     $table->foreign('teknisi_id')->references('id')->on('pegawai')->onDelete('cascade');
     $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
 });
-echo "Workorder Penjualan was created.\n";
+echo "Table workorder_penjualan was created.\n";
 
-Capsule::schema()->dropIfExists('workorder_penyewaan');
 Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->engine = 'InnoDB';
     $table->uuid('id')->primary();
@@ -240,3 +230,87 @@ Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->foreign('workorder_id')->references('id')->on('workorders')->onDelete('cascade');
 });
 echo "Tabel workorder_penyewaan dibuat.\n";
+
+
+// Drop child tables first
+Capsule::schema()->dropIfExists('workorder_salejasaorderline');
+Capsule::schema()->dropIfExists('workorder_salebarangorderline');
+Capsule::schema()->dropIfExists('saleorder_salejasaorderline');
+Capsule::schema()->dropIfExists('saleorder_salebarangorderline');
+Capsule::schema()->dropIfExists('saleorderjasaline');
+Capsule::schema()->dropIfExists('saleorderbarangline');
+
+// 1. Buat tabel utama/detail dulu
+Capsule::schema()->create('saleorderbarangline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->integer('qty')->nullable();
+    $table->bigInteger('harga')->nullable();
+    $table->bigInteger('total')->nullable();
+    $table->string('keterangan')->nullable();
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+    $table->timestamps();
+});
+echo "Tabel saleorderbarangline dibuat.\n";
+
+Capsule::schema()->create('saleorderjasaline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+    $table->uuid('id')->primary();
+    $table->integer('qty')->nullable();
+    $table->bigInteger('harga')->nullable();
+    $table->bigInteger('total')->nullable();
+    $table->string('keterangan')->nullable();
+    $table->uuid('product_id');
+    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+    $table->timestamps();
+});
+echo "Tabel saleorderjasaline dibuat.\n";
+
+// 2. Baru buat tabel pivot/relasi
+Capsule::schema()->create('saleorder_salebarangorderline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+
+    $table->uuid('saleorder_id');
+    $table->uuid('saleorderbarangline_id');
+
+    $table->primary(['saleorder_id', 'saleorderbarangline_id'], 'pk_so_sobarline');
+
+    $table->foreign('saleorder_id')
+        ->references('id')->on('saleorder')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->foreign('saleorderbarangline_id')
+        ->references('id')->on('saleorderbarangline')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->index('saleorder_id', 'idx_so_sobarline_so');
+    $table->index('saleorderbarangline_id', 'idx_so_sobarline_line');
+
+    $table->timestamps();
+});
+echo "Tabel saleorder_salebarangorderline dibuat.\n";
+
+// SaleOrder <-> SaleOrderJasaLine
+Capsule::schema()->create('saleorder_salejasaorderline', function (Blueprint $table) {
+    $table->engine = 'InnoDB';
+
+    $table->uuid('saleorder_id');
+    $table->uuid('saleorderjasaline_id');
+
+    $table->primary(['saleorder_id', 'saleorderjasaline_id'], 'pk_so_sojasaline');
+
+    $table->foreign('saleorder_id')
+        ->references('id')->on('saleorder')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->foreign('saleorderjasaline_id')
+        ->references('id')->on('saleorderjasaline')
+        ->onDelete('cascade')->onUpdate('cascade');
+
+    $table->index('saleorder_id', 'idx_so_sojasaline_so');
+    $table->index('saleorderjasaline_id', 'idx_so_sojasaline_line');
+
+    $table->timestamps();
+});
+echo "Tabel saleorder_salejasaorderline dibuat.\n";

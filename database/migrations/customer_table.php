@@ -52,14 +52,7 @@ $capsule->bootEloquent();
 
 $tables = [
     // Pivot
-    'workorder_salebarangorderline',
-    'workorder_salejasaorderline',
-    'saleorder_salebarangorderline',
-    'saleorder_salejasaorderline',
-    // Child transaksi
-    'saleorderbarangline',
-    'saleorderjasaline',
-    'workorders',
+    
     'customer_assets',
     'saleorder',
     // HR
@@ -92,7 +85,6 @@ $tables = [
     'brand',
     'tipe',
     'jenis_workorder',
-    'rental_assets',
 ];
 
 foreach ($tables as $t) {
@@ -267,43 +259,7 @@ Capsule::schema()->create('customer_assets', function (Blueprint $table) {
 });
 echo "Tabel customer_assets dibuat.\n";
 
-Capsule::schema()->create('rental_assets', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-    $table->uuid('id')->primary();
 
-    $table->uuid('tipe_id');
-    $table->foreign('tipe_id')->references('id')->on('tipe')->onDelete('cascade');
-
-    $table->string('keterangan')->nullable();
-    $table->string('gambar')->nullable();
-    $table->string('lokasi')->nullable();
-    $table->string('status')->nullable(); // aktif, non-aktif
-
-    $table->uuid('brand_id');
-    $table->foreign('brand_id')->references('id')->on('brand')->onDelete('cascade');
-
-    $table->string('model')->nullable();
-    $table->string('freon')->nullable();
-    $table->string('kapasitas')->nullable();
-
-    $table->uuid('customer_id');
-    $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-
-    $table->timestamps();
-});
-echo "Tabel rental_assets dibuat.\n";
-
-// workorders
-Capsule::schema()->create('workorders', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-    $table->uuid('id')->primary();
-    $table->string('nowo')->unique();
-    $table->date('tanggal');
-    $table->string('jenis')->nullable();
-
-    $table->timestamps();
-});
-echo "Tabel workorders dibuat.\n";
 
 /*------------------------------------------------------------
 Check List Work Order
@@ -348,38 +304,6 @@ Capsule::schema()->create('expense', function (Blueprint $table) {
     $table->timestamps();
 });
 echo "Tabel expense dibuat.\n";
-
-// saleorderbarangline (detail barang)
-Capsule::schema()->create('saleorderbarangline', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-    $table->uuid('id')->primary();
-    $table->integer('qty')->nullable();
-    $table->bigInteger('harga')->nullable();
-    $table->bigInteger('total')->nullable();
-    $table->string('keterangan')->nullable();
-
-    $table->uuid('product_id');
-    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-
-    $table->timestamps();
-});
-echo "Tabel saleorderbarangline dibuat.\n";
-
-// saleorderjasaline (detail jasa)
-Capsule::schema()->create('saleorderjasaline', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-    $table->uuid('id')->primary();
-    $table->integer('qty')->nullable();
-    $table->bigInteger('harga')->nullable();
-    $table->bigInteger('total')->nullable();
-    $table->string('keterangan')->nullable();
-
-    $table->uuid('product_id');
-    $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-
-    $table->timestamps();
-});
-echo "Tabel saleorderjasaline dibuat.\n";
 
 /*--------------------------------------------------------------
 Purchase Order
@@ -468,102 +392,6 @@ echo "Tabel manual_transfer dibuat.\n";
 /* -------------------------------------------------------------
 | 3) PIVOT TABLES (many-to-many)
 | ------------------------------------------------------------- */
-
-// WO <-> SaleOrderBarangLine
-Capsule::schema()->create('workorder_salebarangorderline', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-
-    $table->uuid('workorder_id');
-    $table->uuid('saleorderbarangline_id');
-
-    $table->primary(['workorder_id', 'saleorderbarangline_id'], 'pk_wo_sobarline');
-
-    $table->foreign('workorder_id')
-        ->references('id')->on('workorders')
-        ->onDelete('cascade')->onUpdate('cascade');
-
-    $table->foreign('saleorderbarangline_id')
-        ->references('id')->on('saleorderbarangline')
-        ->onDelete('cascade')->onUpdate('cascade');
-
-    $table->index('workorder_id', 'idx_wo_sobarline_wo');
-    $table->index('saleorderbarangline_id', 'idx_wo_sobarline_line');
-
-    $table->timestamps();
-});
-echo "Tabel workorder_salebarangorderline dibuat.\n";
-
-// WO <-> SaleOrderJasaLine
-Capsule::schema()->create('workorder_salejasaorderline', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-
-    $table->uuid('workorder_id');
-    $table->uuid('saleorderjasaline_id');
-
-    $table->primary(['workorder_id', 'saleorderjasaline_id'], 'pk_wo_sojasaline');
-
-    $table->foreign('workorder_id')
-        ->references('id')->on('workorders')
-        ->onDelete('cascade')->onUpdate('cascade');
-
-    $table->foreign('saleorderjasaline_id')
-        ->references('id')->on('saleorderjasaline')
-        ->onDelete('cascade')->onUpdate('cascade');
-
-    $table->index('workorder_id', 'idx_wo_sojasaline_wo');
-    $table->index('saleorderjasaline_id', 'idx_wo_sojasaline_line');
-
-    $table->timestamps();
-});
-echo "Tabel workorder_salejasaorderline dibuat.\n";
-
-// SaleOrder <-> SaleOrderBarangLine
-Capsule::schema()->create('saleorder_salebarangorderline', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-
-    $table->uuid('saleorder_id');
-    $table->uuid('saleorderbarangline_id');
-
-    $table->primary(['saleorder_id', 'saleorderbarangline_id'], 'pk_so_sobarline');
-
-    $table->foreign('saleorder_id')
-        ->references('id')->on('saleorder')
-        ->onDelete('cascade')->onUpdate('cascade');
-
-    $table->foreign('saleorderbarangline_id')
-        ->references('id')->on('saleorderbarangline')
-        ->onDelete('cascade')->onUpdate('cascade');
-
-    $table->index('saleorder_id', 'idx_so_sobarline_so');
-    $table->index('saleorderbarangline_id', 'idx_so_sobarline_line');
-
-    $table->timestamps();
-});
-echo "Tabel saleorder_salebarangorderline dibuat.\n";
-
-// SaleOrder <-> SaleOrderJasaLine
-Capsule::schema()->create('saleorder_salejasaorderline', function (Blueprint $table) {
-    $table->engine = 'InnoDB';
-
-    $table->uuid('saleorder_id');
-    $table->uuid('saleorderjasaline_id');
-
-    $table->primary(['saleorder_id', 'saleorderjasaline_id'], 'pk_so_sojasaline');
-
-    $table->foreign('saleorder_id')
-        ->references('id')->on('saleorder')
-        ->onDelete('cascade')->onUpdate('cascade');
-
-    $table->foreign('saleorderjasaline_id')
-        ->references('id')->on('saleorderjasaline')
-        ->onDelete('cascade')->onUpdate('cascade');
-
-    $table->index('saleorder_id', 'idx_so_sojasaline_so');
-    $table->index('saleorderjasaline_id', 'idx_so_sojasaline_line');
-
-    $table->timestamps();
-});
-echo "Tabel saleorder_salejasaorderline dibuat.\n";
 
 
 
@@ -700,6 +528,34 @@ Capsule::schema()->create('jurnal', function (Blueprint $table) {
 
     $table->timestamps();
 });
+
+
+// DROP TABLE jika ada
+Capsule::schema()->dropIfExists('rental_assets');
+
+// CREATE TABLE rental_assets
+Capsule::schema()->create('rental_assets', function (Blueprint $table) {
+    $table->uuid('id')->primary();
+    $table->uuid('tipe_id')->nullable();
+    $table->string('keterangan')->nullable();
+    $table->string('lokasi')->nullable();
+    $table->uuid('brand_id')->nullable();
+    $table->string('model')->nullable();
+    $table->string('freon')->nullable();
+    $table->string('kapasitas')->nullable();
+    $table->string('gambar')->nullable();
+    $table->string('status')->nullable();
+    $table->integer('harga_perolehan')->nullable();
+    $table->integer('harga_sewa')->nullable();
+    $table->integer('sisa_harga_sekarang')->nullable();
+    $table->timestamps();
+
+    // Foreign keys
+    $table->foreign('brand_id')->references('id')->on('brands')->onDelete('set null');
+    $table->foreign('tipe_id')->references('id')->on('tipes')->onDelete('set null');
+});
+
+echo "Tabel rental_assets berhasil dibuat.\n";
 
 echo "Tabel jurnal dibuat.\n";
 

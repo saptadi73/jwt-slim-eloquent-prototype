@@ -36,7 +36,7 @@ return function (App $app) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
                     'type'    => get_class($e),
-                    'data'    => $workorder ?? null,
+                    'data'    => $data ?? null,
                     'file'    => $e->getFile() . ':' . $e->getLine(),
                 ], 500);
             }
@@ -54,7 +54,7 @@ return function (App $app) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
                     'type'    => get_class($e),
-                    'data'    => $workorder ?? null,
+                    'data'    => $data ?? null,
                     'file'    => $e->getFile() . ':' . $e->getLine(),
                 ], 500);
             }
@@ -72,7 +72,7 @@ return function (App $app) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
                     'type'    => get_class($e),
-                    'data'    => $workorder ?? null,
+                    'data'    => $data ?? null,
                     'file'    => $e->getFile() . ':' . $e->getLine(),
                 ], 500);
             }
@@ -86,7 +86,21 @@ return function (App $app) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
                     'type'    => get_class($e),
-                    'data'    => $workorder ?? null,
+                    'data'    => null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
+        
+        $wo->get('/wo/list', function (Request $req, Response $res) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->listWorkOrders($res);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => null,
                     'file'    => $e->getFile() . ':' . $e->getLine(),
                 ], 500);
             }
@@ -100,10 +114,11 @@ return function (App $app) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
                     'type'    => get_class($e),
-                    'data'    => $workorder ?? null,
+                    'data'    => null,
                     'file'    => $e->getFile() . ':' . $e->getLine(),
                 ], 500);
             }
         });
+
     });
 };
