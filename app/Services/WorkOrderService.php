@@ -6,6 +6,8 @@ use App\Models\Workorder;
 use App\Models\WorkOrderAcService;
 use App\Models\WorkOrderPenyewaan;
 use Illuminate\Support\Str;
+use Psr\Http\Message\UploadedFileInterface as File;
+use App\Utils\Upload;
 use App\Models\Pegawai;
 use App\Models\Customer;
 use App\Models\CustomerAsset;
@@ -31,6 +33,19 @@ class WorkOrderService
 
         $next = ((int)$max) + 1;
         return $prefix . str_pad((string)$next, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generate random 11 digit alphanumeric string
+     */
+    private function random11(): string
+    {
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $result = '';
+        for ($i = 0; $i < 11; $i++) {
+            $result .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+        return $result;
     }
 
     public function createWorkorderPemeliharaan(Response $response, array $data): Response
@@ -237,8 +252,36 @@ class WorkOrderService
 
     public function listWorkOrders(Response $response): Response
     {
-        $workorders = Workorder::with(['workOrderAcService', 'workorderPenyewaan', 'workorderPenjualan'])->orderBy('created_at', 'desc')->get();
-        return JsonResponder::success($response, $workorders, 'Berhasil mengambil daftar workorder', 200);
+        $workorders = Workorder::orderBy('created_at', 'desc')->get();
+
+        $result = $workorders->map(function($wo) {
+            $nama_pelanggan = null;
+            if ($wo->workOrderAcService) {
+                $nama_pelanggan = $wo->workOrderAcService->customerAsset->customer->nama;
+                $nama_pegawai = $wo->workOrderAcService->pegawai->nama ?? null;
+                $status = $wo->workOrderAcService->status ?? null;
+                $hp = $wo->workOrderAcService->customerAsset->customer->hp ?? null;
+
+            } elseif ($wo->workorderPenyewaan) {
+                $nama_pelanggan = $wo->workorderPenyewaan->customer->nama;
+                $nama_pegawai = $wo->workorderPenyewaan->pegawai->nama ?? null;
+                $status = $wo->workorderPenyewaan->status ?? null;
+                $hp = $wo->workorderPenyewaan->customer->hp ?? null;
+            } elseif ($wo->workorderPenjualan) {
+                $nama_pelanggan = $wo->workorderPenjualan->customerAsset->customer->nama;
+                $nama_pegawai = $wo->workorderPenjualan->pegawai->nama ?? null;
+                $status = $wo->workorderPenjualan->status ?? null;
+                $hp = $wo->workorderPenjualan->customerAsset->customer->hp ?? null;
+            }
+            return array_merge($wo->toArray(), [
+                'nama_pelanggan' => $nama_pelanggan,
+                'nama_pegawai' => $nama_pegawai,
+                'status' => $status,
+                'hp' => $hp,
+            ]);
+        });
+
+        return JsonResponder::success($response, $result, 'Berhasil mengambil daftar workorder', 200);
     }
 
     public function getPegawaiList(Response $response): Response
@@ -246,4 +289,210 @@ class WorkOrderService
         $pegawai = Pegawai::all();
         return JsonResponder::success($response, $pegawai, 'Berhasil mengambil daftar pegawai', 200);
     }
+
+    public function getWorkOrderServiceById(Response $response, $workorder_id): Response
+    {
+        $workOrderAcService = WorkOrderAcService::with(['customerAsset.customer', 'pegawai', 'customerAsset.brand', 'customerAsset.tipe'])->where('id', $workorder_id)->first();
+        if (!$workOrderAcService) {
+            return JsonResponder::error($response, 'Workorder Service tidak ditemukan', 404);
+        }
+        return JsonResponder::success($response, $workOrderAcService, 'Berhasil mengambil workorder service', 200);
+    }
+
+    public function getWorkOrderPenyewaanById(Response $response, $workorder_id): Response
+    {
+        $workOrderPenyewaan = WorkOrderPenyewaan::with(['customer', 'pegawai', 'rentalAsset.brand', 'rentalAsset.tipe'])->where('id', $workorder_id)->first();
+        if (!$workOrderPenyewaan) {
+            return JsonResponder::error($response, 'Workorder Penyewaan tidak ditemukan', 404);
+        }
+        return JsonResponder::success($response, $workOrderPenyewaan, 'Berhasil mengambil workorder penyewaan', 200);
+    }
+
+    public function getWorkOrderPenjualanById(Response $response, $workorder_id): Response
+    {
+        $workOrderPenjualan = WorkorderPenjualan::with(['customerAsset.customer', 'pegawai', 'customerAsset.brand', 'customerAsset.tipe'])->where('id', $workorder_id)->first();
+        if (!$workOrderPenjualan) {
+            return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
+        }
+        return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil mengambil workorder penjualan', 200);
+    }
+
+    public function updateWorkOrderService(Response $response, array $data, $workorder_id): Response
+    {
+        $workOrderAcService = WorkOrderAcService::where('id', $workorder_id)->first();
+        if (!$workOrderAcService) {
+            return JsonResponder::error($response, 'Workorder Service tidak ditemukan', 404);
+        }
+
+        try {
+            $workOrderAcService->update($data);
+            return JsonResponder::success($response, $workOrderAcService, 'Berhasil memperbarui workorder service', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui workorder service: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function updateWorkOrderPenyewaan(Response $response, array $data, $workorder_id): Response
+    {
+        $workOrderPenyewaan = WorkOrderPenyewaan::where('id', $workorder_id)->first();
+        if (!$workOrderPenyewaan) {
+            return JsonResponder::error($response, 'Workorder Penyewaan tidak ditemukan', 404);
+        }
+
+        try {
+            $workOrderPenyewaan->update($data);
+            return JsonResponder::success($response, $workOrderPenyewaan, 'Berhasil memperbarui workorder penyewaan', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui workorder penyewaan: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function updateWorkOrderPenjualan(Response $response, array $data, $workorder_id): Response
+    {
+        $workOrderPenjualan = WorkorderPenjualan::where('id', $workorder_id)->first();
+        if (!$workOrderPenjualan) {
+            return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
+        }
+
+        try {
+            $workOrderPenjualan->update($data);
+            return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil memperbarui workorder penjualan', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui workorder penjualan: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function  setLinkSignatureWorkorderService(Response $response, $workorder_id): Response
+    {
+        $customerCode = $this->random11();
+        $workOrderAcService = WorkOrderAcService::where('id', $workorder_id)->first();
+        if (!$workOrderAcService) {
+            return JsonResponder::error($response, 'Workorder Service tidak ditemukan', 404);
+        }
+
+        try {
+            $workOrderAcService->customerCode = $customerCode;
+            $workOrderAcService->save();
+            return JsonResponder::success($response, $workOrderAcService, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function  setLinkSignatureWorkorderPenyewaan(Response $response, $workorder_id): Response
+    {
+        $customerCode = $this->random11();
+        $workOrderPenyewaan = WorkOrderPenyewaan::where('id', $workorder_id)->first();
+        if (!$workOrderPenyewaan) {
+            return JsonResponder::error($response, 'Workorder Penyewaan tidak ditemukan', 404);
+        }
+
+        try {
+            $workOrderPenyewaan->customerCode = $customerCode;
+            $workOrderPenyewaan->save();
+            return JsonResponder::success($response, $workOrderPenyewaan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function  setLinkSignatureWorkorderPenjualan(Response $response, $workorder_id): Response
+    {
+        $customerCode = $this->random11();
+        $workOrderPenjualan = WorkorderPenjualan::where('id', $workorder_id)->first();
+        if (!$workOrderPenjualan) {
+            return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
+        }
+
+        try {
+            $workOrderPenjualan->customerCode = $customerCode;
+            $workOrderPenjualan->save();
+            return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function updateSignatureWorkorderService(Response $response, array $data, File $file, $customerCode): Response
+    {
+
+        $workOrderAcService = WorkOrderAcService::where('customerCode', $customerCode)->first();
+        if (!$workOrderAcService) {
+            return JsonResponder::error($response, 'Workorder Service tidak ditemukan', 404);
+        }
+        if ($file && $file->getError() === UPLOAD_ERR_OK) {
+                $filename = Upload::storeImage($file, 'tanda_tangan');
+                $workOrderAcService->gambar = $filename;
+                $workOrderAcService->status = 'selesai';
+                $workOrderAcService->save();
+            }else {
+                $workOrderAcService->gambar = null;
+                $workOrderAcService->status = 'selesai';
+                $workOrderAcService->save();
+                return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
+            }
+
+        try {
+            $workOrderAcService->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
+            $workOrderAcService->save();
+            return JsonResponder::success($response, $workOrderAcService, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        }
+    }
+    public function updateSignatureWorkorderPenyewaan(Response $response, array $data, File $file, $customerCode): Response
+    {
+
+        $workOrderPenyewaan = WorkOrderPenyewaan::where('customerCode', $customerCode)->first();
+        if (!$workOrderPenyewaan) {
+            return JsonResponder::error($response, 'Workorder Penyewaan tidak ditemukan', 404);
+        }
+        if ($file && $file->getError() === UPLOAD_ERR_OK) {
+                $filename = Upload::storeImage($file, 'tanda_tangan');
+                $workOrderPenyewaan->gambar = $filename;
+                $workOrderPenyewaan->status = 'selesai';
+                $workOrderPenyewaan->save();
+            }else {
+                $workOrderPenyewaan->gambar = null;
+                $workOrderPenyewaan->status = 'selesai';
+                $workOrderPenyewaan->save();
+                return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
+            }
+
+        try {
+            $workOrderPenyewaan->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
+            $workOrderPenyewaan->save();
+            return JsonResponder::success($response, $workOrderPenyewaan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        }
+    }
+    public function updateSignatureWorkorderPenjualan(Response $response, array $data, File $file, $customerCode): Response
+    {
+
+        $workOrderPenjualan = WorkorderPenjualan::where('customerCode', $customerCode)->first();
+        if (!$workOrderPenjualan) {
+            return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
+        }
+        if ($file && $file->getError() === UPLOAD_ERR_OK) {
+                $filename = Upload::storeImage($file, 'tanda_tangan');
+                $workOrderPenjualan->gambar = $filename;
+                $workOrderPenjualan->status = 'selesai';
+                $workOrderPenjualan->save();
+            }else {
+                $workOrderPenjualan->gambar = null;
+                $workOrderPenjualan->status = 'selesai';
+                $workOrderPenjualan->save();
+                return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
+            }
+
+        try {
+            $workOrderPenjualan->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
+            $workOrderPenjualan->save();
+            return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        }
+    }
+
 }

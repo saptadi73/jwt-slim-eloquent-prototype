@@ -111,6 +111,7 @@ Capsule::schema()->create('workorder_service', function (Blueprint $table) {
     $table->string('hasil_pekerjaan')->nullable();
     $table->string('tanda_tangan_pelanggan')->nullable();
     $table->string('status')->nullable()->default('open');
+    $table->string('customerCode')->nullable();
     $table->uuid('workorder_id')->nullable();
     $table->timestamps();
 
@@ -160,6 +161,7 @@ Capsule::schema()->create('workorder_penjualan', function (Blueprint $table) {
     $table->string('tanda_tangan_pelanggan')->nullable();
     $table->string('status')->nullable()->default('open');
     $table->uuid('workorder_id')->nullable();
+    $table->string('customerCode')->nullable();
     $table->timestamps();
 
     // Foreign key untuk customer
@@ -175,7 +177,6 @@ Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->uuid('rental_asset_id');
     $table->uuid('customer_id');
     $table->uuid('teknisi_id')->nullable();
-    $table->string('tanda_tangan_teknisi')->nullable();
     $table->string('tanda_tangan_pelanggan')->nullable();
     $table->string('hasil_pekerjaan')->nullable();
     $table->boolean('checkIndoor')->default(false);
@@ -220,6 +221,7 @@ Capsule::schema()->create('workorder_penyewaan', function (Blueprint $table) {
     $table->string('keteranganKabelB')->nullable();
     $table->string('status')->nullable()->default('open');
     $table->uuid('workorder_id')->nullable();
+    $table->string('customerCode')->nullable();
     $table->timestamps();
 
     // Foreign key untuk customer_asset_id

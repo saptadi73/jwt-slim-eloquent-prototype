@@ -61,7 +61,8 @@ class WorkOrderPenyewaan extends Model
         'keteranganKabelB',
         'tanda_tangan_pelanggan',
         'status',
-        'workorder_id'
+        'workorder_id',
+        'customerCode'
     ];
 
     // Relasi dengan customer asset
