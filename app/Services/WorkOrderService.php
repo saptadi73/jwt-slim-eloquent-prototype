@@ -19,6 +19,7 @@ use App\Models\Checklist;
 use App\Models\ChecklistTemplate;
 use App\Models\JenisWorkorder;
 use App\Models\Brand;
+use App\Models\RentalAsset;
 use App\Models\Tipe;
 
 class WorkOrderService
@@ -261,23 +262,27 @@ class WorkOrderService
                 $nama_pegawai = $wo->workOrderAcService->pegawai->nama ?? null;
                 $status = $wo->workOrderAcService->status ?? null;
                 $hp = $wo->workOrderAcService->customerAsset->customer->hp ?? null;
+                $customerCode = $wo->workOrderAcService->customerCode ?? null;
 
             } elseif ($wo->workorderPenyewaan) {
                 $nama_pelanggan = $wo->workorderPenyewaan->customer->nama;
                 $nama_pegawai = $wo->workorderPenyewaan->pegawai->nama ?? null;
                 $status = $wo->workorderPenyewaan->status ?? null;
                 $hp = $wo->workorderPenyewaan->customer->hp ?? null;
+                $customerCode = $wo->workorderPenyewaan->customerCode ?? null;
             } elseif ($wo->workorderPenjualan) {
                 $nama_pelanggan = $wo->workorderPenjualan->customerAsset->customer->nama;
                 $nama_pegawai = $wo->workorderPenjualan->pegawai->nama ?? null;
                 $status = $wo->workorderPenjualan->status ?? null;
                 $hp = $wo->workorderPenjualan->customerAsset->customer->hp ?? null;
+                $customerCode = $wo->workorderPenjualan->customerCode ?? null;
             }
             return array_merge($wo->toArray(), [
                 'nama_pelanggan' => $nama_pelanggan,
                 'nama_pegawai' => $nama_pegawai,
                 'status' => $status,
                 'hp' => $hp,
+                'customerCode' => $customerCode,
             ]);
         });
 
@@ -372,8 +377,9 @@ class WorkOrderService
 
         try {
             $workOrderAcService->customerCode = $customerCode;
+            $workOrderAcService->status = 'waiting signature';
             $workOrderAcService->save();
-            return JsonResponder::success($response, $workOrderAcService, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+            return JsonResponder::success($response, $customerCode, 'Berhasil memperbarui tanda tangan pelanggan', 200);
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
         }
@@ -389,8 +395,9 @@ class WorkOrderService
 
         try {
             $workOrderPenyewaan->customerCode = $customerCode;
+            $workOrderPenyewaan->status = 'waiting signature';
             $workOrderPenyewaan->save();
-            return JsonResponder::success($response, $workOrderPenyewaan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+            return JsonResponder::success($response, $customerCode, 'Berhasil memperbarui tanda tangan pelanggan', 200);
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
         }
@@ -406,14 +413,15 @@ class WorkOrderService
 
         try {
             $workOrderPenjualan->customerCode = $customerCode;
+            $workOrderPenjualan->status = 'waiting signature';
             $workOrderPenjualan->save();
-            return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
+            return JsonResponder::success($response, $customerCode, 'Berhasil memperbarui tanda tangan pelanggan', 200);
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
         }
     }
 
-    public function updateSignatureWorkorderService(Response $response, array $data, File $file, $customerCode): Response
+    public function updateSignatureWorkorderService(Response $response, File $file, $customerCode): Response
     {
 
         $workOrderAcService = WorkOrderAcService::where('customerCode', $customerCode)->first();
@@ -422,15 +430,20 @@ class WorkOrderService
         }
         if ($file && $file->getError() === UPLOAD_ERR_OK) {
                 $filename = Upload::storeImage($file, 'tanda_tangan');
-                $workOrderAcService->gambar = $filename;
+                $workOrderAcService->tanda_tangan_pelanggan = $filename;
                 $workOrderAcService->status = 'selesai';
                 $workOrderAcService->save();
             }else {
-                $workOrderAcService->gambar = null;
+                $workOrderAcService->tanda_tangan_pelanggan = null;
                 $workOrderAcService->status = 'selesai';
                 $workOrderAcService->save();
                 return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
             }
+            $customer_asset_id = $workOrderAcService->customer_asset_id;
+            $customerAsset = CustomerAsset::find($customer_asset_id);
+            $customerAsset->lastService = date('Y-m-d');
+            $customerAsset->nextService = date('Y-m-d', strtotime('+4 months'));
+            $customerAsset->save();
 
         try {
             $workOrderAcService->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
@@ -440,7 +453,7 @@ class WorkOrderService
             return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
         }
     }
-    public function updateSignatureWorkorderPenyewaan(Response $response, array $data, File $file, $customerCode): Response
+    public function updateSignatureWorkorderPenyewaan(Response $response, File $file, $customerCode): Response
     {
 
         $workOrderPenyewaan = WorkOrderPenyewaan::where('customerCode', $customerCode)->first();
@@ -449,16 +462,21 @@ class WorkOrderService
         }
         if ($file && $file->getError() === UPLOAD_ERR_OK) {
                 $filename = Upload::storeImage($file, 'tanda_tangan');
-                $workOrderPenyewaan->gambar = $filename;
+                $workOrderPenyewaan->tanda_tangan_pelanggan = $filename;
                 $workOrderPenyewaan->status = 'selesai';
                 $workOrderPenyewaan->save();
             }else {
-                $workOrderPenyewaan->gambar = null;
+                $workOrderPenyewaan->tanda_tangan_pelanggan = null;
                 $workOrderPenyewaan->status = 'selesai';
                 $workOrderPenyewaan->save();
                 return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
             }
-
+            $rental_asset_id = $workOrderPenyewaan->rental_asset_id;
+            $rentalAsset = RentalAsset::find($rental_asset_id);
+            $harga_sewa = $rentalAsset->hargaSewa ?? 0;
+            $harga_perolehan = $rentalAsset->harga_perolehan ?? 0;
+            $harga_perolehan_akhir = $harga_perolehan - $harga_sewa;
+            $rentalAsset->harga_perolehan = $harga_perolehan_akhir;
         try {
             $workOrderPenyewaan->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
             $workOrderPenyewaan->save();
@@ -467,7 +485,7 @@ class WorkOrderService
             return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
         }
     }
-    public function updateSignatureWorkorderPenjualan(Response $response, array $data, File $file, $customerCode): Response
+    public function updateSignatureWorkorderPenjualan(Response $response, File $file, $customerCode): Response
     {
 
         $workOrderPenjualan = WorkorderPenjualan::where('customerCode', $customerCode)->first();
@@ -476,15 +494,20 @@ class WorkOrderService
         }
         if ($file && $file->getError() === UPLOAD_ERR_OK) {
                 $filename = Upload::storeImage($file, 'tanda_tangan');
-                $workOrderPenjualan->gambar = $filename;
+                $workOrderPenjualan->tanda_tangan_pelanggan = $filename;
                 $workOrderPenjualan->status = 'selesai';
                 $workOrderPenjualan->save();
             }else {
-                $workOrderPenjualan->gambar = null;
+                $workOrderPenjualan->tanda_tangan_pelanggan = null;
                 $workOrderPenjualan->status = 'selesai';
                 $workOrderPenjualan->save();
                 return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
             }
+            $customer_asset_id = $workOrderPenjualan->customer_asset_id;
+            $customerAsset = CustomerAsset::find($customer_asset_id);
+            $customerAsset->lastService = date('Y-m-d');
+            $customerAsset->nextService = date('Y-m-d', strtotime('+4 months'));
+            $customerAsset->save();
 
         try {
             $workOrderPenjualan->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
@@ -493,6 +516,33 @@ class WorkOrderService
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
         }
+    }
+
+    public function getWorkoderServiceByCustomerCode(Response $response, $customerCode): Response
+    {
+        $workOrderAcService = WorkOrderAcService::with(['customerAsset.customer', 'pegawai', 'customerAsset.brand', 'customerAsset.tipe'])->where('customerCode', $customerCode)->first();
+        if (!$workOrderAcService) {
+            return JsonResponder::error($response, 'Workorder Service tidak ditemukan', 404);
+        }
+        return JsonResponder::success($response, $workOrderAcService, 'Berhasil mengambil workorder service', 200);
+    }
+
+    public function getWorkoderPenyewaanByCustomerCode(Response $response, $customerCode): Response
+    {
+        $workOrderPenyewaan = WorkOrderPenyewaan::with(['customer', 'pegawai', 'rentalAsset.brand', 'rentalAsset.tipe'])->where('customerCode', $customerCode)->first();
+        if (!$workOrderPenyewaan) {
+            return JsonResponder::error($response, 'Workorder Penyewaan tidak ditemukan', 404);
+        }
+        return JsonResponder::success($response, $workOrderPenyewaan, 'Berhasil mengambil workorder penyewaan', 200);
+    }
+
+    public function getWorkoderPenjualanByCustomerCode(Response $response, $customerCode): Response
+    {
+        $workOrderPenjualan = WorkorderPenjualan::with(['customerAsset.customer', 'pegawai', 'customerAsset.brand', 'customerAsset.tipe'])->where('customerCode', $customerCode)->first();
+        if (!$workOrderPenjualan) {
+            return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
+        }
+        return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil mengambil workorder penjualan', 200);
     }
 
 }

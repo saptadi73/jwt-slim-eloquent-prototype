@@ -217,12 +217,11 @@ return function (App $app) {
             }
         })->add(new JwtMiddleware());
 
-    $wo->post('/service/close/{id:[0-9a-fA-F-]{36}}', function (Request $req, Response $res, array $args) use ($container) {
-            $uploadedFiles = $req->getUploadedFiles();
-            $file = $uploadedFiles['tanda_tangan'] ?? null;
+    $wo->post('/service/close/{id}', function (Request $req, Response $res, array $args) use ($container) {
+            $file = RequestHelper::pickUploadedFile($req, ['file', 'photo']);
             try {
                 $svc = $container->get(WorkOrderService::class);
-                return $svc->closeWorkOrderService($req, $res, $args['id'], $file);
+                return $svc->updateSignatureWorkorderService($res, $file, $args['id']);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
@@ -233,11 +232,11 @@ return function (App $app) {
             }
         });
 
-        $wo->post('/penyewaan/close/{id:[0-9a-fA-F-]{36}}', function (Request $req, Response $res, array $args) use ($container) {
+        $wo->post('/penyewaan/close/{id}', function (Request $req, Response $res, array $args) use ($container) {
             try {
-                $file = $req->getUploadedFiles()['tanda_tangan'] ?? null;
+                $file = RequestHelper::pickUploadedFile($req, ['file', 'photo']);
                 $svc = $container->get(WorkOrderService::class);
-                return $svc->closeWorkOrderPenyewaan($res, $args['id'], $file);
+                return $svc->updateSignatureWorkorderPenyewaan($res, $file, $args['id']);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
@@ -248,11 +247,11 @@ return function (App $app) {
             }
         });
 
-        $wo->post('/penjualan/close/{id:[0-9a-fA-F-]{36}}', function (Request $req, Response $res, array $args) use ($container) {
+        $wo->post('/penjualan/close/{id}', function (Request $req, Response $res, array $args) use ($container) {
             try {
-                $file = $req->getUploadedFiles()['tanda_tangan'] ?? null;
+                $file = RequestHelper::pickUploadedFile($req, ['file', 'photo']);
                 $svc = $container->get(WorkOrderService::class);
-                return $svc->closeWorkOrderPenjualan($res, $args['id'], $file);
+                return $svc->updateSignatureWorkorderPenjualan($res, $file, $args['id']);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
@@ -262,6 +261,90 @@ return function (App $app) {
                 ], 500);
             }
         });
+
+        $wo->get('/service/customercode/{id}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->getWorkoderServiceByCustomerCode($res, $args['id']);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
+
+        $wo->get('/penyewaan/customercode/{id}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->getWorkoderPenyewaanByCustomerCode($res, $args['id']);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
+
+        $wo->get('/penjualan/customercode/{id}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->getWorkoderPenjualanByCustomerCode($res, $args['id']);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
+
+        $wo->post('/service/sign/{id:[0-9a-fA-F-]{36}}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->setLinkSignatureWorkorderService($res, $args['id']);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $data ?? null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        })->add(new JwtMiddleware());
+
+        $wo->post('/penjualan/sign/{id:[0-9a-fA-F-]{36}}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->setLinkSignatureWorkorderPenjualan($res, $args['id']);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $data ?? null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        })->add(new JwtMiddleware());
+
+        $wo->post('/penyewaan/sign/{id:[0-9a-fA-F-]{36}}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->setLinkSignatureWorkorderPenyewaan($res, $args['id']);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => $data ?? null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        })->add(new JwtMiddleware());
 
     });
 };
