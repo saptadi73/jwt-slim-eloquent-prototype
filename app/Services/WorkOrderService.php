@@ -473,10 +473,10 @@ class WorkOrderService
             }
             $rental_asset_id = $workOrderPenyewaan->rental_asset_id;
             $rentalAsset = RentalAsset::find($rental_asset_id);
-            $harga_sewa = $rentalAsset->hargaSewa ?? 0;
+            $harga_sewa = $rentalAsset->harga_sewa ?? 0;
             $harga_perolehan = $rentalAsset->harga_perolehan ?? 0;
             $harga_perolehan_akhir = $harga_perolehan - $harga_sewa;
-            $rentalAsset->harga_perolehan = $harga_perolehan_akhir;
+            $rentalAsset->sisa_harga_sekarang = $harga_perolehan_akhir;
         try {
             $workOrderPenyewaan->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
             $workOrderPenyewaan->save();
