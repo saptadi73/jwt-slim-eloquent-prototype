@@ -423,99 +423,80 @@ class WorkOrderService
 
     public function updateSignatureWorkorderService(Response $response, File $file, $customerCode): Response
     {
-
         $workOrderAcService = WorkOrderAcService::where('customerCode', $customerCode)->first();
         if (!$workOrderAcService) {
             return JsonResponder::error($response, 'Workorder Service tidak ditemukan', 404);
         }
         if ($file && $file->getError() === UPLOAD_ERR_OK) {
-                $filename = Upload::storeImage($file, 'tanda_tangan');
-                $workOrderAcService->tanda_tangan_pelanggan = $filename;
-                $workOrderAcService->status = 'selesai';
-                $workOrderAcService->save();
-            }else {
-                $workOrderAcService->tanda_tangan_pelanggan = null;
-                $workOrderAcService->status = 'selesai';
-                $workOrderAcService->save();
-                return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
-            }
-            $customer_asset_id = $workOrderAcService->customer_asset_id;
-            $customerAsset = CustomerAsset::find($customer_asset_id);
-            $customerAsset->lastService = date('Y-m-d');
-            $customerAsset->nextService = date('Y-m-d', strtotime('+4 months'));
-            $customerAsset->save();
-
-        try {
-            $workOrderAcService->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
+            $filename = Upload::storeImage($file, 'tanda_tangan');
+            $workOrderAcService->tanda_tangan_pelanggan = $filename;
+            $workOrderAcService->status = 'selesai';
             $workOrderAcService->save();
-            return JsonResponder::success($response, $workOrderAcService, 'Berhasil memperbarui tanda tangan pelanggan', 200);
-        } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        } else {
+            $workOrderAcService->tanda_tangan_pelanggan = null;
+            $workOrderAcService->status = 'selesai';
+            $workOrderAcService->save();
+            return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
         }
+        $customer_asset_id = $workOrderAcService->customer_asset_id;
+        $customerAsset = CustomerAsset::find($customer_asset_id);
+        $customerAsset->lastService = date('Y-m-d');
+        $customerAsset->nextService = date('Y-m-d', strtotime('+4 months'));
+        $customerAsset->save();
+
+        return JsonResponder::success($response, $workOrderAcService, 'Berhasil memperbarui tanda tangan pelanggan', 200);
     }
     public function updateSignatureWorkorderPenyewaan(Response $response, File $file, $customerCode): Response
     {
-
         $workOrderPenyewaan = WorkOrderPenyewaan::where('customerCode', $customerCode)->first();
         if (!$workOrderPenyewaan) {
             return JsonResponder::error($response, 'Workorder Penyewaan tidak ditemukan', 404);
         }
         if ($file && $file->getError() === UPLOAD_ERR_OK) {
-                $filename = Upload::storeImage($file, 'tanda_tangan');
-                $workOrderPenyewaan->tanda_tangan_pelanggan = $filename;
-                $workOrderPenyewaan->status = 'selesai';
-                $workOrderPenyewaan->save();
-            }else {
-                $workOrderPenyewaan->tanda_tangan_pelanggan = null;
-                $workOrderPenyewaan->status = 'selesai';
-                $workOrderPenyewaan->save();
-                return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
-            }
-            $rental_asset_id = $workOrderPenyewaan->rental_asset_id;
-            $rentalAsset = RentalAsset::find($rental_asset_id);
-            $harga_sewa = $rentalAsset->harga_sewa ?? 0;
-            $harga_perolehan = $rentalAsset->harga_perolehan ?? 0;
-            $harga_perolehan_akhir = $harga_perolehan - $harga_sewa;
-            $rentalAsset->sisa_harga_sekarang = $harga_perolehan_akhir;
-        try {
-            $workOrderPenyewaan->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
+            $filename = Upload::storeImage($file, 'tanda_tangan');
+            $workOrderPenyewaan->tanda_tangan_pelanggan = $filename;
+            $workOrderPenyewaan->status = 'selesai';
             $workOrderPenyewaan->save();
-            return JsonResponder::success($response, $workOrderPenyewaan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
-        } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        } else {
+            $workOrderPenyewaan->tanda_tangan_pelanggan = null;
+            $workOrderPenyewaan->status = 'selesai';
+            $workOrderPenyewaan->save();
+            return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
         }
+        $rental_asset_id = $workOrderPenyewaan->rental_asset_id;
+        $rentalAsset = RentalAsset::find($rental_asset_id);
+        $harga_sewa = $rentalAsset->harga_sewa ?? 0;
+        $harga_perolehan = $rentalAsset->harga_perolehan ?? 0;
+        $harga_perolehan_akhir = $harga_perolehan - $harga_sewa;
+        $rentalAsset->sisa_harga_sekarang = $harga_perolehan_akhir;
+        $rentalAsset->save();
+
+        return JsonResponder::success($response, $workOrderPenyewaan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
     }
     public function updateSignatureWorkorderPenjualan(Response $response, File $file, $customerCode): Response
     {
-
         $workOrderPenjualan = WorkorderPenjualan::where('customerCode', $customerCode)->first();
         if (!$workOrderPenjualan) {
             return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
         }
         if ($file && $file->getError() === UPLOAD_ERR_OK) {
-                $filename = Upload::storeImage($file, 'tanda_tangan');
-                $workOrderPenjualan->tanda_tangan_pelanggan = $filename;
-                $workOrderPenjualan->status = 'selesai';
-                $workOrderPenjualan->save();
-            }else {
-                $workOrderPenjualan->tanda_tangan_pelanggan = null;
-                $workOrderPenjualan->status = 'selesai';
-                $workOrderPenjualan->save();
-                return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
-            }
-            $customer_asset_id = $workOrderPenjualan->customer_asset_id;
-            $customerAsset = CustomerAsset::find($customer_asset_id);
-            $customerAsset->lastService = date('Y-m-d');
-            $customerAsset->nextService = date('Y-m-d', strtotime('+4 months'));
-            $customerAsset->save();
-
-        try {
-            $workOrderPenjualan->tanda_tangan_pelanggan = $data['tanda_tangan_pelanggan'] ?? null;
+            $filename = Upload::storeImage($file, 'tanda_tangan');
+            $workOrderPenjualan->tanda_tangan_pelanggan = $filename;
+            $workOrderPenjualan->status = 'selesai';
             $workOrderPenjualan->save();
-            return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
-        } catch (\Throwable $th) {
-            return JsonResponder::error($response, 'Gagal memperbarui tanda tangan pelanggan: ' . $th->getMessage(), 500);
+        } else {
+            $workOrderPenjualan->tanda_tangan_pelanggan = null;
+            $workOrderPenjualan->status = 'selesai';
+            $workOrderPenjualan->save();
+            return JsonResponder::error($response, 'File tanda tangan tidak ada, Tutup tanpa tanda tangan', 400);
         }
+        $customer_asset_id = $workOrderPenjualan->customer_asset_id;
+        $customerAsset = CustomerAsset::find($customer_asset_id);
+        $customerAsset->lastService = date('Y-m-d');
+        $customerAsset->nextService = date('Y-m-d', strtotime('+4 months'));
+        $customerAsset->save();
+
+        return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil memperbarui tanda tangan pelanggan', 200);
     }
 
     public function getWorkoderServiceByCustomerCode(Response $response, $customerCode): Response

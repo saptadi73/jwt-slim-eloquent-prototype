@@ -217,11 +217,11 @@ return function (App $app) {
             }
         })->add(new JwtMiddleware());
 
-    $wo->post('/service/close/{id}', function (Request $req, Response $res, array $args) use ($container) {
+        $wo->post('/service/close/{customerCode}', function (Request $req, Response $res, array $args) use ($container) {
             $file = RequestHelper::pickUploadedFile($req, ['file', 'photo']);
             try {
                 $svc = $container->get(WorkOrderService::class);
-                return $svc->updateSignatureWorkorderService($res, $file, $args['id']);
+                return $svc->updateSignatureWorkorderService($res, $file, $args['customerCode']);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
@@ -232,11 +232,11 @@ return function (App $app) {
             }
         });
 
-        $wo->post('/penyewaan/close/{id}', function (Request $req, Response $res, array $args) use ($container) {
+        $wo->post('/penyewaan/close/{customerCode}', function (Request $req, Response $res, array $args) use ($container) {
             try {
                 $file = RequestHelper::pickUploadedFile($req, ['file', 'photo']);
                 $svc = $container->get(WorkOrderService::class);
-                return $svc->updateSignatureWorkorderPenyewaan($res, $file, $args['id']);
+                return $svc->updateSignatureWorkorderPenyewaan($res, $file, $args['customerCode']);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
@@ -247,11 +247,11 @@ return function (App $app) {
             }
         });
 
-        $wo->post('/penjualan/close/{id}', function (Request $req, Response $res, array $args) use ($container) {
+        $wo->post('/penjualan/close/{customerCode}', function (Request $req, Response $res, array $args) use ($container) {
             try {
                 $file = RequestHelper::pickUploadedFile($req, ['file', 'photo']);
                 $svc = $container->get(WorkOrderService::class);
-                return $svc->updateSignatureWorkorderPenjualan($res, $file, $args['id']);
+                return $svc->updateSignatureWorkorderPenjualan($res, $file, $args['customerCode']);
             } catch (\Exception $e) {
                 return JsonResponder::error($res, [
                     'message' => $e->getMessage(),
