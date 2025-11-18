@@ -1,0 +1,206 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\SaleOrder;
+use App\Models\ProductOrderLine;
+use App\Models\Customer;
+use App\Enums\OrderStatus;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
+use Exception;
+use Ramsey\Uuid\Uuid;
+use Carbon\Carbon;
+use App\Models\Product;
+use App\Models\Brand;
+use App\Models\ServiceOrderLine;
+use App\Models\Service;
+use App\Support\JsonResponder;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+
+class SaleOrderService
+{
+    public function createSaleOrder(Response $response, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            // Create Sale Order
+            $saleOrder = new SaleOrder($data);
+            $saleOrder->save();
+
+            // Create Product Order Lines
+            if (isset($data['product_lines']) && is_array($data['product_lines'])) {
+                foreach ($data['product_lines'] as $lineData) {
+                    $lineData['sale_order_id'] = $saleOrder->id;
+                    $productLine = new ProductOrderLine($lineData);
+                    $productLine->save();
+                }
+            }
+
+            // Create Service Order Lines
+            if (isset($data['service_lines']) && is_array($data['service_lines'])) {
+                foreach ($data['service_lines'] as $lineData) {
+                    $lineData['sale_order_id'] = $saleOrder->id;
+                    $serviceLine = new ServiceOrderLine($lineData);
+                    $serviceLine->save();
+                }
+            }
+
+            DB::commit();
+            return JsonResponder::success($response, $saleOrder);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function getSaleOrder(Response $response, string $SaleOrderID)
+    {
+        try {
+            $saleOrder = SaleOrder::with(['customer', 'productLines.product', 'serviceLines.service'])
+                ->findOrFail($SaleOrderID);
+            return JsonResponder::success($response, $saleOrder);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function updateSaleOrder(Response $response, string $SaleOrderID, array $data)
+    {
+        DB::beginTransaction();
+        try {
+            $saleOrder = SaleOrder::find($SaleOrderID);
+            if (!$saleOrder) {
+                throw new ModelNotFoundException("Sale Order not found");
+            }
+            $saleOrder->fill($data);
+            $saleOrder->save();
+            DB::commit();
+            return JsonResponder::success($response, $saleOrder);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function listSaleOrders(Response $response)
+    {
+        try {
+            $saleOrders = SaleOrder::with(['customer'])->get();
+            return JsonResponder::success($response, $saleOrders);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function deleteSaleOrder(Response $response, string $SaleOrderID)
+    {
+        DB::beginTransaction();
+        try {
+            $saleOrder = SaleOrder::find($SaleOrderID);
+            if (!$saleOrder) {
+                throw new ModelNotFoundException("Sale Order not found");
+            }
+            $saleOrder->delete();
+            DB::commit();
+            return JsonResponder::success($response, ["message" => "Sale Order deleted successfully"]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function changeOrderStatus(Response $response, string $SaleOrderID, OrderStatus $newStatus)
+    {
+        DB::beginTransaction();
+        try {
+            $saleOrder = SaleOrder::find($SaleOrderID);
+            if (!$saleOrder) {
+                throw new ModelNotFoundException("Sale Order not found");
+            }
+            $saleOrder->status = $newStatus;
+            $saleOrder->save();
+            DB::commit();
+            return JsonResponder::success($response, $saleOrder);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function deleteProductLine(Response $response, string $lineID)
+    {
+        DB::beginTransaction();
+        try {
+            $productLine = ProductOrderLine::find($lineID);
+            if (!$productLine) {
+                throw new ModelNotFoundException("Product Order Line not found");
+            }
+            $productLine->delete();
+            DB::commit();
+            return JsonResponder::success($response, ["message" => "Product Order Line deleted successfully"]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function deleteServiceLine(Response $response, string $lineID)
+    {
+        DB::beginTransaction();
+        try {
+            $serviceLine = ServiceOrderLine::find($lineID);
+            if (!$serviceLine) {
+                throw new ModelNotFoundException("Service Order Line not found");
+            }
+            $serviceLine->delete();
+            DB::commit();
+            return JsonResponder::success($response, ["message" => "Service Order Line deleted successfully"]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function AddProductLine(Response $response, string $SaleOrderID, array $lineData)
+    {
+        DB::beginTransaction();
+        try {
+            $saleOrder = SaleOrder::find($SaleOrderID);
+            if (!$saleOrder) {
+                throw new ModelNotFoundException("Sale Order not found");
+            }
+            $lineData['sale_order_id'] = $SaleOrderID;
+            $productLine = new ProductOrderLine($lineData);
+            $productLine->save();
+            DB::commit();
+            return JsonResponder::success($response, $productLine);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return JsonResponder::error($response, $th);
+        }
+    }
+
+    public function AddServiceLine(Response $response, string $SaleOrderID, array $lineData)
+    {
+        DB::beginTransaction();
+        try {
+            $saleOrder = SaleOrder::find($SaleOrderID);
+            if (!$saleOrder) {
+                throw new ModelNotFoundException("Sale Order not found");
+            }
+            $lineData['sale_order_id'] = $SaleOrderID;
+            $serviceLine = new ServiceOrderLine($lineData);
+            $serviceLine->save();
+            DB::commit();
+            return JsonResponder::success($response, $serviceLine);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return JsonResponder::error($response, $th);
+        }
+    }
+}
+

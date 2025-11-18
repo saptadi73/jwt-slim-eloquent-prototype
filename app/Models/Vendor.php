@@ -31,9 +31,4 @@ class Vendor extends Model
     {
         return $this->hasMany(PurchaseOrder::class, 'vendor_id');
     }
-
-    public function jurnals()
-    {
-        return $this->hasMany(Jurnal::class, 'vendor_id');
-    }
 }

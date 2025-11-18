@@ -6,6 +6,8 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 use App\Middlewares\CorsMiddleware;
 use App\Services\CustomerService;
 use App\Services\OrganisasiService;
+use App\Services\PurchaseOrderService;
+use App\Services\SaleOrderService;
 use App\Services\WorkOrderService;
 use Dotenv\Dotenv;
 
@@ -20,6 +22,8 @@ $pimple = new PimpleContainer();
 $pimple[CustomerService::class] = fn($c) => new CustomerService();
 $pimple[WorkOrderService::class] = fn($c) => new WorkOrderService();
 $pimple[OrganisasiService::class] = fn($c) => new OrganisasiService();
+$pimple[PurchaseOrderService::class] = fn($c) => new PurchaseOrderService();
+$pimple[SaleOrderService::class] = fn($c) => new SaleOrderService();
 // (opsional) $pimple[CorsMiddleware::class] = fn($c) => new CorsMiddleware();
 
 $container = new Psr11Container($pimple);
