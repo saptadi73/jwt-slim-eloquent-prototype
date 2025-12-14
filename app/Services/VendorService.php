@@ -99,6 +99,16 @@ class VendorService
             return JsonResponder::error($response, 'Vendor tidak ditemukan', 404);
         }
 
+        // Delete file gambar jika ada
+        if ($vendor->gambar) {
+            try {
+                Upload::deleteImage($vendor->gambar);
+            } catch (\Exception $e) {
+                // Log error tapi jangan hentikan proses delete vendor
+                // (file mungkin sudah dihapus manual)
+            }
+        }
+
         $vendor->delete();
         return JsonResponder::success($response, null, 'Vendor dihapus');
     }
