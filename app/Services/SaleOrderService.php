@@ -7,7 +7,8 @@ use App\Models\ProductOrderLine;
 use App\Models\Customer;
 use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
+use App\Services\ProductService;
+use Illuminate\Database\Capsule\Manager as DB;
 use Exception;
 use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
@@ -21,6 +22,13 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class SaleOrderService
 {
+    private ProductStockService $productStockService;
+
+    public function __construct(ProductStockService $productStockService)
+    {
+        $this->productStockService = $productStockService;
+    }
+
     public function createSaleOrder(Response $response, array $data)
     {
         DB::beginTransaction();
@@ -75,8 +83,15 @@ class SaleOrderService
             if (!$saleOrder) {
                 throw new ModelNotFoundException("Sale Order not found");
             }
+            $oldStatus = $saleOrder->status;
             $saleOrder->fill($data);
             $saleOrder->save();
+
+            // Jika status berubah ke 'confirmed', apply stock
+            if ($oldStatus != OrderStatus::Confirmed && $saleOrder->status == OrderStatus::Confirmed) {
+                $this->productStockService->applySaleOrder($saleOrder);
+            }
+
             DB::commit();
             return JsonResponder::success($response, $saleOrder);
 

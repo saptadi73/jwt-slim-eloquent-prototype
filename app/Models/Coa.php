@@ -15,6 +15,6 @@ class Coa extends Model
 
     public function jurnals()
     {
-        return $this->hasMany(Jurnal::class, 'account_id');
+        return $this->hasMany(JournalLine::class, 'account_id');
     }
 }

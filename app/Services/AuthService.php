@@ -54,28 +54,31 @@ class AuthService
     }
 
 
-    // Fungsi registrasi
     public static function register($name, $email, $password, $role_id = null)
     {
-        // Jika tidak ada role_id yang diberikan, set role default (misalnya, 'User')
+        // Ambil role default jika role_id tidak diberikan
         if (!$role_id) {
-            $role = Role::where('name', 'user')->first();  // Mengambil role default dengan nama 'user'
+            $role = Role::where('name', 'user')->first();
             if (!$role) {
-                return ['success' => false, 'message' => 'Default role not found'];  // Jika role tidak ditemukan
+                return ['success' => false, 'message' => 'Default role not found'];
             }
-            $role_id = $role->id;  // Assign role_id default
+            $role_id = $role->id;
         }
 
-        // Membuat user baru tanpa menyertakan role_id pada tabel 'users'
+        // Membuat user baru dengan UUID manual
         $user = User::create([
-            'name' => $name,
-            'email' => $email,
-            'password' => password_hash($password, PASSWORD_DEFAULT),  // Enkripsi password
+            'id'       => (string) \Illuminate\Support\Str::uuid(),
+            'name'     => $name,
+            'email'    => $email,
+            'password' => password_hash($password, PASSWORD_DEFAULT),
         ]);
 
-        // Menyambungkan pengguna dengan role yang diberikan melalui pivot table role_user
-        $user->roles()->attach($role_id);  // Menambahkan relasi pada tabel pivot 'role_user'
+        // Attach role ke pivot
+        $user->roles()->attach($role_id);
 
-        return $user;  // Mengembalikan data user yang telah dibuat
+        return [
+            'success' => true,
+            'user'    => $user->load('roles'),
+        ];
     }
 }

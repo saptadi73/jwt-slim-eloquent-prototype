@@ -19,30 +19,36 @@ class UserService
         return User::find($id);
     }
 
-    // Membuat pengguna baru dan mengaitkannya dengan role melalui tabel pivot
     public static function create($name, $email, $password, $role_id = null)
-    {
-        // Jika tidak ada role_id yang diberikan, ambil role default (misalnya 'User')
-        if (!$role_id) {
-            $role = Role::where('name', 'User')->first();  // Ambil role default
-            if (!$role) {
-                return ['success' => false, 'message' => 'Default role not found'];
-            }
-            $role_id = $role->id;  // Jika role ditemukan, gunakan id-nya
+{
+    // Ambil role default jika role_id tidak diberikan
+    if (!$role_id) {
+        $role = Role::where('name', 'User')->first();
+        if (!$role) {
+            return ['success' => false, 'message' => 'Default role not found'];
         }
-
-        // Membuat pengguna baru tanpa menyertakan role_id
-        $user = User::create([
-            'name' => $name,
-            'email' => $email,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-        ]);
-
-        // Menyambungkan pengguna dengan role yang diberikan melalui pivot table role_user
-        $user->roles()->attach($role_id);  // Menambahkan relasi pada tabel pivot
-
-        return $user;
+        $role_id = $role->id;
     }
+
+    // Create user
+    $user = User::create([
+        'name'     => $name,
+        'email'    => $email,
+        'password' => password_hash($password, PASSWORD_DEFAULT),
+    ]);
+
+    $user->refresh();
+
+    // ✅ Validasi sebelum attach
+    if (empty($user->id)) {
+        throw new \Exception('User ID tidak terisi setelah create');
+    }
+
+    $user->roles()->attach($role_id);
+
+    return $user->load('roles');
+}
+
 
     // Mengupdate pengguna berdasarkan ID dan mengupdate relasi di pivot table
     public static function update($id, $data)

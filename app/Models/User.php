@@ -3,23 +3,29 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasUuid;
 
 class User extends Model
 {
-    protected $table = 'users';  // Nama tabel
-    protected $fillable = ['name', 'email', 'password'];  // Kolom yang bisa diisi
-    protected $hidden = ['password'];  // Menyembunyikan password dalam respons API
+    use HasUuid;
+
+    protected $table = 'users';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
+    protected $fillable = ['id', 'name', 'email', 'password'];
+    protected $hidden = ['password'];
     public $timestamps = true;
 
     // Relasi Many-to-Many dengan Role
     public function roles()
     {
-        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id')->withTimestamps();
-    }
-
-    // Memeriksa apakah pengguna memiliki role tertentu
-    public function hasRole(string $role): bool
-    {
-        return $this->roles()->where('name', $role)->exists();
+        return $this->belongsToMany(
+            Role::class,      // Model terkait
+            'role_users',     // Nama pivot table
+            'user_id',        // Foreign key user di pivot table
+            'role_id'         // Foreign key role di pivot table
+        )->withTimestamps();
     }
 }

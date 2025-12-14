@@ -3,6 +3,8 @@ use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 use App\Services\SaleOrderService;
 use App\Services\PurchaseOrderService;
+use App\Services\ProductStockService;
+use App\Models\ProductMoveHistory;
 use App\Support\JsonResponder;
 use App\Support\RequestHelper;
 use App\Middlewares\JwtMiddleware;
@@ -17,7 +19,7 @@ return function (App $app) {
         $orders->post('/purchase', function (Request $request, Response $response) use ($container) {
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
             $svc = $container->get(PurchaseOrderService::class);
-            return $svc->createPurchaseOrder($request, $response, (array) $data);
+            return $svc->createPurchaseOrder($response, (array) $data);
         });
 
         // Get Purchase Order by ID

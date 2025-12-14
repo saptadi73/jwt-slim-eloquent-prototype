@@ -4,8 +4,10 @@ use Pimple\Psr11\Container as Psr11Container;
 use Slim\Factory\AppFactory;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use App\Middlewares\CorsMiddleware;
+use App\Services\ChartOfAccountService;
 use App\Services\CustomerService;
 use App\Services\OrganisasiService;
+use App\Services\ProductStockService;
 use App\Services\PurchaseOrderService;
 use App\Services\SaleOrderService;
 use App\Services\WorkOrderService;
@@ -19,11 +21,13 @@ if (file_exists(__DIR__ . '/../.env')) {
 }
 
 $pimple = new PimpleContainer();
+$pimple[ProductStockService::class] = fn($c) => new ProductStockService();
 $pimple[CustomerService::class] = fn($c) => new CustomerService();
 $pimple[WorkOrderService::class] = fn($c) => new WorkOrderService();
 $pimple[OrganisasiService::class] = fn($c) => new OrganisasiService();
-$pimple[PurchaseOrderService::class] = fn($c) => new PurchaseOrderService();
-$pimple[SaleOrderService::class] = fn($c) => new SaleOrderService();
+$pimple[PurchaseOrderService::class] = fn($c) => new PurchaseOrderService($pimple[ProductStockService::class]);
+$pimple[SaleOrderService::class] = fn($c) => new SaleOrderService($pimple[ProductStockService::class]);
+$pimple[ChartOfAccountService::class] = fn($c) => new ChartOfAccountService();
 // (opsional) $pimple[CorsMiddleware::class] = fn($c) => new CorsMiddleware();
 
 $container = new Psr11Container($pimple);

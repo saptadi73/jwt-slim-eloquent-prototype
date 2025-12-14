@@ -3,20 +3,28 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasUuid;
 
 class Role extends Model
 {
-    protected $table = 'roles';  // Nama tabel
-    protected $fillable = ['name', 'label'];  // Kolom yang bisa diisi
-    public $timestamps = true;
-    protected $keyType = 'string';
-    public $incrementing = false;   // UUID
+    use HasUuid;
 
-    protected $dateFormat = 'Y-m-d H:i:s';
+    protected $table = 'roles';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
+    protected $fillable = ['name', 'label'];
+    public $timestamps = true;
 
     // Relasi Many-to-Many dengan User
     public function users()
     {
-        return $this->belongsToMany(User::class, 'role_user', 'role_id', 'user_id')->withTimestamps();
+        return $this->belongsToMany(
+            User::class,
+            'role_users',
+            'role_id',
+            'user_id'
+        )->withTimestamps();
     }
 }

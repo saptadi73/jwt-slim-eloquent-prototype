@@ -5,14 +5,22 @@ namespace App\Services;
 use App\Enums\OrderStatus;
 use App\Models\PurchaseOrder;
 use App\Models\Vendor;
+use App\Services\ProductStockService;
 use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Capsule\Manager as DB;
 use App\Models\PurchaseOrderLine;
 
 class PurchaseOrderService
 {
+    private ProductStockService $productStockService;
+
+    public function __construct(ProductStockService $productStockService)
+    {
+        $this->productStockService = $productStockService;
+    }
+
     public function createPurchaseOrder(Response $response, array $data)
     {
         DB::beginTransaction();
@@ -63,7 +71,13 @@ class PurchaseOrderService
         DB::beginTransaction();
         try {
             $purchaseOrder = PurchaseOrder::findOrFail($purchaseOrderID);
+            $oldStatus = $purchaseOrder->status;
             $purchaseOrder->update($data);
+
+            // Jika status berubah ke 'confirmed', apply stock
+            if ($oldStatus != OrderStatus::Confirmed && $purchaseOrder->status == OrderStatus::Confirmed) {
+                $this->productStockService->applyPurchaseOrder($purchaseOrder);
+            }
 
             // Optionally handle updating purchase order lines here
 
