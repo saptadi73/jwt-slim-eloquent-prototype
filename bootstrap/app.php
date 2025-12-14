@@ -4,12 +4,14 @@ use Pimple\Psr11\Container as Psr11Container;
 use Slim\Factory\AppFactory;
 use Illuminate\Database\Capsule\Manager as Capsule;
 use App\Middlewares\CorsMiddleware;
+use App\Middlewares\MethodOverrideMiddleware;
 use App\Services\ChartOfAccountService;
 use App\Services\CustomerService;
 use App\Services\OrganisasiService;
 use App\Services\ProductStockService;
 use App\Services\PurchaseOrderService;
 use App\Services\SaleOrderService;
+use App\Services\VendorService;
 use App\Services\WorkOrderService;
 use Dotenv\Dotenv;
 
@@ -28,6 +30,7 @@ $pimple[OrganisasiService::class] = fn($c) => new OrganisasiService();
 $pimple[PurchaseOrderService::class] = fn($c) => new PurchaseOrderService($pimple[ProductStockService::class]);
 $pimple[SaleOrderService::class] = fn($c) => new SaleOrderService($pimple[ProductStockService::class]);
 $pimple[ChartOfAccountService::class] = fn($c) => new ChartOfAccountService();
+$pimple[VendorService::class] = fn($c) => new VendorService();
 // (opsional) $pimple[CorsMiddleware::class] = fn($c) => new CorsMiddleware();
 
 $container = new Psr11Container($pimple);
@@ -40,6 +43,9 @@ $app->addBodyParsingMiddleware();
 
 $displayError = ($_ENV['APP_DEBUG'] ?? 'false') === 'true';
 $app->addErrorMiddleware($displayError, true, true);
+
+// Method Override Middleware (untuk PUT request dengan multipart/form-data)
+$app->add(new MethodOverrideMiddleware());
 
 // Preflight CORS (optional but helpful)
 $app->options('/{routes:.+}', fn($req, $res) => $res);
