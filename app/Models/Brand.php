@@ -3,14 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\HasUuid;
 
 class Brand extends Model
 {
 
+    use HasUuid;
 
     protected $table = 'brand';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama','id'];
+    protected $fillable = ['nama'];
     protected $keyType = 'string';
     public $incrementing = false;   // UUID
 

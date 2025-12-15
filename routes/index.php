@@ -10,4 +10,8 @@ return function (App $app) {
     (require __DIR__ . '/orders.php')($app);
     (require __DIR__ . '/chart_of_accounts.php')($app);
     (require __DIR__ . '/vendors.php')($app);
+    (require __DIR__ . '/products.php')($app);
+    (require __DIR__ . '/kategoris.php')($app);
+    (require __DIR__ . '/brands.php')($app);
+    (require __DIR__ . '/satuans.php')($app);
 };

@@ -11,6 +11,10 @@ use App\Services\OrganisasiService;
 use App\Services\ProductStockService;
 use App\Services\PurchaseOrderService;
 use App\Services\SaleOrderService;
+use App\Services\ProductService;
+use App\Services\KategoriService;
+use App\Services\BrandService;
+use App\Services\SatuanService;
 use App\Services\VendorService;
 use App\Services\WorkOrderService;
 use Dotenv\Dotenv;
@@ -24,6 +28,10 @@ if (file_exists(__DIR__ . '/../.env')) {
 
 $pimple = new PimpleContainer();
 $pimple[ProductStockService::class] = fn($c) => new ProductStockService();
+$pimple[ProductService::class] = fn($c) => new ProductService();
+$pimple[KategoriService::class] = fn($c) => new KategoriService();
+$pimple[BrandService::class] = fn($c) => new BrandService();
+$pimple[SatuanService::class] = fn($c) => new SatuanService();
 $pimple[CustomerService::class] = fn($c) => new CustomerService();
 $pimple[WorkOrderService::class] = fn($c) => new WorkOrderService();
 $pimple[OrganisasiService::class] = fn($c) => new OrganisasiService();

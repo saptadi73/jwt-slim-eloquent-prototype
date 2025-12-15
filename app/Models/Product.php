@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Concerns\HasUuid;
+use App\Models\PurchaseOrderLine;
 
 class Product extends Model
 {
@@ -12,7 +13,7 @@ class Product extends Model
     protected $table = 'products';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'nama','satuan_id','deskripsi','kode','type','harga','hpp','stok','brand_id','model','kategori_id','is_sealable'
+        'nama','satuan_id','deskripsi','kode','tipe','harga','hpp','stok','brand_id','model','kategori_id','is_sealable','gambar'
     ];
 
     protected $keyType = 'string';
@@ -38,11 +39,6 @@ class Product extends Model
     public function brand()
     {
         return $this->belongsTo(Brand::class,'brand_id');
-    }
-
-    public function productorderlines()
-    {
-        return $this->hasMany(ProductOrderLine::class, 'product_id');
     }
 
     public function purchaseorderline()
