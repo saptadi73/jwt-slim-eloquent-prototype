@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\SaleOrder;
-use App\Models\PurchaseOrder;
 use App\Models\ProductOrderLine;
+use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderLine;
 use App\Models\ProductMoveHistory;
 use Illuminate\Database\Capsule\Manager as DB;
@@ -14,14 +14,14 @@ use Illuminate\Support\Carbon;
 class ProductStockService
 {
     /**
-     * Hitung stok berdasarkan sum dari product_move_histories
-     * direction='in' + qty, direction='out' - qty
+     * Hitung stok berdasarkan sum qty dari product_move_histories
+     * Purchase: qty positif (+)
+     * Sale: qty negatif (-)
+     * Final stock = SUM(qty)
      */
-    protected function calculateStock(Product $product): int
+    protected function calculateStock(Product $product): float
     {
-        $inSum = ProductMoveHistory::where('product_id', $product->id)->where('direction', 'in')->sum('qty');
-        $outSum = ProductMoveHistory::where('product_id', $product->id)->where('direction', 'out')->sum('qty');
-        return $inSum - $outSum;
+        return ProductMoveHistory::where('product_id', $product->id)->sum('qty') ?? 0;
     }
 
     /**
@@ -51,29 +51,29 @@ class ProductStockService
 
     /**
      * Tambah stok dari satu baris purchase order line
+     * Menyimpan qty positif (+$line->qty)
      */
     protected function increaseFromPurchaseLine(PurchaseOrderLine $line, PurchaseOrder $order): void
     {
-        // relasi product() sudah ada di PurchaseOrderLine
         $product = $line->product;
 
         if (!$product) {
             throw new \RuntimeException('Product tidak ditemukan di PurchaseOrderLine');
         }
 
-        $before = $this->calculateStock($product);
-        $qty    = $line->qty; // GANTI jika nama kolom di DB bukan 'qty'
-        $after  = $before + $qty;
+        $stockBefore = $this->calculateStock($product);
+        $qty = (float) $line->qty; // qty positif untuk pembelian
+        $stockAfter = $stockBefore + $qty;
 
         $now = Carbon::now();
 
         ProductMoveHistory::create([
             'product_id'      => $product->id,
             'move_type'       => 'purchase',
-            'direction'       => 'in',
-            'qty'             => $qty,
-            'stock_before'    => $before,
-            'stock_after'     => $after,
+            'direction'       => 'in', // Pembelian = stok masuk
+            'qty'             => $qty, // Positif untuk purchase
+            'stock_before'    => $stockBefore,
+            'stock_after'     => $stockAfter,
             'source_table'    => 'purchase_order_line',
             'source_id'       => $line->id,
             'source_order_id' => $order->id,
@@ -88,6 +88,7 @@ class ProductStockService
 
     /**
      * Kurangi stok dari satu baris sale order line
+     * Menyimpan qty negatif (-$line->qty)
      */
     protected function decreaseFromSaleLine(ProductOrderLine $line, SaleOrder $order): void
     {
@@ -97,11 +98,11 @@ class ProductStockService
             throw new \RuntimeException('Product tidak ditemukan di ProductOrderLine');
         }
 
-        $before = $this->calculateStock($product);
-        $qty    = $line->qty; // GANTI jika nama kolom di DB bukan 'qty'
-        $after  = $before - $qty;
+        $stockBefore = $this->calculateStock($product);
+        $qty = -1 * (float) $line->qty; // qty negatif untuk penjualan
+        $stockAfter = $stockBefore + $qty; // += negatif = kurang
 
-        if ($after < 0) {
+        if ($stockAfter < 0) {
             throw new \RuntimeException('Stok tidak cukup untuk produk ' . $product->nama);
         }
 
@@ -110,10 +111,10 @@ class ProductStockService
         ProductMoveHistory::create([
             'product_id'      => $product->id,
             'move_type'       => 'sale',
-            'direction'       => 'out',
-            'qty'             => $qty,
-            'stock_before'    => $before,
-            'stock_after'     => $after,
+            'direction'       => 'out', // Penjualan = stok keluar
+            'qty'             => $qty, // Negatif untuk sale
+            'stock_before'    => $stockBefore,
+            'stock_after'     => $stockAfter,
             'source_table'    => 'product_order_line',
             'source_id'       => $line->id,
             'source_order_id' => $order->id,
