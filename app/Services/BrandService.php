@@ -12,8 +12,14 @@ class BrandService
     {
         try {
             // Validasi input
-            if (empty($data['nama'])) {
-                return JsonResponder::error($response, 'Nama brand wajib diisi', 422);
+            $errors = [];
+            if (empty($data['nama']) || !is_string($data['nama'])) {
+                $errors[] = 'Nama brand wajib diisi';
+            } elseif (mb_strlen($data['nama']) > 191) {
+                $errors[] = 'Nama maksimal 191 karakter';
+            }
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
             }
 
             $brand = new Brand($data);
@@ -56,6 +62,20 @@ class BrandService
             $brand = Brand::find($id);
             if (!$brand) {
                 return JsonResponder::error($response, 'Brand tidak ditemukan', 404);
+            }
+
+            // Validasi partial update
+            $candidate = [
+                'nama' => $data['nama'] ?? $brand->nama,
+            ];
+            $errors = [];
+            if (empty($candidate['nama']) || !is_string($candidate['nama'])) {
+                $errors[] = 'Nama brand wajib diisi';
+            } elseif (mb_strlen($candidate['nama']) > 191) {
+                $errors[] = 'Nama maksimal 191 karakter';
+            }
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
             }
 
             $brand->update($data);

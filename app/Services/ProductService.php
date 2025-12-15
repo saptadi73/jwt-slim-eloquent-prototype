@@ -11,15 +11,50 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\UploadedFileInterface;
 use App\Support\RequestHelper;
+use App\Models\Brand;
+use App\Models\Kategori as KategoriModel;
+use App\Models\Satuan as SatuanModel;
+use InvalidArgumentException;
 
 class ProductService
 {
+    private function isValidUuid($value): bool
+    {
+        if (!is_string($value)) return false;
+        return preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/', $value) === 1;
+    }
     public function createProduct(Response $response, array $data, ?UploadedFileInterface $file = null)
     {
         try {
             // Validasi input
-            if (empty($data['nama'])) {
-                return JsonResponder::error($response, 'Nama produk wajib diisi', 422);
+            $errors = [];
+            if (empty($data['nama']) || !is_string($data['nama'])) {
+                $errors[] = 'Nama produk wajib diisi';
+            } elseif (mb_strlen($data['nama']) > 191) {
+                $errors[] = 'Nama maksimal 191 karakter';
+            }
+            if (isset($data['harga'])) {
+                if (!is_numeric($data['harga'])) {
+                    $errors[] = 'Harga harus numerik';
+                } elseif ((float)$data['harga'] < 0) {
+                    $errors[] = 'Harga tidak boleh negatif';
+                }
+            }
+            // Optional FK validations if present
+            foreach (['brand_id' => Brand::class, 'kategori_id' => KategoriModel::class, 'satuan_id' => SatuanModel::class] as $key => $modelClass) {
+                if (isset($data[$key])) {
+                    if (!$this->isValidUuid($data[$key])) {
+                        $errors[] = "$key harus UUID valid";
+                    } else {
+                        if (!$modelClass::find($data[$key])) {
+                            $errors[] = "$key tidak ditemukan";
+                        }
+                    }
+                }
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
             }
 
             // Kompatibilitas kolom: map 'type' -> 'tipe' (DB menggunakan 'tipe')
@@ -54,7 +89,7 @@ class ProductService
                 'debug'   => $debug,
             ], 'Produk dibuat', 201);
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, $th->getMessage(), 500);
+            return JsonResponder::error($response, $th, 500);
         }
     }
 
@@ -89,6 +124,39 @@ class ProductService
                 return JsonResponder::error($response, 'Produk tidak ditemukan', 404);
             }
 
+            // Validasi partial update
+            $candidate = [
+                'nama'  => $data['nama']  ?? $product->nama,
+                'harga' => $data['harga'] ?? $product->harga,
+            ];
+            $errors = [];
+            if (empty($candidate['nama']) || !is_string($candidate['nama'])) {
+                $errors[] = 'Nama produk wajib diisi';
+            } elseif (mb_strlen($candidate['nama']) > 191) {
+                $errors[] = 'Nama maksimal 191 karakter';
+            }
+            if (!is_numeric($candidate['harga'])) {
+                $errors[] = 'Harga harus numerik';
+            } elseif ((float)$candidate['harga'] < 0) {
+                $errors[] = 'Harga tidak boleh negatif';
+            }
+
+            // Optional FK validations if present
+            foreach (['brand_id' => Brand::class, 'kategori_id' => KategoriModel::class, 'satuan_id' => SatuanModel::class] as $key => $modelClass) {
+                if (isset($data[$key])) {
+                    if (!$this->isValidUuid($data[$key])) {
+                        $errors[] = "$key harus UUID valid";
+                    } else {
+                        if (!$modelClass::find($data[$key])) {
+                            $errors[] = "$key tidak ditemukan";
+                        }
+                    }
+                }
+            }
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
+
             // Kompatibilitas kolom: map 'type' -> 'tipe' (DB menggunakan 'tipe')
             if (isset($data['type']) && !isset($data['tipe'])) {
                 $data['tipe'] = $data['type'];
@@ -121,7 +189,7 @@ class ProductService
                 'debug'   => $debug,
             ], 'Produk diperbarui');
         } catch (\Throwable $th) {
-            return JsonResponder::error($response, $th->getMessage(), 500);
+            return JsonResponder::error($response, $th, 500);
         }
     }
 

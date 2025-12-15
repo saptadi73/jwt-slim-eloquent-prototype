@@ -12,6 +12,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Illuminate\Database\Capsule\Manager as DB;
 use App\Models\PurchaseOrderLine;
 use Illuminate\Support\Str;
+use App\Models\Vendor as VendorModel;
+use App\Models\Product as ProductModel;
 
 class PurchaseOrderService
 {
@@ -26,6 +28,30 @@ class PurchaseOrderService
     {
         DB::beginTransaction();
         try {
+            // Validate vendor_id
+            $errors = [];
+            if (!isset($data['vendor_id']) || !is_string($data['vendor_id'])) {
+                $errors[] = 'vendor_id wajib diisi';
+            } elseif (!\Ramsey\Uuid\Uuid::isValid($data['vendor_id'])) {
+                $errors[] = 'vendor_id harus UUID valid';
+            } elseif (!VendorModel::find($data['vendor_id'])) {
+                $errors[] = 'vendor_id tidak ditemukan';
+            }
+
+            // Validate product_lines
+            if (isset($data['product_lines']) && is_array($data['product_lines'])) {
+                foreach ($data['product_lines'] as $idx => $line) {
+                    if (!isset($line['product_id']) || !\Ramsey\Uuid\Uuid::isValid($line['product_id'])) {
+                        $errors[] = "product_lines[$idx].product_id harus UUID valid";
+                    } elseif (!ProductModel::find($line['product_id'])) {
+                        $errors[] = "product_lines[$idx].product_id tidak ditemukan";
+                    }
+                }
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
             // Create Purchase Order
             $purchaseOrder = new PurchaseOrder($data);
             // Explicitly assign UUID to avoid null id issues
@@ -47,7 +73,7 @@ class PurchaseOrderService
             return JsonResponder::success($response, $result);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return JsonResponder::error($response, $th);
+            return JsonResponder::error($response, $th, 500);
         }
     }
 
@@ -76,6 +102,19 @@ class PurchaseOrderService
         DB::beginTransaction();
         try {
             $purchaseOrder = PurchaseOrder::findOrFail($purchaseOrderID);
+
+            $errors = [];
+            if (isset($data['vendor_id'])) {
+                if (!\Ramsey\Uuid\Uuid::isValid($data['vendor_id'])) {
+                    $errors[] = 'vendor_id harus UUID valid';
+                } elseif (!VendorModel::find($data['vendor_id'])) {
+                    $errors[] = 'vendor_id tidak ditemukan';
+                }
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
             $oldStatus = $purchaseOrder->status;
             $purchaseOrder->update($data);
 
@@ -146,6 +185,19 @@ class PurchaseOrderService
             if (!$purchaseOrderLine) {
                 return JsonResponder::error($response, "Purchase Order Line not found");
             }
+
+            $errors = [];
+            if (isset($data['product_id'])) {
+                if (!\Ramsey\Uuid\Uuid::isValid($data['product_id'])) {
+                    $errors[] = 'product_id harus UUID valid';
+                } elseif (!ProductModel::find($data['product_id'])) {
+                    $errors[] = 'product_id tidak ditemukan';
+                }
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
             $purchaseOrderLine->fill($data);
             $purchaseOrderLine->save();
             DB::commit();
@@ -161,6 +213,16 @@ class PurchaseOrderService
     {
         DB::beginTransaction();
         try {
+            $errors = [];
+            if (!isset($lineData['product_id']) || !\Ramsey\Uuid\Uuid::isValid($lineData['product_id'])) {
+                $errors[] = 'product_id harus UUID valid';
+            } elseif (!ProductModel::find($lineData['product_id'])) {
+                $errors[] = 'product_id tidak ditemukan';
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
             $purchaseOrderLine = new PurchaseOrderLine($lineData);
             $purchaseOrderLine->purchase_order_id = $purchaseOrderID;
             $purchaseOrderLine->save();

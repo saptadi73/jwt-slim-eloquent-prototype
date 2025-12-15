@@ -12,8 +12,14 @@ class KategoriService
     {
         try {
             // Validasi input
-            if (empty($data['nama'])) {
-                return JsonResponder::error($response, 'Nama kategori wajib diisi', 422);
+            $errors = [];
+            if (empty($data['nama']) || !is_string($data['nama'])) {
+                $errors[] = 'Nama kategori wajib diisi';
+            } elseif (mb_strlen($data['nama']) > 191) {
+                $errors[] = 'Nama maksimal 191 karakter';
+            }
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
             }
 
             $kategori = new Kategori($data);
@@ -55,6 +61,20 @@ class KategoriService
             $kategori = Kategori::find($id);
             if (!$kategori) {
                 return JsonResponder::error($response, 'Kategori tidak ditemukan', 404);
+            }
+
+            // Validasi partial update
+            $candidate = [
+                'nama' => $data['nama'] ?? $kategori->nama,
+            ];
+            $errors = [];
+            if (empty($candidate['nama']) || !is_string($candidate['nama'])) {
+                $errors[] = 'Nama kategori wajib diisi';
+            } elseif (mb_strlen($candidate['nama']) > 191) {
+                $errors[] = 'Nama maksimal 191 karakter';
+            }
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
             }
 
             $kategori->update($data);

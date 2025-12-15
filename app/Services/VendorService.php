@@ -31,6 +31,22 @@ class VendorService
     {
         $payload = Arr::only($data, ['nama', 'alamat', 'email', 'hp']);
 
+        // Validation
+        $errors = [];
+        if (empty($payload['nama']) || !is_string($payload['nama'])) {
+            $errors[] = 'Nama vendor wajib diisi';
+        } elseif (mb_strlen($payload['nama']) > 191) {
+            $errors[] = 'Nama maksimal 191 karakter';
+        }
+        if (!empty($payload['email'])) {
+            if (!filter_var($payload['email'], FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Email tidak valid';
+            }
+        }
+        if (!empty($errors)) {
+            return JsonResponder::badRequest($response, $errors);
+        }
+
         $vendor = new Vendor($payload);
         $vendor->id = (string) Str::uuid();
         
@@ -65,6 +81,24 @@ class VendorService
         }
 
         $payload = Arr::only($data, ['nama', 'alamat', 'email', 'hp']);
+
+        // Validation (partial)
+        $candidate = [
+            'nama'  => $payload['nama']  ?? $vendor->nama,
+            'email' => $payload['email'] ?? $vendor->email,
+        ];
+        $errors = [];
+        if (empty($candidate['nama']) || !is_string($candidate['nama'])) {
+            $errors[] = 'Nama vendor wajib diisi';
+        } elseif (mb_strlen($candidate['nama']) > 191) {
+            $errors[] = 'Nama maksimal 191 karakter';
+        }
+        if (!empty($candidate['email']) && !filter_var($candidate['email'], FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Email tidak valid';
+        }
+        if (!empty($errors)) {
+            return JsonResponder::badRequest($response, $errors);
+        }
         
         // Jika ada file baru, simpan dan hapus file lama
         if ($file && $file->getError() === UPLOAD_ERR_OK) {

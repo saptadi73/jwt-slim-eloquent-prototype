@@ -26,4 +26,16 @@ class JsonResponder
         $response->getBody()->write(json_encode($payload));
         return $response->withStatus($code)->withHeader('Content-Type', 'application/json');
     }
+
+    public static function badRequest(ResponseInterface $response, $errors)
+    {
+        $payload = [
+            'status' => false,
+            'message' => 'Invalid data provided',
+            'errors' => is_array($errors) ? $errors : [$errors],
+            'data' => []
+        ];
+        $response->getBody()->write(json_encode($payload));
+        return $response->withStatus(400)->withHeader('Content-Type', 'application/json');
+    }
 }

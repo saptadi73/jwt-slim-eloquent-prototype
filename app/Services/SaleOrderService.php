@@ -19,6 +19,7 @@ use App\Models\Service;
 use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use InvalidArgumentException;
 
 class SaleOrderService
 {
@@ -33,6 +34,41 @@ class SaleOrderService
     {
         DB::beginTransaction();
         try {
+            // Basic FK validation: customer_id
+            $errors = [];
+            if (!isset($data['customer_id']) || !is_string($data['customer_id'])) {
+                $errors[] = 'customer_id wajib diisi';
+            } elseif (!\Ramsey\Uuid\Uuid::isValid($data['customer_id'])) {
+                $errors[] = 'customer_id harus UUID valid';
+            } elseif (!Customer::find($data['customer_id'])) {
+                $errors[] = 'customer_id tidak ditemukan';
+            }
+
+            // Validate product lines
+            if (isset($data['product_lines']) && is_array($data['product_lines'])) {
+                foreach ($data['product_lines'] as $idx => $line) {
+                    if (!isset($line['product_id']) || !\Ramsey\Uuid\Uuid::isValid($line['product_id'])) {
+                        $errors[] = "product_lines[$idx].product_id harus UUID valid";
+                    } elseif (!Product::find($line['product_id'])) {
+                        $errors[] = "product_lines[$idx].product_id tidak ditemukan";
+                    }
+                }
+            }
+
+            // Validate service lines
+            if (isset($data['service_lines']) && is_array($data['service_lines'])) {
+                foreach ($data['service_lines'] as $idx => $line) {
+                    if (!isset($line['service_id']) || !\Ramsey\Uuid\Uuid::isValid($line['service_id'])) {
+                        $errors[] = "service_lines[$idx].service_id harus UUID valid";
+                    } elseif (!Service::find($line['service_id'])) {
+                        $errors[] = "service_lines[$idx].service_id tidak ditemukan";
+                    }
+                }
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
             // Create Sale Order
             $saleOrder = new SaleOrder($data);
             $saleOrder->save();
@@ -59,7 +95,7 @@ class SaleOrderService
             return JsonResponder::success($response, $saleOrder);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return JsonResponder::error($response, $th);
+            return JsonResponder::error($response, $th, 500);
         }
     }
 
@@ -83,6 +119,20 @@ class SaleOrderService
             if (!$saleOrder) {
                 throw new ModelNotFoundException("Sale Order not found");
             }
+
+            $errors = [];
+            if (isset($data['customer_id'])) {
+                if (!Uuid::isValid($data['customer_id'])) {
+                    $errors[] = 'customer_id harus UUID valid';
+                } elseif (!Customer::find($data['customer_id'])) {
+                    $errors[] = 'customer_id tidak ditemukan';
+                }
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
+
             $oldStatus = $saleOrder->status;
             $saleOrder->fill($data);
             $saleOrder->save();
@@ -188,6 +238,18 @@ class SaleOrderService
             if (!$saleOrder) {
                 throw new ModelNotFoundException("Sale Order not found");
             }
+
+            $errors = [];
+            if (!isset($lineData['product_id']) || !Uuid::isValid($lineData['product_id'])) {
+                $errors[] = 'product_id harus UUID valid';
+            } elseif (!Product::find($lineData['product_id'])) {
+                $errors[] = 'product_id tidak ditemukan';
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
+
             $lineData['sale_order_id'] = $SaleOrderID;
             $productLine = new ProductOrderLine($lineData);
             $productLine->save();
@@ -207,6 +269,18 @@ class SaleOrderService
             if (!$saleOrder) {
                 throw new ModelNotFoundException("Sale Order not found");
             }
+
+            $errors = [];
+            if (!isset($lineData['service_id']) || !Uuid::isValid($lineData['service_id'])) {
+                $errors[] = 'service_id harus UUID valid';
+            } elseif (!Service::find($lineData['service_id'])) {
+                $errors[] = 'service_id tidak ditemukan';
+            }
+
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
+            }
+
             $lineData['sale_order_id'] = $SaleOrderID;
             $serviceLine = new ServiceOrderLine($lineData);
             $serviceLine->save();

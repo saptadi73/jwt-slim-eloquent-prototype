@@ -12,8 +12,14 @@ class SatuanService
     {
         try {
             // Validasi input
-            if (empty($data['nama'])) {
-                return JsonResponder::error($response, 'Nama satuan wajib diisi', 422);
+            $errors = [];
+            if (empty($data['nama']) || !is_string($data['nama'])) {
+                $errors[] = 'Nama satuan wajib diisi';
+            } elseif (mb_strlen($data['nama']) > 191) {
+                $errors[] = 'Nama maksimal 191 karakter';
+            }
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
             }
 
             $satuan = new Satuan($data);
@@ -55,6 +61,20 @@ class SatuanService
             $satuan = Satuan::find($id);
             if (!$satuan) {
                 return JsonResponder::error($response, 'Satuan tidak ditemukan', 404);
+            }
+
+            // Validasi partial update
+            $candidate = [
+                'nama' => $data['nama'] ?? $satuan->nama,
+            ];
+            $errors = [];
+            if (empty($candidate['nama']) || !is_string($candidate['nama'])) {
+                $errors[] = 'Nama satuan wajib diisi';
+            } elseif (mb_strlen($candidate['nama']) > 191) {
+                $errors[] = 'Nama maksimal 191 karakter';
+            }
+            if (!empty($errors)) {
+                return JsonResponder::badRequest($response, $errors);
             }
 
             $satuan->update($data);
