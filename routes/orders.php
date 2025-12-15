@@ -26,7 +26,7 @@ return function (App $app) {
         $orders->get('/purchase/{id}', function (Request $request, Response $response, array $args) use ($container) {
             $id = $args['id'];
             $svc = $container->get(PurchaseOrderService::class);
-            return $svc->getPurchaseOrder($request, $response, $id);
+            return $svc->getPurchaseOrder($response, $id);
         });
 
         // List all Purchase Orders
@@ -44,7 +44,7 @@ return function (App $app) {
         $orders->get('/sale/{id}', function (Request $request, Response $response, array $args) use ($container) {
             $id = $args['id'];
             $svc = $container->get(SaleOrderService::class);
-            return $svc->getSaleOrder($request, $response, $id);
+            return $svc->getSaleOrder($response, $id);
         });
 
         $orders->get('/sale', function (Request $request, Response $response) use ($container) {

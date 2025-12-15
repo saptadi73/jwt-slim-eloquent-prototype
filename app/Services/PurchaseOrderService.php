@@ -11,6 +11,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Illuminate\Database\Capsule\Manager as DB;
 use App\Models\PurchaseOrderLine;
+use Illuminate\Support\Str;
 
 class PurchaseOrderService
 {
@@ -27,6 +28,8 @@ class PurchaseOrderService
         try {
             // Create Purchase Order
             $purchaseOrder = new PurchaseOrder($data);
+            // Explicitly assign UUID to avoid null id issues
+            $purchaseOrder->id = (string) Str::uuid();
             $purchaseOrder->save();
 
             // Create Purchase Order Lines
@@ -39,7 +42,9 @@ class PurchaseOrderService
             }
 
             DB::commit();
-            return JsonResponder::success($response, $purchaseOrder);
+            // Return with relations for convenience
+            $result = PurchaseOrder::with(['vendor', 'productLines.product'])->find($purchaseOrder->id);
+            return JsonResponder::success($response, $result);
         } catch (\Throwable $th) {
             DB::rollBack();
             return JsonResponder::error($response, $th);
@@ -152,7 +157,7 @@ class PurchaseOrderService
         }
     }
 
-    public function AddPurchaseOrderLine(Response $response, string $purchaseOrderID, array $lineData)
+    public function addPurchaseOrderLine(Response $response, string $purchaseOrderID, array $lineData)
     {
         DB::beginTransaction();
         try {
