@@ -20,6 +20,7 @@ use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use InvalidArgumentException;
+use Ramsey\Uuid\Uuid as RamseyUuid;
 
 class SaleOrderService
 {
@@ -85,23 +86,53 @@ class SaleOrderService
             if (!empty($errors)) {
                 return JsonResponder::badRequest($response, $errors);
             }
+            
+            // Extract product_lines and service_lines before creating sale order
+            $productLinesData = $data['product_lines'] ?? [];
+            $serviceLinesData = $data['service_lines'] ?? [];
+            unset($data['product_lines'], $data['service_lines']);
+            
+            // Generate UUID explicitly if not provided
+            if (empty($data['id'])) {
+                $data['id'] = (string) RamseyUuid::uuid4();
+            }
+            
             // Create Sale Order
             $saleOrder = new SaleOrder($data);
+            error_log('Before save - ID: ' . $saleOrder->id);
             $saleOrder->save();
+            error_log('After save - ID: ' . $saleOrder->id);
+            
+            // Ensure ID is set after save
+            if (!$saleOrder->id) {
+                throw new Exception('Failed to generate sale order ID after save');
+            }
 
             // Create Product Order Lines
-            if (isset($data['product_lines']) && is_array($data['product_lines'])) {
-                foreach ($data['product_lines'] as $lineData) {
+            if (is_array($productLinesData)) {
+                foreach ($productLinesData as $lineData) {
                     $lineData['sale_order_id'] = $saleOrder->id;
+                    // Normalize decimal fields
+                    foreach (['qty', 'unit_price', 'discount', 'line_total', 'hpp'] as $field) {
+                        if (isset($lineData[$field])) {
+                            $lineData[$field] = (float) $lineData[$field];
+                        }
+                    }
                     $productLine = new ProductOrderLine($lineData);
                     $productLine->save();
                 }
             }
 
             // Create Service Order Lines
-            if (isset($data['service_lines']) && is_array($data['service_lines'])) {
-                foreach ($data['service_lines'] as $lineData) {
+            if (is_array($serviceLinesData)) {
+                foreach ($serviceLinesData as $lineData) {
                     $lineData['sale_order_id'] = $saleOrder->id;
+                    // Normalize decimal fields
+                    foreach (['qty', 'unit_price', 'discount', 'line_total'] as $field) {
+                        if (isset($lineData[$field])) {
+                            $lineData[$field] = (float) $lineData[$field];
+                        }
+                    }
                     $serviceLine = new ServiceOrderLine($lineData);
                     $serviceLine->save();
                 }
@@ -111,6 +142,8 @@ class SaleOrderService
             return JsonResponder::success($response, $saleOrder);
         } catch (\Throwable $th) {
             DB::rollBack();
+            error_log('SaleOrder creation error: ' . $th->getMessage());
+            error_log('Stack trace: ' . $th->getTraceAsString());
             return JsonResponder::error($response, $th, 500);
         }
     }

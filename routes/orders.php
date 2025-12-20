@@ -15,6 +15,11 @@ return function (App $app) {
     $container = $app->getContainer();
 
     $app->group('/orders', function (RouteCollectorProxy $orders) use ($container) {
+        // CORS Preflight
+        $orders->options('/{routes:.+}', function (Request $request, Response $response) {
+            return $response;
+        });
+
         // Create Purchase Order
         $orders->post('/purchase', function (Request $request, Response $response) use ($container) {
             $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);

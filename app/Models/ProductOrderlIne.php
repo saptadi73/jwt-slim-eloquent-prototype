@@ -13,6 +13,7 @@ class ProductOrderLine extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'sale_order_id',
         'product_id',
         'line_number',

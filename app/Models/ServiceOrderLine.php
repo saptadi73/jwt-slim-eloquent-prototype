@@ -9,10 +9,11 @@ class ServiceOrderLine extends Model
 {
     use HasUuid;
 
-    protected $table = 'service_order_line';
+    protected $table = 'service_order_lines';
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'sale_order_id',
         'service_id',
         'line_number',

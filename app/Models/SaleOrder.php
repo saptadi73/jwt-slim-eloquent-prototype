@@ -14,6 +14,7 @@ class SaleOrder extends Model
     protected $primaryKey = 'id';
 
     protected $fillable = [
+        'id',
         'order_number',
         'order_date',
         'status',
