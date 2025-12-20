@@ -36,6 +36,9 @@ $migrations = [
     __DIR__ . '/database/migrations/2025_01_01_000002_create_journal_lines_table.php',
     __DIR__ . '/database/migrations/2025_01_01_000003_add_normal_balance_to_chart_of_accounts_table.php',
     __DIR__ . '/database/migrations/2025_01_01_000004_add_vendor_customer_to_journal_lines_table.php',
+    __DIR__ . '/database/migrations/2025_12_20_100000_create_product_order_lines_table.php',
+    __DIR__ . '/database/migrations/2025_12_20_111900_add_customer_fields_to_sale_orders.php',
+    __DIR__ . '/database/migrations/2025_12_20_120000_add_hpp_to_product_order_lines.php',
 ];
 
 foreach ($migrations as $migrationFile) {

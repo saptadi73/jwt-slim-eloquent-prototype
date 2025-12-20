@@ -21,6 +21,7 @@ class ProductOrderLine extends Model
         'unit_price',
         'discount',
         'line_total',
+        'hpp',
     ];
 
     protected $keyType = 'string';
@@ -34,6 +35,7 @@ class ProductOrderLine extends Model
         'unit_price' => 'decimal:2',
         'discount'   => 'decimal:2',
         'line_total' => 'decimal:2',
+        'hpp'        => 'decimal:2',
     ];
 
     /* =======================

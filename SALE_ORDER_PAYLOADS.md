@@ -57,13 +57,12 @@ Dokumentasi lengkap payload yang valid untuk operasi CRUD Sale Order berdasarkan
 ### Field Descriptions
 
 #### Sale Order Fields (Required)
-- `order_number` (string): Nomor order unik
-- `order_date` (date): Tanggal order format `YYYY-MM-DD`
-- `status` (enum): Status order - nilai valid: `"draft"`, `"confirmed"`, `"paid"`, `"cancelled"`
-- `subtotal` (decimal): Subtotal sebelum pajak
-- `tax` (decimal): Nilai pajak
-- `total` (decimal): Total keseluruhan (subtotal + tax)
-- `customer_id` (uuid): ID customer yang valid
+
+#### Snapshot Customer Fields (Optional)
+- `nama` (string, optional): Nama customer disalin ke sale order
+- `alamat` (string, optional): Alamat customer disalin ke sale order
+- `hp` (string, optional, max 30): Nomor HP disalin ke sale order
+- `keterangan` (string, optional): Catatan/keterangan tambahan
 
 #### Product Lines (Optional Array)
 - `product_id` (uuid): ID produk yang valid
@@ -73,6 +72,7 @@ Dokumentasi lengkap payload yang valid untuk operasi CRUD Sale Order berdasarkan
 - `unit_price` (decimal): Harga per unit
 - `discount` (decimal): Diskon
 - `line_total` (decimal): Total baris (qty × unit_price - discount)
+- `hpp` (decimal, optional): Harga Pokok Penjualan untuk keperluan accounting
 
 #### Service Lines (Optional Array)
 - `service_id` (uuid): ID service yang valid
@@ -97,6 +97,24 @@ Dokumentasi lengkap payload yang valid untuk operasi CRUD Sale Order berdasarkan
 }
 ```
 
+### Example dengan Snapshot Customer Fields (Optional)
+
+```json
+{
+  "order_number": "SO-2025-005",
+  "order_date": "2025-01-15",
+  "status": "draft",
+  "subtotal": 0.00,
+  "tax": 0.00,
+  "total": 0.00,
+  "customer_id": "uuid-customer-id-here",
+  "nama": "PT Angin Sepoi",
+  "alamat": "Jl. Kenangan No. 12, Jakarta",
+  "hp": "081234567890",
+  "keterangan": "Catat permintaan delivery pagi"
+}
+```
+
 ### Example dengan Product Lines Saja
 
 ```json
@@ -117,6 +135,57 @@ Dokumentasi lengkap payload yang valid untuk operasi CRUD Sale Order berdasarkan
       "unit_price": 500000.00,
       "discount": 0.00,
       "line_total": 1000000.00
+    }
+  ]
+}
+```
+
+### Example LENGKAP - Dengan Semua Fields (Recommended)
+
+```json
+{
+  "order_number": "SO-2025-006",
+  "order_date": "2025-12-20",
+  "status": "draft",
+  "subtotal": 1500000.00,
+  "tax": 150000.00,
+  "total": 1650000.00,
+  "customer_id": "550e8400-e29b-41d4-a716-446655440000",
+  "nama": "PT Dingin Sejuk Indonesia",
+  "alamat": "Jl. Merdeka No. 45, Jakarta Pusat",
+  "hp": "081234567890",
+  "keterangan": "Pengiriman ke gudang utama, jam kerja 08:00-17:00",
+  "product_lines": [
+    {
+      "product_id": "660e8400-e29b-41d4-a716-446655440001",
+      "line_number": 1,
+      "description": "AC Split 1 PK Toshiba RAS-10U2KH3S",
+      "qty": 2.00,
+      "unit_price": 500000.00,
+      "discount": 50000.00,
+      "line_total": 950000.00,
+      "hpp": 350000.00
+    },
+    {
+      "product_id": "660e8400-e29b-41d4-a716-446655440002",
+      "line_number": 2,
+      "description": "Remote Control AC Original",
+      "qty": 2.00,
+      "unit_price": 250000.00,
+      "discount": 0.00,
+      "line_total": 500000.00,
+      "hpp": 150000.00
+    }
+  ],
+  "service_lines": [
+    {
+      "service_id": "770e8400-e29b-41d4-a716-446655440001",
+      "line_number": 1,
+      "description": "Instalasi AC Split + Pipa 10 meter",
+      "qty": 1.00,
+      "unit_price": 300000.00,
+      "discount": 0.00,
+      "line_total": 300000.00
     }
   ]
 }
@@ -175,6 +244,10 @@ GET /orders/sale/9d4f5e6a-7b8c-9d0e-1f2a-3b4c5d6e7f8g
     "tax": "150000.00",
     "total": "1650000.00",
     "customer_id": "uuid-customer-id",
+    "nama": "PT Angin Sepoi",
+    "alamat": "Jl. Kenangan No. 12, Jakarta",
+    "hp": "081234567890",
+    "keterangan": "Catat permintaan delivery pagi",
     "created_at": "2025-01-15 10:30:00",
     "updated_at": "2025-01-15 10:30:00",
     "customer": {

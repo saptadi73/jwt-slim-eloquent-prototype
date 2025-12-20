@@ -66,6 +66,22 @@ class SaleOrderService
                 }
             }
 
+            // Normalize optional snapshot customer fields (always optional)
+            foreach (['nama', 'alamat', 'hp', 'keterangan'] as $k) {
+                if (array_key_exists($k, $data)) {
+                    if ($data[$k] === null || $data[$k] === '') {
+                        // keep null/empty as-is
+                        continue;
+                    }
+                    // cast to string
+                    $data[$k] = (string) $data[$k];
+                    if ($k === 'hp') {
+                        // remove spaces and cap length to 30
+                        $data[$k] = substr(preg_replace('/\s+/', '', $data[$k]), 0, 30);
+                    }
+                }
+            }
+
             if (!empty($errors)) {
                 return JsonResponder::badRequest($response, $errors);
             }
@@ -126,6 +142,19 @@ class SaleOrderService
                     $errors[] = 'customer_id harus UUID valid';
                 } elseif (!Customer::find($data['customer_id'])) {
                     $errors[] = 'customer_id tidak ditemukan';
+                }
+            }
+
+            // Normalize optional snapshot customer fields on update (always optional)
+            foreach (['nama', 'alamat', 'hp', 'keterangan'] as $k) {
+                if (array_key_exists($k, $data)) {
+                    if ($data[$k] === null || $data[$k] === '') {
+                        continue;
+                    }
+                    $data[$k] = (string) $data[$k];
+                    if ($k === 'hp') {
+                        $data[$k] = substr(preg_replace('/\s+/', '', $data[$k]), 0, 30);
+                    }
                 }
             }
 

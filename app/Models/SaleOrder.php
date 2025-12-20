@@ -21,6 +21,10 @@ class SaleOrder extends Model
         'tax',
         'total',
         'customer_id',
+        'nama',
+        'alamat',
+        'hp',
+        'keterangan',
     ];
 
     protected $keyType = 'string';

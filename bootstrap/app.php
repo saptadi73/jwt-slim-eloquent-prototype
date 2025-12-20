@@ -17,6 +17,7 @@ use App\Services\BrandService;
 use App\Services\SatuanService;
 use App\Services\VendorService;
 use App\Services\WorkOrderService;
+use App\Services\ServiceService;
 use Dotenv\Dotenv;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -39,6 +40,7 @@ $pimple[PurchaseOrderService::class] = fn($c) => new PurchaseOrderService($pimpl
 $pimple[SaleOrderService::class] = fn($c) => new SaleOrderService($pimple[ProductStockService::class]);
 $pimple[ChartOfAccountService::class] = fn($c) => new ChartOfAccountService();
 $pimple[VendorService::class] = fn($c) => new VendorService();
+$pimple[ServiceService::class] = fn($c) => new ServiceService();
 // (opsional) $pimple[CorsMiddleware::class] = fn($c) => new CorsMiddleware();
 
 $container = new Psr11Container($pimple);
