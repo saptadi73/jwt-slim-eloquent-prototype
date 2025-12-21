@@ -11,6 +11,7 @@ use App\Models\Expense;
 use App\Models\ProductMoveHistory;
 use App\Support\JsonResponder;
 use Illuminate\Database\Capsule\Manager as DB;
+use Illuminate\Support\Str;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class AccountingService
@@ -36,23 +37,29 @@ class AccountingService
 
             $entry = DB::connection()->transaction(function () use ($data) {
                 // Create journal entry
-                $entry = JournalEntry::create([
+                $entry = new JournalEntry([
                     'entry_date' => $data['entry_date'],
                     'reference_number' => $data['reference_number'] ?? 'MISC-' . time(),
                     'description' => $data['description'] ?? 'Miscellaneous Journal Entry',
                     'status' => $data['status'] ?? 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
 
                 // Create journal lines
                 foreach ($data['lines'] as $line) {
-                    JournalLine::create([
+                    $journalLine = new JournalLine([
                         'journal_entry_id' => $entry->id,
                         'chart_of_account_id' => $line['chart_of_account_id'],
                         'description' => $line['description'] ?? '',
                         'debit' => $line['debit'] ?? 0,
                         'credit' => $line['credit'] ?? 0,
+                        'customer_id' => $line['customer_id'] ?? null,
+                        'vendor_id' => $line['vendor_id'] ?? null,
                     ]);
+                    $journalLine->id = (string) Str::uuid();
+                    $journalLine->save();
                 }
 
                 return $entry->load('journalLines.chartOfAccount');
@@ -89,16 +96,18 @@ class AccountingService
                 }
 
                 // Create journal entry
-                $entry = JournalEntry::create([
+                $entry = new JournalEntry([
                     'entry_date' => $saleOrder->order_date,
                     'reference_number' => 'SALE-' . $saleOrder->order_number,
                     'description' => 'Sales Perpetual Journal - ' . $saleOrder->customer->name,
                     'status' => 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
 
                 // Debit Accounts Receivable / Credit Sales Revenue
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $accountsReceivable->id,
                     'description' => 'Accounts Receivable - ' . $saleOrder->customer->name,
@@ -106,14 +115,18 @@ class AccountingService
                     'credit' => 0,
                     'customer_id' => $saleOrder->customer_id,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $salesRevenue->id,
                     'description' => 'Sales Revenue - ' . $saleOrder->order_number,
                     'debit' => 0,
                     'credit' => $saleOrder->total_amount,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
                 // Calculate COGS
                 $totalCost = 0;
@@ -123,21 +136,25 @@ class AccountingService
 
                 // Debit COGS / Credit Inventory
                 if ($totalCost > 0) {
-                    JournalLine::create([
+                    $line = new JournalLine([
                         'journal_entry_id' => $entry->id,
                         'chart_of_account_id' => $cogs->id,
                         'description' => 'Cost of Goods Sold - ' . $saleOrder->order_number,
                         'debit' => $totalCost,
                         'credit' => 0,
                     ]);
+                    $line->id = (string) Str::uuid();
+                    $line->save();
 
-                    JournalLine::create([
+                    $line = new JournalLine([
                         'journal_entry_id' => $entry->id,
                         'chart_of_account_id' => $inventory->id,
                         'description' => 'Inventory Reduction - ' . $saleOrder->order_number,
                         'debit' => 0,
                         'credit' => $totalCost,
                     ]);
+                    $line->id = (string) Str::uuid();
+                    $line->save();
                 }
 
                 return $entry->load('journalLines.chartOfAccount');
@@ -166,24 +183,28 @@ class AccountingService
                 }
 
                 // Create journal entry
-                $entry = JournalEntry::create([
+                $entry = new JournalEntry([
                     'entry_date' => $data['payment_date'],
                     'reference_number' => $data['reference_number'] ?? 'PAY-SALE-' . time(),
                     'description' => $data['description'] ?? 'Payment received from customer',
                     'status' => 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
 
                 // Debit Cash / Credit Accounts Receivable
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $cash->id,
                     'description' => 'Cash received - ' . ($data['description'] ?? ''),
                     'debit' => $data['amount'],
                     'credit' => 0,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $accountsReceivable->id,
                     'description' => 'A/R reduction - ' . ($data['description'] ?? ''),
@@ -191,6 +212,8 @@ class AccountingService
                     'credit' => $data['amount'],
                     'customer_id' => $data['customer_id'] ?? null,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
                 return $entry->load('journalLines.chartOfAccount');
             });
@@ -224,24 +247,28 @@ class AccountingService
                 }
 
                 // Create journal entry
-                $entry = JournalEntry::create([
+                $entry = new JournalEntry([
                     'entry_date' => $purchaseOrder->order_date,
                     'reference_number' => 'PUR-' . $purchaseOrder->order_number,
                     'description' => 'Purchase Journal - ' . $purchaseOrder->vendor->name,
                     'status' => 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
 
                 // Debit Inventory / Credit Accounts Payable
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $inventory->id,
                     'description' => 'Inventory Purchase - ' . $purchaseOrder->order_number,
                     'debit' => $purchaseOrder->total_amount,
                     'credit' => 0,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $accountsPayable->id,
                     'description' => 'Accounts Payable - ' . $purchaseOrder->vendor->name,
@@ -249,6 +276,8 @@ class AccountingService
                     'credit' => $purchaseOrder->total_amount,
                     'vendor_id' => $purchaseOrder->vendor_id,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
                 return $entry->load('journalLines.chartOfAccount');
             });
@@ -276,16 +305,18 @@ class AccountingService
                 }
 
                 // Create journal entry
-                $entry = JournalEntry::create([
+                $entry = new JournalEntry([
                     'entry_date' => $data['payment_date'],
                     'reference_number' => $data['reference_number'] ?? 'PAY-PUR-' . time(),
                     'description' => $data['description'] ?? 'Payment to vendor',
                     'status' => 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
 
                 // Debit Accounts Payable / Credit Cash
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $accountsPayable->id,
                     'description' => 'A/P reduction - ' . ($data['description'] ?? ''),
@@ -293,6 +324,8 @@ class AccountingService
                     'credit' => 0,
                     'vendor_id' => $data['vendor_id'] ?? null,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
                 JournalLine::create([
                     'journal_entry_id' => $entry->id,
@@ -334,24 +367,28 @@ class AccountingService
                 }
 
                 // Create journal entry
-                $entry = JournalEntry::create([
+                $entry = new JournalEntry([
                     'entry_date' => $expense->expense_date,
                     'reference_number' => 'EXP-' . $expense->id,
                     'description' => 'Expense Journal - ' . $expense->description,
                     'status' => 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
 
                 // Debit Expense / Credit Accounts Payable (if not paid) or Cash (if paid)
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $expenseAccount->id,
                     'description' => 'Expense - ' . $expense->description,
                     'debit' => $expense->amount,
                     'credit' => 0,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $accountsPayable->id,
                     'description' => 'Accounts Payable - ' . $expense->description,
@@ -386,30 +423,36 @@ class AccountingService
                 }
 
                 // Create journal entry
-                $entry = JournalEntry::create([
+                $entry = new JournalEntry([
                     'entry_date' => $data['payment_date'],
                     'reference_number' => $data['reference_number'] ?? 'PAY-EXP-' . time(),
                     'description' => $data['description'] ?? 'Expense payment',
                     'status' => 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
 
                 // Debit Accounts Payable / Credit Cash
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $accountsPayable->id,
                     'description' => 'Expense payment - ' . ($data['description'] ?? ''),
                     'debit' => $data['amount'],
                     'credit' => 0,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $cash->id,
                     'description' => 'Cash payment - ' . ($data['description'] ?? ''),
                     'debit' => 0,
                     'credit' => $data['amount'],
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
                 return $entry->load('journalLines.chartOfAccount');
             });
@@ -437,30 +480,36 @@ class AccountingService
                 }
 
                 // Create journal entry
-                $entry = JournalEntry::create([
+                $entry = new JournalEntry([
                     'entry_date' => $data['usage_date'],
                     'reference_number' => $data['reference_number'] ?? 'INT-USE-' . time(),
                     'description' => $data['description'] ?? 'Internal goods expenditure',
                     'status' => 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
 
                 // Debit Internal Expense / Credit Inventory
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $internalExpense->id,
                     'description' => 'Internal use - ' . ($data['description'] ?? ''),
                     'debit' => $data['amount'],
                     'credit' => 0,
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $inventory->id,
                     'description' => 'Inventory reduction - ' . ($data['description'] ?? ''),
                     'debit' => 0,
                     'credit' => $data['amount'],
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
                 return $entry->load('journalLines.chartOfAccount');
             });
@@ -477,7 +526,7 @@ class AccountingService
     public function getAllJournals(Response $response, array $filters = []): Response
     {
         try {
-            $query = JournalEntry::with(['journalLines.chartOfAccount', 'createdBy']);
+            $query = JournalEntry::with(['journalLines.chartOfAccount']);
 
             // Apply filters
             if (isset($filters['start_date'])) {
@@ -507,7 +556,7 @@ class AccountingService
     public function getJournalById(Response $response, string $id): Response
     {
         try {
-            $entry = JournalEntry::with(['journalLines.chartOfAccount', 'journalLines.customer', 'journalLines.vendor', 'createdBy'])
+            $entry = JournalEntry::with(['journalLines.chartOfAccount', 'journalLines.customer', 'journalLines.vendor'])
                 ->find($id);
             
             if (!$entry) {

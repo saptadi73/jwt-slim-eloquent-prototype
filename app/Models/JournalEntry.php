@@ -29,11 +29,6 @@ class JournalEntry extends Model
         'entry_date' => 'date:Y-m-d',
     ];
 
-    public function createdBy()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
     public function journalLines()
     {
         return $this->hasMany(JournalLine::class, 'journal_entry_id');
