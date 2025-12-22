@@ -9,6 +9,7 @@ return function (App $app) {
     (require __DIR__ . '/seeds.php')($app);
     (require __DIR__ . '/orders.php')($app);
     (require __DIR__ . '/chart_of_accounts.php')($app);
+    (require __DIR__ . '/bank_accounts.php')($app);
     (require __DIR__ . '/accounting.php')($app);
     (require __DIR__ . '/vendors.php')($app);
     (require __DIR__ . '/products.php')($app);

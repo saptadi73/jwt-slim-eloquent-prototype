@@ -79,7 +79,7 @@ class AccountingService
     {
         try {
             $entry = DB::connection()->transaction(function () use ($data) {
-                $saleOrder = SaleOrder::with('customer', 'productOrderLines.product')->find($data['sale_order_id']);
+                $saleOrder = SaleOrder::with('customer', 'productLines.product')->find($data['sale_order_id']);
                 
                 if (!$saleOrder) {
                     throw new \Exception('Sale order not found');
@@ -111,7 +111,7 @@ class AccountingService
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $accountsReceivable->id,
                     'description' => 'Accounts Receivable - ' . $saleOrder->customer->name,
-                    'debit' => $saleOrder->total_amount,
+                    'debit' => $saleOrder->total,
                     'credit' => 0,
                     'customer_id' => $saleOrder->customer_id,
                 ]);
@@ -123,15 +123,15 @@ class AccountingService
                     'chart_of_account_id' => $salesRevenue->id,
                     'description' => 'Sales Revenue - ' . $saleOrder->order_number,
                     'debit' => 0,
-                    'credit' => $saleOrder->total_amount,
+                    'credit' => $saleOrder->total,
                 ]);
                 $line->id = (string) Str::uuid();
                 $line->save();
 
                 // Calculate COGS
                 $totalCost = 0;
-                foreach ($saleOrder->productOrderLines as $line) {
-                    $totalCost += ($line->product->cost ?? 0) * $line->quantity;
+                foreach ($saleOrder->productLines as $line) {
+                    $totalCost += ($line->hpp ?? 0) * $line->qty;
                 }
 
                 // Debit COGS / Credit Inventory
@@ -175,7 +175,10 @@ class AccountingService
         try {
             $entry = DB::connection()->transaction(function () use ($data) {
                 // Get CoA IDs
-                $cash = ChartOfAccount::where('code', '1110')->first(); // Cash/Bank
+                $cashAccountId = $data['cash_account_id'] ?? $data['bank_account_id'] ?? null;
+                $cash = $cashAccountId
+                    ? ChartOfAccount::find($cashAccountId)
+                    : ChartOfAccount::where('code', '1110')->first(); // Cash/Bank
                 $accountsReceivable = ChartOfAccount::where('code', '1120')->first(); // A/R
 
                 if (!$cash || !$accountsReceivable) {
@@ -298,7 +301,10 @@ class AccountingService
             $entry = DB::connection()->transaction(function () use ($data) {
                 // Get CoA IDs
                 $accountsPayable = ChartOfAccount::where('code', '2110')->first(); // A/P
-                $cash = ChartOfAccount::where('code', '1110')->first(); // Cash/Bank
+                $cashAccountId = $data['cash_account_id'] ?? $data['bank_account_id'] ?? null;
+                $cash = $cashAccountId
+                    ? ChartOfAccount::find($cashAccountId)
+                    : ChartOfAccount::where('code', '1110')->first(); // Cash/Bank
 
                 if (!$cash || !$accountsPayable) {
                     throw new \Exception('Required chart of accounts not found');
@@ -416,7 +422,10 @@ class AccountingService
             $entry = DB::connection()->transaction(function () use ($data) {
                 // Get CoA IDs
                 $accountsPayable = ChartOfAccount::where('code', '2110')->first(); // A/P
-                $cash = ChartOfAccount::where('code', '1110')->first(); // Cash/Bank
+                $cashAccountId = $data['cash_account_id'] ?? $data['bank_account_id'] ?? null;
+                $cash = $cashAccountId
+                    ? ChartOfAccount::find($cashAccountId)
+                    : ChartOfAccount::where('code', '1110')->first(); // Cash/Bank
 
                 if (!$cash || !$accountsPayable) {
                     throw new \Exception('Required chart of accounts not found');

@@ -55,6 +55,7 @@ return array(
     'App\\Models\\Workorder' => $baseDir . '/app/Models/Workorder.php',
     'App\\Services\\AccountingService' => $baseDir . '/app/Services/AccountingService.php',
     'App\\Services\\AuthService' => $baseDir . '/app/Services/AuthService.php',
+    'App\\Services\\BankAccountService' => $baseDir . '/app/Services/BankAccountService.php',
     'App\\Services\\BrandService' => $baseDir . '/app/Services/BrandService.php',
     'App\\Services\\ChartOfAccountService' => $baseDir . '/app/Services/ChartOfAccountService.php',
     'App\\Services\\CheckListService' => $baseDir . '/app/Services/CheckListService.php',

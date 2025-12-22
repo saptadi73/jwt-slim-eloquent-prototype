@@ -25,10 +25,12 @@ use Ramsey\Uuid\Uuid as RamseyUuid;
 class SaleOrderService
 {
     private ProductStockService $productStockService;
+    private AccountingService $accountingService;
 
-    public function __construct(ProductStockService $productStockService)
+    public function __construct(ProductStockService $productStockService, AccountingService $accountingService)
     {
         $this->productStockService = $productStockService;
+        $this->accountingService = $accountingService;
     }
 
     public function createSaleOrder(Response $response, array $data)
@@ -199,9 +201,16 @@ class SaleOrderService
             $saleOrder->fill($data);
             $saleOrder->save();
 
-            // Jika status berubah ke 'confirmed', apply stock
+            // Jika status berubah ke 'confirmed', apply stock dan create journal
             if ($oldStatus != OrderStatus::Confirmed && $saleOrder->status == OrderStatus::Confirmed) {
                 $this->productStockService->applySaleOrder($saleOrder);
+                
+                // Create sales perpetual journal entry
+                $journalData = [
+                    'sale_order_id' => $saleOrder->id,
+                    'created_by' => $data['created_by'] ?? null
+                ];
+                $this->accountingService->createSalesPerpetualJournal($response, $journalData);
             }
 
             DB::commit();

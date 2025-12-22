@@ -327,6 +327,7 @@ class ComposerStaticInitc0d7893a557a5ce10d6810b5c1d421b6
         'App\\Models\\Workorder' => __DIR__ . '/../..' . '/app/Models/Workorder.php',
         'App\\Services\\AccountingService' => __DIR__ . '/../..' . '/app/Services/AccountingService.php',
         'App\\Services\\AuthService' => __DIR__ . '/../..' . '/app/Services/AuthService.php',
+        'App\\Services\\BankAccountService' => __DIR__ . '/../..' . '/app/Services/BankAccountService.php',
         'App\\Services\\BrandService' => __DIR__ . '/../..' . '/app/Services/BrandService.php',
         'App\\Services\\ChartOfAccountService' => __DIR__ . '/../..' . '/app/Services/ChartOfAccountService.php',
         'App\\Services\\CheckListService' => __DIR__ . '/../..' . '/app/Services/CheckListService.php',
