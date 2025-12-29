@@ -106,6 +106,18 @@ return function (App $app) {
             return $svc->createExpenseJournal($response, (array) $data);
         })->add(new JwtMiddleware());
 
+        // Create Expense Journal (Flexible account selection)
+        $accounting->post('/journals/journal-expense', function (Request $request, Response $response) use ($container) {
+            $data = json_decode($request->getBody()->getContents(), true) ?? [];
+            
+            if (!isset($data['expense_account_id']) || !isset($data['amount']) || !isset($data['entry_date'])) {
+                return JsonResponder::error($response, 'Required: expense_account_id, amount, entry_date', 400);
+            }
+
+            $svc = $container->get(AccountingService::class);
+            return $svc->createJournalExpense($response, (array) $data);
+        })->add(new JwtMiddleware());
+
         // Create Expense Payment Journal
         $accounting->post('/journals/expense-payment', function (Request $request, Response $response) use ($container) {
             $data = json_decode($request->getBody()->getContents(), true) ?? [];

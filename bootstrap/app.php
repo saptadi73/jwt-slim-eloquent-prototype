@@ -21,6 +21,7 @@ use App\Services\ServiceService;
 use App\Services\AccountingService;
 use App\Services\BankAccountService;
 use App\Services\ReportService;
+use App\Services\ExpenseService;
 use Dotenv\Dotenv;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -39,15 +40,15 @@ $pimple[SatuanService::class] = fn($c) => new SatuanService();
 $pimple[CustomerService::class] = fn($c) => new CustomerService();
 $pimple[WorkOrderService::class] = fn($c) => new WorkOrderService();
 $pimple[OrganisasiService::class] = fn($c) => new OrganisasiService();
-$pimple[PurchaseOrderService::class] = fn($c) => new PurchaseOrderService($pimple[ProductStockService::class]);
 $pimple[AccountingService::class] = fn($c) => new AccountingService();
+$pimple[PurchaseOrderService::class] = fn($c) => new PurchaseOrderService($pimple[ProductStockService::class], $pimple[AccountingService::class]);
 $pimple[SaleOrderService::class] = fn($c) => new SaleOrderService($pimple[ProductStockService::class], $pimple[AccountingService::class]);
 $pimple[ChartOfAccountService::class] = fn($c) => new ChartOfAccountService();
 $pimple[BankAccountService::class] = fn($c) => new BankAccountService();
 $pimple[VendorService::class] = fn($c) => new VendorService();
 $pimple[ServiceService::class] = fn($c) => new ServiceService();
-$pimple[AccountingService::class] = fn($c) => new AccountingService();
 $pimple[ReportService::class] = fn($c) => new ReportService();
+$pimple[ExpenseService::class] = fn($c) => new ExpenseService();
 // (opsional) $pimple[CorsMiddleware::class] = fn($c) => new CorsMiddleware();
 
 $container = new Psr11Container($pimple);

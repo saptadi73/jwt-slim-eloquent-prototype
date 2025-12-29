@@ -8,7 +8,7 @@ class Expense extends Model
     protected $table = 'expenses';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'tanggal','product_id','nomor','keterangan','jumlah','status','bukti','id'];
+        'tanggal','jenis','nomor','keterangan','jumlah','status','bukti','id'];
     protected $casts = [
         'tanggal' => 'date',
         'jumlah' => 'bigInteger',
@@ -16,6 +16,7 @@ class Expense extends Model
         'keterangan' =>'string',
         'bukti' => 'string',
         'nomor' => 'string',
+        'jenis' => 'string',
     ];
     protected $keyType = 'string';
     public $incrementing = false;   // UUID
@@ -23,10 +24,5 @@ class Expense extends Model
     public $timestamps = true;
 
     protected $dateFormat = 'Y-m-d H:i:s';
-
-    public function products()
-    {
-        return $this->belongsTo(Product::class, 'product_id');
-    }
 
 }

@@ -19,6 +19,12 @@ return function (App $app) {
             return $svc->getAll($response);
         });
 
+        // List expense type chart of accounts
+        $chartOfAccounts->get('/expenses', function (Request $request, Response $response) use ($container) {
+            $svc = $container->get(ChartOfAccountService::class);
+            return $svc->getExpenses($response);
+        });
+
         // Get chart of account by ID
         $chartOfAccounts->get('/{id}', function (Request $request, Response $response, array $args) use ($container) {
             $id = $args['id'];

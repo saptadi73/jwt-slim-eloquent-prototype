@@ -235,7 +235,7 @@ class AccountingService
     {
         try {
             $entry = DB::connection()->transaction(function () use ($data) {
-                $purchaseOrder = PurchaseOrder::with('vendor', 'purchaseOrderLines.product')->find($data['purchase_order_id']);
+                $purchaseOrder = PurchaseOrder::with('vendor', 'productLines.product')->find($data['purchase_order_id']);
                 
                 if (!$purchaseOrder) {
                     throw new \Exception('Purchase order not found');
@@ -265,7 +265,7 @@ class AccountingService
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $inventory->id,
                     'description' => 'Inventory Purchase - ' . $purchaseOrder->order_number,
-                    'debit' => $purchaseOrder->total_amount,
+                    'debit' => $purchaseOrder->total,
                     'credit' => 0,
                 ]);
                 $line->id = (string) Str::uuid();
@@ -276,7 +276,7 @@ class AccountingService
                     'chart_of_account_id' => $accountsPayable->id,
                     'description' => 'Accounts Payable - ' . $purchaseOrder->vendor->name,
                     'debit' => 0,
-                    'credit' => $purchaseOrder->total_amount,
+                    'credit' => $purchaseOrder->total,
                     'vendor_id' => $purchaseOrder->vendor_id,
                 ]);
                 $line->id = (string) Str::uuid();
@@ -300,14 +300,26 @@ class AccountingService
         try {
             $entry = DB::connection()->transaction(function () use ($data) {
                 // Get CoA IDs
-                $accountsPayable = ChartOfAccount::where('code', '2110')->first(); // A/P
+                // 2010 = Hutang Usaha (Accounts Payable) - preferred
+                // 2110 = Accounts Payable - fallback
+                // 1110 = Cash/Bank (default if not specified)
+                $accountsPayable = ChartOfAccount::where('code', '2010')->first();
+                
+                // Fallback to 2110 if 2010 doesn't exist
+                if (!$accountsPayable) {
+                    $accountsPayable = ChartOfAccount::where('code', '2110')->first();
+                }
+                
                 $cashAccountId = $data['cash_account_id'] ?? $data['bank_account_id'] ?? null;
                 $cash = $cashAccountId
                     ? ChartOfAccount::find($cashAccountId)
-                    : ChartOfAccount::where('code', '1110')->first(); // Cash/Bank
+                    : ChartOfAccount::where('code', '1110')->first(); // Cash/Bank default
 
-                if (!$cash || !$accountsPayable) {
-                    throw new \Exception('Required chart of accounts not found');
+                if (!$cash) {
+                    throw new \Exception('Required bank/cash account not found. Please provide valid cash_account_id or bank_account_id from frontend');
+                }
+                if (!$accountsPayable) {
+                    throw new \Exception('Required Accounts Payable account (2010 Hutang Usaha or 2110) not found');
                 }
 
                 // Create journal entry
@@ -333,13 +345,15 @@ class AccountingService
                 $line->id = (string) Str::uuid();
                 $line->save();
 
-                JournalLine::create([
+                $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $cash->id,
                     'description' => 'Cash payment - ' . ($data['description'] ?? ''),
                     'debit' => 0,
                     'credit' => $data['amount'],
                 ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
 
                 return $entry->load('journalLines.chartOfAccount');
             });
@@ -413,22 +427,106 @@ class AccountingService
     }
 
     /**
-     * Create expense payment journal
-     * Records payment of expenses
+     * Create journal for expenses with flexible account selection
+     * Allows selecting expense account from frontend
+     * Always uses 2030 (Hutang Perusahaan) for liability
      */
+    public function createJournalExpense(Response $response, array $data): Response
+    {
+        try {
+            $entry = DB::connection()->transaction(function () use ($data) {
+                // Validate required fields
+                if (!isset($data['expense_account_id']) || !isset($data['amount']) || !isset($data['entry_date'])) {
+                    throw new \Exception('Required fields: expense_account_id, amount, entry_date');
+                }
+
+                // Get CoA IDs
+                // Expense account from frontend (flexible)
+                $expenseAccount = ChartOfAccount::find($data['expense_account_id']);
+                if (!$expenseAccount) {
+                    throw new \Exception('Expense account not found');
+                }
+
+                // Hutang Perusahaan: try 2030 first, then fallback to 2010 (Hutang Usaha), then 2110 (A/P)
+                $liabilityAccount = ChartOfAccount::where('code', '2030')->first(); // Hutang Perusahaan
+                if (!$liabilityAccount) {
+                    $liabilityAccount = ChartOfAccount::where('code', '2010')->first(); // Hutang Usaha
+                }
+                if (!$liabilityAccount) {
+                    $liabilityAccount = ChartOfAccount::where('code', '2110')->first(); // Accounts Payable
+                }
+
+                if (!$liabilityAccount) {
+                    throw new \Exception('Required liability account (2030 Hutang Perusahaan, 2010 Hutang Usaha, or 2110 Accounts Payable) not found');
+                }
+
+                // Create journal entry
+                $entry = new JournalEntry([
+                    'entry_date' => $data['entry_date'],
+                    'reference_number' => $data['reference_number'] ?? 'EXP-' . date('YmdHis'),
+                    'description' => $data['description'] ?? 'Expense Journal',
+                    'status' => 'posted',
+                    'created_by' => $data['created_by'] ?? null,
+                ]);
+                $entry->id = (string) Str::uuid();
+                $entry->save();
+
+                // Debit Expense Account
+                $line = new JournalLine([
+                    'journal_entry_id' => $entry->id,
+                    'chart_of_account_id' => $expenseAccount->id,
+                    'description' => 'Expense: ' . ($data['description'] ?? ''),
+                    'debit' => $data['amount'],
+                    'credit' => 0,
+                ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
+
+                // Credit Liability Account (Hutang Perusahaan / Hutang Usaha)
+                $line = new JournalLine([
+                    'journal_entry_id' => $entry->id,
+                    'chart_of_account_id' => $liabilityAccount->id,
+                    'description' => 'Liability: ' . ($data['description'] ?? ''),
+                    'debit' => 0,
+                    'credit' => $data['amount'],
+                    'vendor_id' => $data['vendor_id'] ?? null,
+                ]);
+                $line->id = (string) Str::uuid();
+                $line->save();
+
+                return $entry->load('journalLines.chartOfAccount');
+            });
+
+            return JsonResponder::success($response, $entry, 'Expense journal created successfully', 201);
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to create expense journal: ' . $th->getMessage(), 500);
+        }
+    }
     public function createExpensePaymentJournal(Response $response, array $data): Response
     {
         try {
             $entry = DB::connection()->transaction(function () use ($data) {
                 // Get CoA IDs
-                $accountsPayable = ChartOfAccount::where('code', '2110')->first(); // A/P
+                // 2010 = Hutang Usaha (Accounts Payable) - preferred
+                // 2110 = Accounts Payable - fallback
+                // 1110 = Cash/Bank (default if not specified)
+                $accountsPayable = ChartOfAccount::where('code', '2010')->first();
+                
+                // Fallback to 2110 if 2010 doesn't exist
+                if (!$accountsPayable) {
+                    $accountsPayable = ChartOfAccount::where('code', '2110')->first();
+                }
+                
                 $cashAccountId = $data['cash_account_id'] ?? $data['bank_account_id'] ?? null;
                 $cash = $cashAccountId
                     ? ChartOfAccount::find($cashAccountId)
-                    : ChartOfAccount::where('code', '1110')->first(); // Cash/Bank
+                    : ChartOfAccount::where('code', '1110')->first(); // Cash/Bank default
 
-                if (!$cash || !$accountsPayable) {
-                    throw new \Exception('Required chart of accounts not found');
+                if (!$cash) {
+                    throw new \Exception('Required bank/cash account not found. Please provide valid cash_account_id or bank_account_id from frontend');
+                }
+                if (!$accountsPayable) {
+                    throw new \Exception('Required Accounts Payable account (2010 Hutang Usaha or 2110) not found');
                 }
 
                 // Create journal entry

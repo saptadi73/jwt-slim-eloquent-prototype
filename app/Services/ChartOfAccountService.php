@@ -39,6 +39,19 @@ class ChartOfAccountService
     }
 
     /**
+     * Get all expense-type chart of accounts
+     */
+    public function getExpenses(Response $response): Response
+    {
+        try {
+            $coas = ChartOfAccount::where('type', 'expense')->get()->toArray();
+            return JsonResponder::success($response, $coas, 'Expense chart of accounts retrieved successfully');
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to retrieve expense chart of accounts: ' . $th->getMessage(), 500);
+        }
+    }
+
+    /**
      * Create new chart of account
      */
     public function create(Response $response, array $data): Response

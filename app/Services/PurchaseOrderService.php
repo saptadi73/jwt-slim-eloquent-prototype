@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Enums\OrderStatus;
 use App\Models\PurchaseOrder;
 use App\Models\Vendor;
+use App\Models\JournalEntry;
+use App\Models\JournalLine;
+use App\Models\ChartOfAccount;
 use App\Services\ProductStockService;
 use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -18,10 +21,12 @@ use App\Models\Product as ProductModel;
 class PurchaseOrderService
 {
     private ProductStockService $productStockService;
+    private AccountingService $accountingService;
 
-    public function __construct(ProductStockService $productStockService)
+    public function __construct(ProductStockService $productStockService, AccountingService $accountingService)
     {
         $this->productStockService = $productStockService;
+        $this->accountingService = $accountingService;
     }
 
     public function createPurchaseOrder(Response $response, array $data)
@@ -115,22 +120,113 @@ class PurchaseOrderService
             if (!empty($errors)) {
                 return JsonResponder::badRequest($response, $errors);
             }
+            
             $oldStatus = $purchaseOrder->status;
             $purchaseOrder->update($data);
+            $newStatus = $purchaseOrder->status;
 
-            // Jika status berubah ke 'confirmed', apply stock
-            if ($oldStatus != OrderStatus::Confirmed && $purchaseOrder->status == OrderStatus::Confirmed) {
+            // Jika status berubah ke 'confirmed', apply stock dan create journal
+            $isStatusChangedToConfirmed = (
+                $oldStatus !== OrderStatus::Confirmed && 
+                $newStatus === OrderStatus::Confirmed
+            );
+            
+            if ($isStatusChangedToConfirmed) {
+                // Apply stock changes
                 $this->productStockService->applyPurchaseOrder($purchaseOrder);
+                
+                // Create purchase journal entry
+                try {
+                    $this->createPurchaseJournalForOrder($purchaseOrder, $data['created_by'] ?? null);
+                } catch (\Exception $journalException) {
+                    // Rollback transaction if journal creation fails
+                    DB::rollBack();
+                    return JsonResponder::error(
+                        $response, 
+                        'Purchase order updated but journal creation failed: ' . $journalException->getMessage(), 
+                        500
+                    );
+                }
             }
 
-            // Optionally handle updating purchase order lines here
-
             DB::commit();
-            return JsonResponder::success($response, $purchaseOrder);
+            $result = PurchaseOrder::with(['vendor', 'productLines.product'])->find($purchaseOrder->id);
+            return JsonResponder::success($response, $result, 'Purchase order updated successfully');
         } catch (\Throwable $th) {
             DB::rollBack();
-            return JsonResponder::error($response, $th);
+            return JsonResponder::error($response, $th->getMessage(), 500);
         }
+    }
+
+    /**
+     * Helper method to create purchase journal for a purchase order
+     */
+    private function createPurchaseJournalForOrder($purchaseOrder, $createdBy = null)
+    {
+        return DB::connection()->transaction(function () use ($purchaseOrder, $createdBy) {
+            $purchaseOrder = PurchaseOrder::with('vendor', 'productLines.product')->find($purchaseOrder->id);
+            
+            if (!$purchaseOrder) {
+                throw new \Exception('Purchase order not found');
+            }
+
+            // Get CoA IDs
+            // Get CoA IDs - try 2010 first (Hutang Usaha), then fallback to 2110
+            // 1130 = Persediaan (Inventory)
+            // 2010 = Hutang Usaha (Accounts Payable) - preferred
+            // 2110 = Accounts Payable - alternative
+            $inventory = ChartOfAccount::where('code', '1130')->first();
+            $accountsPayable = ChartOfAccount::where('code', '2010')->first();
+            
+            // Fallback to 2110 if 2010 doesn't exist
+            if (!$accountsPayable) {
+                $accountsPayable = ChartOfAccount::where('code', '2110')->first();
+            }
+
+            if (!$inventory || !$accountsPayable) {
+                if (!$inventory) {
+                    throw new \Exception('Required COA (1130 - Inventory) not found');
+                }
+                if (!$accountsPayable) {
+                    throw new \Exception('Required COA for Hutang Usaha (2010 or 2110) not found');
+                }
+            }
+
+            // Create journal entry
+            $entry = new JournalEntry([
+                'entry_date' => $purchaseOrder->order_date,
+                'reference_number' => 'PUR-' . $purchaseOrder->order_number,
+                'description' => 'Purchase Journal - ' . $purchaseOrder->vendor->name,
+                'status' => 'posted',
+                'created_by' => $createdBy,
+            ]);
+            $entry->id = (string) Str::uuid();
+            $entry->save();
+
+            // Debit Inventory / Credit Accounts Payable
+            $line = new JournalLine([
+                'journal_entry_id' => $entry->id,
+                'chart_of_account_id' => $inventory->id,
+                'description' => 'Inventory Purchase - ' . $purchaseOrder->order_number,
+                'debit' => $purchaseOrder->total,
+                'credit' => 0,
+            ]);
+            $line->id = (string) Str::uuid();
+            $line->save();
+
+            $line = new JournalLine([
+                'journal_entry_id' => $entry->id,
+                'chart_of_account_id' => $accountsPayable->id,
+                'description' => 'Accounts Payable - ' . $purchaseOrder->vendor->name,
+                'debit' => 0,
+                'credit' => $purchaseOrder->total,
+                'vendor_id' => $purchaseOrder->vendor_id,
+            ]);
+            $line->id = (string) Str::uuid();
+            $line->save();
+
+            return $entry->load('journalLines.chartOfAccount');
+        });
     }
 
     public function deletePurchaseOrder(Response $response, string $purchaseOrderID)

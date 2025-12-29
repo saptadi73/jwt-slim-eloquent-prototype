@@ -20,6 +20,7 @@ class PurchaseOrderLine extends Model
         'qty',
         'unit_price',
         'discount',
+        'tax',
         'line_total',
     ];
 
@@ -34,6 +35,7 @@ class PurchaseOrderLine extends Model
         'qty'         => 'decimal:2',
         'unit_price'  => 'decimal:2',
         'discount'    => 'decimal:2',
+        'tax'         => 'decimal:2',
         'line_total'  => 'decimal:2',
     ];
 

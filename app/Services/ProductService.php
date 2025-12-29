@@ -33,11 +33,27 @@ class ProductService
             } elseif (mb_strlen($data['nama']) > 191) {
                 $errors[] = 'Nama maksimal 191 karakter';
             }
-            if (isset($data['harga'])) {
+            
+            // Normalize decimal fields: convert empty string to null
+            if (isset($data['harga']) && $data['harga'] === '') {
+                $data['harga'] = null;
+            }
+            if (isset($data['hpp']) && $data['hpp'] === '') {
+                $data['hpp'] = null;
+            }
+            
+            if (isset($data['harga']) && $data['harga'] !== null) {
                 if (!is_numeric($data['harga'])) {
                     $errors[] = 'Harga harus numerik';
                 } elseif ((float)$data['harga'] < 0) {
                     $errors[] = 'Harga tidak boleh negatif';
+                }
+            }
+            if (isset($data['hpp']) && $data['hpp'] !== null) {
+                if (!is_numeric($data['hpp'])) {
+                    $errors[] = 'HPP harus numerik';
+                } elseif ((float)$data['hpp'] < 0) {
+                    $errors[] = 'HPP tidak boleh negatif';
                 }
             }
             // Optional FK validations if present
@@ -61,6 +77,20 @@ class ProductService
             if (isset($data['type']) && !isset($data['tipe'])) {
                 $data['tipe'] = $data['type'];
                 unset($data['type']);
+            }
+
+            // Remove empty object/array for gambar if present
+            if (isset($data['gambar']) && (is_array($data['gambar']) || is_object($data['gambar']))) {
+                unset($data['gambar']);
+            }
+
+            // Validasi dan set default untuk stok (integer field)
+            if (!isset($data['stok']) || $data['stok'] === '' || $data['stok'] === null) {
+                $data['stok'] = 0;
+            } elseif (!is_numeric($data['stok'])) {
+                return JsonResponder::badRequest($response, ['Stok harus berupa angka']);
+            } else {
+                $data['stok'] = (int) $data['stok'];
             }
 
             // Handle file upload
@@ -128,17 +158,36 @@ class ProductService
             $candidate = [
                 'nama'  => $data['nama']  ?? $product->nama,
                 'harga' => $data['harga'] ?? $product->harga,
+                'hpp'   => $data['hpp'] ?? $product->hpp,
             ];
+            
+            // Normalize decimal fields: convert empty string to null
+            if (isset($data['harga']) && $data['harga'] === '') {
+                $data['harga'] = null;
+                $candidate['harga'] = null;
+            }
+            if (isset($data['hpp']) && $data['hpp'] === '') {
+                $data['hpp'] = null;
+                $candidate['hpp'] = null;
+            }
+            
             $errors = [];
             if (empty($candidate['nama']) || !is_string($candidate['nama'])) {
                 $errors[] = 'Nama produk wajib diisi';
             } elseif (mb_strlen($candidate['nama']) > 191) {
                 $errors[] = 'Nama maksimal 191 karakter';
             }
-            if (!is_numeric($candidate['harga'])) {
+            if ($candidate['harga'] !== null && !is_numeric($candidate['harga'])) {
                 $errors[] = 'Harga harus numerik';
-            } elseif ((float)$candidate['harga'] < 0) {
+            } elseif ($candidate['harga'] !== null && (float)$candidate['harga'] < 0) {
                 $errors[] = 'Harga tidak boleh negatif';
+            }
+            if (isset($candidate['hpp']) && $candidate['hpp'] !== null) {
+                if (!is_numeric($candidate['hpp'])) {
+                    $errors[] = 'HPP harus numerik';
+                } elseif ((float)$candidate['hpp'] < 0) {
+                    $errors[] = 'HPP tidak boleh negatif';
+                }
             }
 
             // Optional FK validations if present
@@ -161,6 +210,22 @@ class ProductService
             if (isset($data['type']) && !isset($data['tipe'])) {
                 $data['tipe'] = $data['type'];
                 unset($data['type']);
+            }
+
+            // Remove empty object/array for gambar if present
+            if (isset($data['gambar']) && (is_array($data['gambar']) || is_object($data['gambar']))) {
+                unset($data['gambar']);
+            }
+
+            // Validasi dan set default untuk stok (integer field)
+            if (isset($data['stok'])) {
+                if ($data['stok'] === '' || $data['stok'] === null) {
+                    $data['stok'] = 0;
+                } elseif (!is_numeric($data['stok'])) {
+                    return JsonResponder::badRequest($response, ['Stok harus berupa angka']);
+                } else {
+                    $data['stok'] = (int) $data['stok'];
+                }
             }
 
             // Handle file upload
