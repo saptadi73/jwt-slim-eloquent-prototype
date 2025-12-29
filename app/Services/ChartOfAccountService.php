@@ -52,6 +52,19 @@ class ChartOfAccountService
     }
 
     /**
+     * Get all liability-type chart of accounts
+     */
+    public function getLiabilities(Response $response): Response
+    {
+        try {
+            $coas = ChartOfAccount::where('type', 'liability')->get()->toArray();
+            return JsonResponder::success($response, $coas, 'Liability chart of accounts retrieved successfully');
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to retrieve liability chart of accounts: ' . $th->getMessage(), 500);
+        }
+    }
+
+    /**
      * Create new chart of account
      */
     public function create(Response $response, array $data): Response

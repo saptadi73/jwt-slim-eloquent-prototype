@@ -11,7 +11,7 @@ class Expense extends Model
         'tanggal','jenis','nomor','keterangan','jumlah','status','bukti','id'];
     protected $casts = [
         'tanggal' => 'date',
-        'jumlah' => 'bigInteger',
+        'jumlah' => 'integer',
         'status' => 'string',
         'keterangan' =>'string',
         'bukti' => 'string',

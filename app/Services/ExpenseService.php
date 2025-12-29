@@ -93,6 +93,33 @@ class ExpenseService
                 return JsonResponder::badRequest($response, $errors);
             }
 
+            // Ensure jenis is present; try common aliases then default to "internal"
+            if (empty($data['jenis'])) {
+                $aliases = ['Jenis', 'type', 'tipe', 'expense_type', 'jenis_biaya'];
+                foreach ($aliases as $k) {
+                    if (!empty($data[$k])) {
+                        $data['jenis'] = (string) $data[$k];
+                        break;
+                    }
+                }
+                if (empty($data['jenis'])) {
+                    $data['jenis'] = 'internal';
+                }
+            } else {
+                $data['jenis'] = (string) $data['jenis'];
+            }
+
+            // Map deskripsi/notes to keterangan (table only has keterangan field)
+            if (empty($data['keterangan'])) {
+                if (!empty($data['deskripsi'])) {
+                    $data['keterangan'] = $data['deskripsi'];
+                } elseif (!empty($data['notes'])) {
+                    $data['keterangan'] = $data['notes'];
+                } elseif (!empty($data['description'])) {
+                    $data['keterangan'] = $data['description'];
+                }
+            }
+
             // Handle file upload for bukti (optional)
             if ($file) {
                 if ($file->getError() === UPLOAD_ERR_OK) {
@@ -125,6 +152,15 @@ class ExpenseService
             $expense = Expense::find($id);
             if (!$expense) {
                 return JsonResponder::error($response, 'Expense not found', 404);
+            }
+
+            // Map deskripsi/notes to keterangan (table only has keterangan field)
+            if (!empty($data['deskripsi']) && empty($data['keterangan'])) {
+                $data['keterangan'] = $data['deskripsi'];
+            } elseif (!empty($data['notes']) && empty($data['keterangan'])) {
+                $data['keterangan'] = $data['notes'];
+            } elseif (!empty($data['description']) && empty($data['keterangan'])) {
+                $data['keterangan'] = $data['description'];
             }
 
             // Handle file upload (replace existing bukti if new file provided)

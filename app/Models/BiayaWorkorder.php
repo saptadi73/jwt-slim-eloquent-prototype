@@ -12,9 +12,9 @@ class BiayaWorkorder extends Model
     protected $primaryKey = 'id';
     protected $fillable = ['jumlah','harga','total','workorder_id','product_id','id'];
     protected $casts = [
-        'jumlah' => 'bigInteger',
-        'harga' => 'bigInteger',
-        'total' => 'bigInteger',
+        'jumlah' => 'integer',
+        'harga' => 'integer',
+        'total' => 'integer',
     ];
     public $incrementing = false;   // UUID
 

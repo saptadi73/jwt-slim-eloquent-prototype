@@ -380,7 +380,14 @@ class AccountingService
 
                 // Get CoA IDs
                 $expenseAccount = ChartOfAccount::find($data['expense_account_id']);
-                $accountsPayable = ChartOfAccount::where('code', '2110')->first(); // A/P
+                // Try liability accounts: 2030 (preferred) -> 2010 -> 2020
+                $accountsPayable = ChartOfAccount::where('code', '2030')->first(); // Hutang Perusahaan
+                if (!$accountsPayable) {
+                    $accountsPayable = ChartOfAccount::where('code', '2010')->first(); // Hutang Usaha
+                }
+                if (!$accountsPayable) {
+                    $accountsPayable = ChartOfAccount::where('code', '2020')->first(); // Hutang Pihak Ketiga
+                }
 
                 if (!$expenseAccount || !$accountsPayable) {
                     throw new \Exception('Required chart of accounts not found');
@@ -388,9 +395,9 @@ class AccountingService
 
                 // Create journal entry
                 $entry = new JournalEntry([
-                    'entry_date' => $expense->expense_date,
+                    'entry_date' => $expense->tanggal,
                     'reference_number' => 'EXP-' . $expense->id,
-                    'description' => 'Expense Journal - ' . $expense->description,
+                    'description' => 'Expense Journal - ' . $expense->keterangan,
                     'status' => 'posted',
                     'created_by' => $data['created_by'] ?? null,
                 ]);
@@ -401,8 +408,8 @@ class AccountingService
                 $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $expenseAccount->id,
-                    'description' => 'Expense - ' . $expense->description,
-                    'debit' => $expense->amount,
+                    'description' => 'Expense - ' . $expense->keterangan,
+                    'debit' => $expense->jumlah,
                     'credit' => 0,
                 ]);
                 $line->id = (string) Str::uuid();
@@ -411,9 +418,9 @@ class AccountingService
                 $line = new JournalLine([
                     'journal_entry_id' => $entry->id,
                     'chart_of_account_id' => $accountsPayable->id,
-                    'description' => 'Accounts Payable - ' . $expense->description,
+                    'description' => 'Accounts Payable - ' . $expense->keterangan,
                     'debit' => 0,
-                    'credit' => $expense->amount,
+                    'credit' => $expense->jumlah,
                     'vendor_id' => $expense->vendor_id ?? null,
                 ]);
 
@@ -428,8 +435,7 @@ class AccountingService
 
     /**
      * Create journal for expenses with flexible account selection
-     * Allows selecting expense account from frontend
-     * Always uses 2030 (Hutang Perusahaan) for liability
+     * Allows selecting both expense account and liability account from frontend
      */
     public function createJournalExpense(Response $response, array $data): Response
     {
@@ -440,24 +446,36 @@ class AccountingService
                     throw new \Exception('Required fields: expense_account_id, amount, entry_date');
                 }
 
-                // Get CoA IDs
-                // Expense account from frontend (flexible)
+                // Get Expense Account from frontend
                 $expenseAccount = ChartOfAccount::find($data['expense_account_id']);
                 if (!$expenseAccount) {
                     throw new \Exception('Expense account not found');
                 }
 
-                // Hutang Perusahaan: try 2030 first, then fallback to 2010 (Hutang Usaha), then 2110 (A/P)
-                $liabilityAccount = ChartOfAccount::where('code', '2030')->first(); // Hutang Perusahaan
-                if (!$liabilityAccount) {
-                    $liabilityAccount = ChartOfAccount::where('code', '2010')->first(); // Hutang Usaha
-                }
-                if (!$liabilityAccount) {
-                    $liabilityAccount = ChartOfAccount::where('code', '2110')->first(); // Accounts Payable
-                }
-
-                if (!$liabilityAccount) {
-                    throw new \Exception('Required liability account (2030 Hutang Perusahaan, 2010 Hutang Usaha, or 2110 Accounts Payable) not found');
+                // Get Liability Account from frontend OR fallback to defaults
+                $liabilityAccount = null;
+                if (!empty($data['liability_account_id'])) {
+                    $liabilityAccount = ChartOfAccount::find($data['liability_account_id']);
+                    if (!$liabilityAccount) {
+                        throw new \Exception('Specified liability account ID not found');
+                    }
+                } else {
+                    // Fallback: try 2030 first, then 2010, then 2020
+                    $liabilityAccount = ChartOfAccount::where('code', '2030')->first(); // Hutang Perusahaan
+                    if (!$liabilityAccount) {
+                        $liabilityAccount = ChartOfAccount::where('code', '2010')->first(); // Hutang Usaha
+                    }
+                    if (!$liabilityAccount) {
+                        $liabilityAccount = ChartOfAccount::where('code', '2020')->first(); // Hutang Pihak Ketiga
+                    }
+                    if (!$liabilityAccount) {
+                        // Get available liability accounts for suggestion
+                        $availableLiability = ChartOfAccount::where('type', 'liability')->limit(5)->get(['id', 'code', 'name'])->toArray();
+                        $availableStr = count($availableLiability) > 0 
+                            ? 'Available: ' . implode(', ', array_map(fn($a) => $a['code'] . '-' . $a['name'], $availableLiability))
+                            : 'No liability accounts found in system';
+                        throw new \Exception('Liability account not found. Provide liability_account_id or create COA 2030/2010/2020. ' . $availableStr);
+                    }
                 }
 
                 // Create journal entry

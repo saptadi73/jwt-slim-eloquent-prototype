@@ -117,5 +117,53 @@ return function (App $app) {
                 ], 500);
             }
         });
+
+        // Create new biaya workorder
+        $biaya->post('', function (Request $req, Response $res) use ($container) {
+            try {
+                $svc = $container->get(ExpenseService::class);
+                $data = $req->getParsedBody() ?? [];
+                $files = $req->getUploadedFiles();
+                $fileBukti = $files['bukti'] ?? null;
+                return $svc->createBiayaWorkorder($res, $data, $fileBukti);
+            } catch (\Throwable $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
+
+        // Update biaya workorder
+        $biaya->put('/{id}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(ExpenseService::class);
+                $data = $req->getParsedBody() ?? [];
+                $files = $req->getUploadedFiles();
+                $fileBukti = $files['bukti'] ?? null;
+                return $svc->updateBiayaWorkorder($res, $args['id'], $data, $fileBukti);
+            } catch (\Throwable $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
+
+        // Delete biaya workorder
+        $biaya->delete('/{id}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(ExpenseService::class);
+                return $svc->deleteBiayaWorkorder($res, $args['id']);
+            } catch (\Throwable $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
     });
 };

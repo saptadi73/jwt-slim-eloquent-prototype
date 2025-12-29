@@ -29,7 +29,9 @@ final class Upload
         }
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mime  = strtolower($finfo->file($tmpPath) ?: $file->getClientMediaType());
+        $mime  = strtolower($finfo->file($tmpPath) ?: ($file->getClientMediaType() ?? ''));
+        // Normalize MIME: strip parameters like ";charset=binary"
+        $mime  = trim(explode(';', $mime)[0]);
 
         // Whitelist
         $allowed = [
@@ -37,11 +39,23 @@ final class Upload
             'image/png'  => 'png',
             'image/gif'  => 'gif',
             'image/webp' => 'webp',
+            'application/pdf' => 'pdf',
+            'application/x-pdf' => 'pdf',
         ];
-        if (!isset($allowed[$mime])) {
+        $ext = $allowed[$mime] ?? null;
+        if ($ext === null) {
+            // Fallback: some clients send application/octet-stream
+            if ($mime === 'application/octet-stream') {
+                $clientName = $file->getClientFilename() ?? '';
+                $clientExt  = strtolower(pathinfo($clientName, PATHINFO_EXTENSION) ?: '');
+                if ($clientExt === 'pdf') {
+                    $ext = 'pdf';
+                }
+            }
+        }
+        if ($ext === null) {
             throw new \RuntimeException('Invalid mime type: '.$mime);
         }
-        $ext = $allowed[$mime];
 
         // Base path publik (bisa dioverride via ENV)
         $publicRoot = rtrim($_ENV['PUBLIC_PATH'] ?? (dirname(__DIR__, 2).'/public'), '/\\');

@@ -3,11 +3,12 @@
 Dokumentasi singkat routes, auth, payload, dan contoh respons untuk resource `services`.
 
 ## Ringkasan Endpoints
+
 - Base path: `/services`
 - Auth: GET bebas; POST update/delete membutuhkan JWT (middleware `JwtMiddleware`).
 
 | Method | Path | Deskripsi | Auth |
-| --- | --- | --- | --- |
+|--------|------|-----------|------|
 | GET | /services | List semua service | Tidak |
 | GET | /services/{id} | Detail service berdasarkan ID (UUID) | Tidak |
 | POST | /services | Create service baru | Ya (JWT) |
@@ -15,7 +16,9 @@ Dokumentasi singkat routes, auth, payload, dan contoh respons untuk resource `se
 | POST | /services/delete/{id} | Hapus service | Ya (JWT) |
 
 ## Aturan Payload
+
 Field yang didukung sesuai validasi di `ServiceService`:
+
 - `nama` (string, wajib, max 191)
 - `harga` (numeric, wajib pada create; pada update boleh absen jika tidak diubah; nilai >= 0)
 - `deskripsi` (string, opsional)
@@ -25,10 +28,13 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ## Contoh Request/Response
 
 ### Create
+
 **Request**
+
 - Method: POST `/services`
 - Header: `Authorization: Bearer <token>`
 - Body (JSON):
+
 ```json
 {
   "nama": "Install AC Split 1PK",
@@ -38,6 +44,7 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ```
 
 **Response 200**
+
 ```json
 {
   "status": true,
@@ -53,6 +60,7 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ```
 
 **Response 400 (validasi gagal)**
+
 ```json
 {
   "status": false,
@@ -61,10 +69,13 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ```
 
 ### Get List
+
 **Request**
+
 - Method: GET `/services`
 
 **Response 200 (ringkas)**
+
 ```json
 {
   "status": true,
@@ -83,16 +94,21 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ```
 
 ### Get by ID
+
 **Request**
+
 - Method: GET `/services/{id}`
 
 **Response 200** sama format dengan get list (single object).
 
 ### Update
+
 **Request**
+
 - Method: POST `/services/update/{id}`
 - Header: `Authorization: Bearer <token>`
 - Body (JSON) contoh partial update:
+
 ```json
 {
   "harga": 500000,
@@ -101,6 +117,7 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ```
 
 **Response 200**
+
 ```json
 {
   "status": true,
@@ -116,6 +133,7 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ```
 
 **Response 400 (validasi gagal)**
+
 ```json
 {
   "status": false,
@@ -124,11 +142,14 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ```
 
 ### Delete
+
 **Request**
+
 - Method: POST `/services/delete/{id}`
 - Header: `Authorization: Bearer <token>`
 
 **Response 200**
+
 ```json
 {
   "status": true,
@@ -139,6 +160,7 @@ Field yang didukung sesuai validasi di `ServiceService`:
 ```
 
 ## Catatan
+
 - Semua respons mengikuti pola `JsonResponder` dengan kunci `status` (boolean) dan `data` atau `errors`.
 - Error lain (server/exception) dikirim dengan status code 500 dan payload dari `JsonResponder::error`.
 - GET endpoints tidak membutuhkan JWT sesuai konfigurasi route.
