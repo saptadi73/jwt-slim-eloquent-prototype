@@ -39,6 +39,14 @@
    - Field descriptions
    - Best practices
 
+3. **[REPORTS_API.md](REPORTS_API.md)** ← Financial Reports
+   - Cash Book
+   - Profit & Loss
+   - Balance Sheet
+   - Aged Ledger
+   - General Ledger
+   - Trial Balance
+
 ---
 
 ## 📖 Complete Documentation Guide
@@ -204,6 +212,9 @@
 ### "I need the complete API reference"
 → Use: [docs/ACCOUNTING_API.md](docs/ACCOUNTING_API.md)
 
+### "I need financial reports documentation"
+→ Use: [REPORTS_API.md](REPORTS_API.md)
+
 ### "I need to set up the system"
 → Read: [docs/ACCOUNTING_QUICK_REFERENCE.md](docs/ACCOUNTING_QUICK_REFERENCE.md)
 
@@ -225,6 +236,9 @@
 ### "I want best practices"
 → Read: [docs/ACCOUNTING_API.md](docs/ACCOUNTING_API.md#best-practices)
 
+### "I need financial reports"
+→ See: [REPORTS_API.md](REPORTS_API.md)
+
 ---
 
 ## 📊 Documentation Statistics
@@ -239,7 +253,8 @@
 | API_EXAMPLES.md | 10 | 2,000 | Developers |
 | FILES_MANIFEST.md | 6 | 1,500 | IT Staff |
 | ACCOUNTING_COMPLETE.md | 12 | 3,000 | Managers |
-| **TOTAL** | **87 pages** | **27,500 words** | |
+| REPORTS_API.md | 15 | 5,000 | Developers |
+| **TOTAL** | **102 pages** | **32,500 words** | |
 
 ---
 
@@ -305,7 +320,7 @@ See: [docs/ACCOUNTING_QUICK_REFERENCE.md#1-create-a-chart-of-account](docs/ACCOU
 See: [docs/API_EXAMPLES.md#-create-journal-entries](docs/API_EXAMPLES.md#-create-journal-entries)
 
 ### Running Reports
-See: [docs/ACCOUNTING_API.md#financial-reports](docs/ACCOUNTING_API.md#financial-reports)
+See: [REPORTS_API.md](REPORTS_API.md)
 
 ### API Reference
 See: [docs/ACCOUNTING_API.md#table-of-contents](docs/ACCOUNTING_API.md#table-of-contents)
@@ -342,6 +357,7 @@ See: [docs/ACCOUNTING_API.md#best-practices](docs/ACCOUNTING_API.md#best-practic
 - [x] Completion report (COMPLETION_REPORT.md)
 - [x] Documentation index (this file)
 - [x] Sample data (chart_of_accounts_seed.php)
+- [x] Financial reports documentation (REPORTS_API.md)
 
 ---
 
@@ -355,6 +371,6 @@ Happy Accounting! 📊💰
 
 ---
 
-**Last Updated:** December 21, 2025  
-**Version:** 1.0  
-**Status:** Complete  
+**Last Updated:** December 30, 2025  
+**Version:** 1.1  
+**Status:** Complete + Financial Reports  

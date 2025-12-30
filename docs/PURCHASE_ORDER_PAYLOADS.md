@@ -304,8 +304,30 @@ GET /orders/purchase
 ### Important Notes
 
 - Semua field bersifat optional, hanya field yang dikirim yang akan diupdate
-- Jika status berubah dari selain `"confirmed"` menjadi `"confirmed"`, sistem akan otomatis apply stock (menambah stok produk)
+- Jika status berubah dari selain `"confirmed"` menjadi `"confirmed"`, sistem akan otomatis:
+  - **Apply stock** (menambah stok produk)
+  - **Calculate average cost (HPP)** menggunakan weighted average method
+  - **Create journal entry** (Debit: Inventory, Credit: Accounts Payable)
 - Status yang valid: `"draft"`, `"confirmed"`, `"paid"`, `"cancelled"`
+
+### Automatic HPP Calculation
+
+Ketika Purchase Order dikonfirmasi (status → `"confirmed"`), sistem otomatis menghitung HPP (Harga Pokok Pembelian) dengan **Weighted Average Cost Method**:
+
+**Formula:**
+```
+New HPP = (Old Stock × Old HPP + Purchase Qty × Purchase Price) / Total Stock
+```
+
+**Contoh:**
+- Stok lama: 10 unit @ HPP Rp 100.000 = Rp 1.000.000
+- Pembelian baru: 5 unit @ Rp 120.000 = Rp 600.000
+- **HPP baru: (1.000.000 + 600.000) / 15 = Rp 106.667**
+
+Sistem akan:
+1. Update field `hpp` di tabel `products` otomatis
+2. Catat perubahan HPP di `product_move_histories`
+3. Simpan history calculation di note field
 
 ### Example Response
 
@@ -636,17 +658,27 @@ curl -X POST http://localhost/orders/add/purchase/product-lines/uuid-purchase-or
 
 4. **JWT Token**: Endpoint yang memerlukan autentikasi harus menyertakan JWT token di header `Authorization: Bearer YOUR_TOKEN`
 
-5. **Stock Management**: Ketika status berubah menjadi `"confirmed"`, sistem akan otomatis menambah stok produk yang ada di product_lines (berbeda dengan Sale Order yang mengurangi stok)
+5. **Stock Management**: Ketika status berubah menjadi `"confirmed"`, sistem akan otomatis:
+   - Menambah stok produk yang ada di product_lines (berbeda dengan Sale Order yang mengurangi stok)
+   - **Calculate HPP (Harga Pokok Pembelian)** menggunakan weighted average cost method
+   - Update field `hpp` di tabel `products` secara otomatis
+   - Catat history perubahan HPP di `product_move_histories`
 
-6. **Transaction**: Semua operasi create/update/delete menggunakan database transaction untuk menjaga konsistensi data
+6. **HPP Calculation**: Sistem menggunakan **Weighted Average Cost Method** untuk menghitung HPP. Formula: `New HPP = (Old Stock × Old HPP + Purchase Qty × Purchase Price) / Total Stock`. Perhitungan dilakukan otomatis saat status berubah ke `"confirmed"`.
 
-7. **Validation**: Pastikan vendor_id dan product_id yang digunakan sudah ada di database
+7. **Transaction**: Semua operasi create/update/delete menggunakan database transaction untuk menjaga konsistensi data
 
-8. **Line Total Calculation**: Sebaiknya line_total dihitung di client side dengan formula: `(qty × unit_price) - discount`
+8. **Validation**: Pastikan vendor_id dan product_id yang digunakan sudah ada di database
 
-9. **No Service Lines**: Purchase Order hanya mendukung Product Lines, tidak ada Service Lines (berbeda dengan Sale Order)
+9. **Line Total Calculation**: Sebaiknya line_total dihitung di client side dengan formula: `(qty × unit_price) - discount`
 
-10. **Authentication Differences**:
+10. **No Service Lines**: Purchase Order hanya mendukung Product Lines, tidak ada Service Lines (berbeda dengan Sale Order)
+
+11. **Authentication Differences**:
     - Create Purchase Order: Tidak perlu JWT
     - Update/Delete Purchase Order: Perlu JWT
     - Create Sale Order: Perlu JWT
+
+12. **Accounting Integration**: Saat status `"confirmed"`, sistem otomatis membuat journal entry dengan COA:
+    - Debit: 1130 - Persediaan (Inventory)
+    - Credit: 2010 - Hutang Usaha (Accounts Payable) atau 2110 sebagai fallback

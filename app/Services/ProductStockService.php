@@ -52,6 +52,7 @@ class ProductStockService
     /**
      * Tambah stok dari satu baris purchase order line
      * Menyimpan qty positif (+$line->qty)
+     * Menghitung average cost (HPP) otomatis menggunakan weighted average method
      */
     protected function increaseFromPurchaseLine(PurchaseOrderLine $line, PurchaseOrder $order): void
     {
@@ -64,6 +65,19 @@ class ProductStockService
         $stockBefore = $this->calculateStock($product);
         $qty = (float) $line->qty; // qty positif untuk pembelian
         $stockAfter = $stockBefore + $qty;
+
+        // Calculate new average cost (HPP) using weighted average method
+        $oldHpp = (float) ($product->hpp ?? 0);
+        $purchasePrice = (float) $line->unit_price;
+        
+        if ($stockAfter > 0) {
+            // Weighted Average Formula: 
+            // New HPP = (Old Stock * Old HPP + Purchase Qty * Purchase Price) / Total Stock
+            $newHpp = (($stockBefore * $oldHpp) + ($qty * $purchasePrice)) / $stockAfter;
+        } else {
+            // Jika stok after tetap 0 atau negatif (edge case), gunakan purchase price
+            $newHpp = $purchasePrice;
+        }
 
         $now = Carbon::now();
 
@@ -78,11 +92,17 @@ class ProductStockService
             'source_id'       => $line->id,
             'source_order_id' => $order->id,
             'move_date'       => $now,
-            'note'            => 'Purchase order ' . ($order->order_number ?? ''),
+            'note'            => sprintf(
+                'Purchase order %s | HPP: %s -> %s', 
+                $order->order_number ?? '',
+                number_format($oldHpp, 2),
+                number_format($newHpp, 2)
+            ),
         ]);
 
-        // Update stok produk berdasarkan sum histories
+        // Update stok dan HPP produk
         $product->stok = $this->calculateStock($product);
+        $product->hpp = round($newHpp, 2); // Round to 2 decimal places
         $product->save();
     }
 
