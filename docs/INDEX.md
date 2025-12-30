@@ -47,6 +47,13 @@
    - General Ledger
    - Trial Balance
 
+4. **[EMPLOYEE_API.md](EMPLOYEE_API.md)** ← Pegawai & Group Management
+   - Groups management
+   - Pegawai CRUD
+   - Signature management
+   - Time off tracking
+   - Attendance tracking
+
 ---
 
 ## 📖 Complete Documentation Guide
@@ -254,7 +261,9 @@
 | FILES_MANIFEST.md | 6 | 1,500 | IT Staff |
 | ACCOUNTING_COMPLETE.md | 12 | 3,000 | Managers |
 | REPORTS_API.md | 15 | 5,000 | Developers |
-| **TOTAL** | **102 pages** | **32,500 words** | |
+| EMPLOYEE_API.md | 25 | 8,000 | Developers |
+| PEGAWAI_GROUPS_SIGNATURE_INTEGRATION.md | 10 | 2,500 | Developers |
+| **TOTAL** | **137 pages** | **43,000 words** | |
 
 ---
 

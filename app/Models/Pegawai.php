@@ -3,19 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+
 class Pegawai extends Model
 {
-
     protected $table = 'pegawai';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama','alamat','hp','departemen_id','group_id','email','id','tanda_tangan'];
+    protected $fillable = ['id', 'nama', 'alamat', 'hp', 'email', 'departemen_id', 'group_id', 'position_id', 'url_foto', 'tanda_tangan', 'hire_date', 'is_active'];
 
     protected $keyType = 'string';
-    public $incrementing = false;   // UUID
+    public $incrementing = false;
 
     public $timestamps = true;
 
     protected $dateFormat = 'Y-m-d H:i:s';
+
+    protected $casts = [
+        'hire_date' => 'date',
+        'is_active' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
+    ];
 
     public function departemen()
     {
@@ -25,6 +32,11 @@ class Pegawai extends Model
     public function group()
     {
         return $this->belongsTo(Group::class, 'group_id');
+    }
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class, 'position_id');
     }
 
     public function absensi()
@@ -55,5 +67,25 @@ class Pegawai extends Model
     public function jatahCuti()
     {
         return $this->hasMany(JatahCuti::class, 'pegawai_id');
+    }
+
+    public function tandaTangan()
+    {
+        return $this->hasMany(TandaTangan::class, 'pegawai_id');
+    }
+
+    public function timeOffs()
+    {
+        return $this->hasMany(TimeOff::class, 'pegawai_id');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'pegawai_id');
+    }
+
+    public function workorders()
+    {
+        return $this->hasMany(Workorder::class, 'pegawai_id');
     }
 }

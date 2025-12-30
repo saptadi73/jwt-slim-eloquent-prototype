@@ -19,4 +19,11 @@ return function (App $app) {
     (require __DIR__ . '/services.php')($app);
     (require __DIR__ . '/expenses.php')($app);
     (require __DIR__ . '/reports.php')($app);
+    (require __DIR__ . '/positions.php')($app);
+    (require __DIR__ . '/departments.php')($app);
+    (require __DIR__ . '/groups.php')($app);
+    (require __DIR__ . '/pegawai.php')($app);
+    (require __DIR__ . '/timeoffs.php')($app);
+    (require __DIR__ . '/attendances.php')($app);
+    (require __DIR__ . '/tanda_tangan.php')($app);
 };
