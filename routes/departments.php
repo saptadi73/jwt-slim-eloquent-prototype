@@ -7,6 +7,11 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 return function ($app) {
     $departmentService = new DepartmentService();
 
+    // Get all departments with employee count (summary)
+    $app->get('/api/departments/summary/count', function (Request $request, Response $response) use ($departmentService) {
+        return $departmentService->getDepartmentsWithCount($response);
+    });
+
     // Get all departments
     $app->get('/api/departments', function (Request $request, Response $response) use ($departmentService) {
         $params = $request->getQueryParams();

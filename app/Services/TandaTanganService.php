@@ -4,62 +4,47 @@ namespace App\Services;
 
 use App\Models\TandaTangan;
 use Psr\Http\Message\UploadedFileInterface;
-use Illuminate\Support\Str;
 
 class TandaTanganService
 {
     public function getAll($page = 1, $limit = 10)
     {
-        return TandaTangan::paginate($limit, ['*'], 'page', $page);
+        return TandaTangan::with('pegawai:id,nama,departemen_id,position_id')
+            ->paginate($limit, ['*'], 'page', $page);
     }
 
     public function getById($id)
     {
-        return TandaTangan::findOrFail($id);
+        return TandaTangan::with('pegawai:id,nama,departemen_id,position_id')
+            ->findOrFail($id);
     }
 
-    public function getByPegawaiId($pegawaiId, $page = 1, $limit = 10)
+    public function store(UploadedFileInterface $file)
     {
-        return TandaTangan::where('pegawai_id', $pegawaiId)
-            ->paginate($limit, ['*'], 'page', $page);
-    }
-
-    public function store($data, ?UploadedFileInterface $file = null)
-    {
-        $urlTandaTangan = null;
-
-        if ($file !== null) {
-            $urlTandaTangan = $this->handleSignatureUpload($file);
-        }
+        $urlTandaTangan = $this->handleSignatureUpload($file);
 
         return TandaTangan::create([
-            'pegawai_id' => $data['pegawai_id'],
             'url_tanda_tangan' => $urlTandaTangan,
-            'deskripsi' => $data['deskripsi'] ?? null,
         ]);
     }
 
-    public function update($id, $data, ?UploadedFileInterface $file = null)
+    public function update($id, ?UploadedFileInterface $file = null)
     {
         $tandaTangan = TandaTangan::findOrFail($id);
-
-        $urlTandaTangan = $tandaTangan->url_tanda_tangan;
 
         if ($file !== null) {
             // Delete old signature if exists
             if ($tandaTangan->url_tanda_tangan) {
                 $this->deleteSignature($tandaTangan->url_tanda_tangan);
             }
+            
             $urlTandaTangan = $this->handleSignatureUpload($file);
+            $tandaTangan->update([
+                'url_tanda_tangan' => $urlTandaTangan,
+            ]);
         }
 
-        $tandaTangan->update([
-            'pegawai_id' => $data['pegawai_id'] ?? $tandaTangan->pegawai_id,
-            'url_tanda_tangan' => $urlTandaTangan,
-            'deskripsi' => $data['deskripsi'] ?? $tandaTangan->deskripsi,
-        ]);
-
-        return $tandaTangan;
+        return $tandaTangan->fresh();
     }
 
     public function delete($id)

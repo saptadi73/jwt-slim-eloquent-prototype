@@ -397,6 +397,54 @@ DELETE /api/positions/{id}
 
 API untuk mengelola data departemen.
 
+### Departments Summary with Count Endpoint
+
+Endpoint untuk mendapatkan jumlah karyawan per departemen (grouped by departemen).
+
+```text
+GET /api/departments/summary/count
+```
+
+### Departments Summary Request Example
+
+```bash
+curl -X GET "http://localhost:8080/api/departments/summary/count" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### Departments Summary Response Example
+
+```json
+{
+  "status": true,
+  "message": "Departments with employee count retrieved successfully",
+  "data": [
+    {
+      "id": "#dfe75975-2fb8-4233-a35e-f27632d8f5bd",
+      "nama": "Finance",
+      "jumlah_karyawan": 1
+    },
+    {
+      "id": "#ee9ba10e-36ee-4446-b36f-49014f949793",
+      "nama": "HRD",
+      "jumlah_karyawan": 1
+    },
+    {
+      "id": "#d1ee2662-99f0-4ac1-ba52-b5c14990af38",
+      "nama": "Teknisi",
+      "jumlah_karyawan": 8
+    },
+    {
+      "id": "#b0e8d3cd-e102-4a03-821e-75b5b391d870",
+      "nama": "Sales/Marketing",
+      "jumlah_karyawan": 0
+    }
+  ]
+}
+```
+
+---
+
 ### Departments List Endpoint
 
 ```text
@@ -413,7 +461,7 @@ GET /api/departments
 ### Departments List Request Example
 
 ```bash
-curl -X GET "http://localhost:8000/api/departments?is_active=true" \
+curl -X GET "http://localhost:8080/api/departments?is_active=true" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -421,26 +469,22 @@ curl -X GET "http://localhost:8000/api/departments?is_active=true" \
 
 ```json
 {
-  "status": "success",
+  "status": true,
   "message": "Departments retrieved successfully",
   "data": [
     {
-      "id": 1,
-      "name": "Technical",
-      "description": "Departemen teknis lapangan",
-      "is_active": true,
-      "employees_count": 8,
-      "created_at": "2024-01-15T10:00:00.000000Z",
-      "updated_at": "2024-01-15T10:00:00.000000Z"
+      "id": "#d1ee2662-99f0-4ac1-ba52-b5c14990af38",
+      "nama": "Teknisi",
+      "created_at": "2025-09-14T01:03:24.000000Z",
+      "updated_at": "2025-09-14T01:03:24.000000Z",
+      "pegawai_count": 8
     },
     {
-      "id": 2,
-      "name": "Administration",
-      "description": "Departemen administrasi",
-      "is_active": true,
-      "employees_count": 3,
-      "created_at": "2024-01-15T10:00:00.000000Z",
-      "updated_at": "2024-01-15T10:00:00.000000Z"
+      "id": "#dfe75975-2fb8-4233-a35e-f27632d8f5bd",
+      "nama": "Finance",
+      "created_at": "2025-09-14T01:03:24.000000Z",
+      "updated_at": "2025-09-14T01:03:24.000000Z",
+      "pegawai_count": 1
     }
   ]
 }
@@ -462,9 +506,8 @@ POST /api/departments
 
 ```json
 {
-  "name": "Sales",
-  "description": "Departemen penjualan",
-  "is_active": true
+  "nama": "Sales",
+  "id": "unique-uuid-string"
 }
 ```
 
@@ -486,6 +529,8 @@ DELETE /api/departments/{id}
 
 API untuk mengelola data pegawai (karyawan).
 
+**Note:** Sejak update terbaru, pegawai dapat memiliki referensi ke tanda tangan melalui field `tanda_tangan_id` (relasi 1-to-1).
+
 ### Pegawai List Endpoint
 
 ```text
@@ -497,15 +542,35 @@ GET /api/pegawai      (alternative endpoint)
 
 | Parameter      | Type    | Required | Default | Description                        |
 |----------------|---------|----------|---------|------------------------------------|
-| department_id  | integer | No       | -       | Filter by department               |
-| position_id    | integer | No       | -       | Filter by position                 |
-| is_active      | boolean | No       | -       | Filter by active status            |
-| search         | string  | No       | -       | Search by name or email            |
+| page           | integer | No       | 1       | Page number for pagination         |
+| limit          | integer | No       | 10      | Items per page                     |
+| department_id  | string  | No       | -       | Filter by department UUID          |
+| group_id       | string  | No       | -       | Filter by group UUID               |
+| position_id    | string  | No       | -       | Filter by position UUID            |
+| is_active      | boolean | No       | -       | Filter by active status (true/false) |
+| search         | string  | No       | -       | Search by name (case insensitive)  |
 
 ### Pegawai List Request Example
 
 ```bash
-curl -X GET "http://localhost:8000/api/employees?department_id=1&search=ahmad" \
+# Get all pegawai with pagination
+curl -X GET "http://localhost:8080/api/pegawai?page=1&limit=10" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Filter by department
+curl -X GET "http://localhost:8080/api/pegawai?department_id=d1ee2662-99f0-4ac1-ba52-b5c14990af38" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Filter by group
+curl -X GET "http://localhost:8080/api/pegawai?group_id=6a620ea4-936f-4ab3-a945-512ad19cc774" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Search by name
+curl -X GET "http://localhost:8080/api/pegawai?search=andi" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Multiple filters
+curl -X GET "http://localhost:8080/api/pegawai?department_id=d1ee2662-99f0-4ac1-ba52-b5c14990af38&is_active=true&search=budi" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -513,34 +578,110 @@ curl -X GET "http://localhost:8000/api/employees?department_id=1&search=ahmad" \
 
 ```json
 {
-  "status": "success",
-  "message": "Pegawai retrieved successfully",
-  "data": [
-    {
-      "id": 1,
-      "name": "Ahmad Budi",
-      "address": "Jl. Raya No. 15, Jakarta",
-      "phone": "08123456789",
-      "department_id": 1,
-      "position_id": 1,
-      "email": "ahmad.budi@bengkel.com",
-      "url_photo": "/uploads/employees/emp_123456_photo.jpg",
-      "hire_date": "2024-01-01",
-      "is_active": true,
-      "created_at": "2024-01-15T10:00:00.000000Z",
-      "updated_at": "2024-01-15T10:00:00.000000Z",
-      "department": {
-        "id": 1,
-        "name": "Technical"
-      },
-      "position": {
-        "id": 1,
-        "name": "Teknisi AC"
+  "status": true,
+  "message": "Success",
+  "data": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": "32099271-b7d1-4b70-8597-a22b129c9741",
+        "nama": "Andi Setiawan",
+        "alamat": "Jl. Andi No. 1",
+        "hp": "081234567890",
+        "email": "andi@example.com",
+        "departemen_id": "d1ee2662-99f0-4ac1-ba52-b5c14990af38",
+        "group_id": "6a620ea4-936f-4ab3-a945-512ad19cc774",
+        "position_id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+        "tanda_tangan_id": 1,
+        "url_foto": "uploads/pegawai/cowok1.jpg",
+        "tanda_tangan": null,
+        "hire_date": null,
+        "is_active": true,
+        "created_at": "2025-09-14T02:43:07.000000Z",
+        "updated_at": "2025-09-14T02:43:07.000000Z",
+        "departemen": {
+          "id": "d1ee2662-99f0-4ac1-ba52-b5c14990af38",
+          "nama": "Teknisi",
+          "created_at": "2025-09-14T01:03:24.000000Z",
+          "updated_at": "2025-09-14T01:03:24.000000Z"
+        },
+        "group": {
+          "id": "6a620ea4-936f-4ab3-a945-512ad19cc774",
+          "nama": "Teknisi Group A",
+          "created_at": "2025-09-14T01:03:12.000000Z",
+          "updated_at": "2025-09-14T01:03:12.000000Z"
+        },
+        "position": {
+          "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+          "nama": "Teknisi AC",
+          "created_at": "2025-09-14T01:03:20.000000Z",
+          "updated_at": "2025-09-14T01:03:20.000000Z"
+        },
+        "tandaTangan": {
+          "id": 1,
+          "url_tanda_tangan": "uploads/signatures/ttd1.png",
+          "created_at": "2025-12-31T04:14:51.968496Z",
+          "updated_at": "2025-12-31T04:40:32.279959Z"
+        }
       }
-    }
-  ]
+    ],
+    "first_page_url": "/api/pegawai?page=1",
+    "from": 1,
+    "last_page": 2,
+    "last_page_url": "/api/pegawai?page=2",
+    "links": [
+      {"url": null, "label": "Previous", "page": null, "active": false},
+      {"url": "/api/pegawai?page=1", "label": "1", "page": 1, "active": true},
+      {"url": "/api/pegawai?page=2", "label": "2", "page": 2, "active": false},
+      {"url": "/api/pegawai?page=2", "label": "Next", "page": 2, "active": false}
+    ],
+    "next_page_url": "/api/pegawai?page=2",
+    "path": "/api/pegawai",
+    "per_page": 10,
+    "prev_page_url": null,
+    "to": 10,
+    "total": 11
+  }
 }
 ```
+
+**Response Structure:**
+- `status` (boolean) - Request status
+- `message` (string) - Response message
+- `data` (object) - Pagination object containing:
+  - `current_page` - Current page number
+  - `data` - Array of pegawai objects
+  - `total` - Total number of records
+  - `per_page` - Items per page (default: 10)
+  - `last_page` - Last page number
+  - `from` - Starting record number on current page
+  - `to` - Ending record number on current page
+  - `links` - Array of pagination links for UI navigation
+  - `next_page_url` - URL to next page (null if on last page)
+  - `prev_page_url` - URL to previous page (null if on first page)
+  - `first_page_url` - URL to first page
+  - `last_page_url` - URL to last page
+
+**Pagination Navigation:**
+
+```bash
+# Get page 2
+curl -X GET "http://localhost:8080/api/pegawai?page=2&limit=10" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Get page 3 with 20 items per page
+curl -X GET "http://localhost:8080/api/pegawai?page=3&limit=20" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Combine pagination with filters
+curl -X GET "http://localhost:8080/api/pegawai?page=1&limit=5&department_id=d1ee2662-99f0-4ac1-ba52-b5c14990af38" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Note:** 
+- Response includes relasi `position`, `departemen`, `group`, dan `tandaTangan` dengan nama field masing-masing untuk kemudahan frontend development.
+- Total 11 pegawai dengan `limit=10` akan menghasilkan 2 halaman (page 1: 10 records, page 2: 1 record)
+- Use `links` array untuk membuat pagination UI dengan Previous/Next buttons
 
 ### Get Employee Detail Endpoint
 
@@ -600,10 +741,13 @@ POST /api/pegawai
   "department_id": 1,
   "position_id": 1,
   "email": "ahmad.budi@bengkel.com",
+  "tanda_tangan_id": 5,
   "hire_date": "2024-01-01",
   "is_active": true
 }
 ```
+
+**Note:** Untuk menggunakan `tanda_tangan_id`, upload signature terlebih dahulu ke endpoint `/api/tanda-tangan`, kemudian gunakan ID yang diberikan.
 
 ### Create Employee with Photo and Signature Request (Multipart Form-Data)
 
@@ -616,10 +760,13 @@ Gunakan `multipart/form-data` dengan parameter:
 - `position_id` atau `position_id` (string, optional) - ID posisi
 - `email` (string, optional) - Email karyawan
 - `group_id` (string, optional) - ID grup karyawan
+- `tanda_tangan_id` (integer, optional) - ID tanda tangan (referensi ke tabel tanda_tangan)
 - `hire_date` (date, optional) - Tanggal hire
 - `is_active` (boolean, optional) - Status aktif
 - `url_foto` (file, optional) - File foto karyawan (PNG, JPG, GIF)
-- `tanda_tangan` (file, optional) - File tanda tangan (PNG, JPG, GIF)
+- `tanda_tangan` (file, optional) - File tanda tangan (PNG, JPG, GIF) - **Legacy support**
+
+**Recommended:** Upload signature ke `/api/tanda-tangan` terlebih dahulu, lalu gunakan `tanda_tangan_id`.
 
 ```bash
 curl -X POST "http://localhost:8000/api/pegawai" \
@@ -650,6 +797,7 @@ curl -X POST "http://localhost:8000/api/pegawai" \
     "group_id": "660e8400-e29b-41d4-a716-446655440001",
     "email": "ahmad.budi@bengkel.com",
     "url_foto": "/uploads/pegawai/emp_678901_photo.jpg",
+    "tanda_tangan_id": null,
     "tanda_tangan": "/uploads/signatures/sig_123abc_signature.png",
     "is_active": true,
     "created_at": "2024-12-30T10:00:00Z",
@@ -662,7 +810,7 @@ curl -X POST "http://localhost:8000/api/pegawai" \
       "id": "660e8400-e29b-41d4-a716-446655440001",
       "name": "Group A"
     },
-    "tandaTangan": []
+    "tandaTangan": null
   }
 }
 ```
@@ -696,7 +844,17 @@ DELETE /api/employees/{id}
 
 ## Employee Signatures
 
-API untuk mengelola tanda tangan digital pegawai. Fitur ini memungkinkan penyimpanan multiple signature files per pegawai.
+API untuk mengelola tanda tangan digital. Tanda tangan disimpan secara independen dan dapat direferensikan oleh pegawai melalui `pegawai.tanda_tangan_id`.
+
+**Architecture:**
+- Tabel `tanda_tangan` hanya berisi: `id`, `url_tanda_tangan`, `created_at`, `updated_at`
+- Relasi: Pegawai `belongsTo` TandaTangan via `tanda_tangan_id`
+- Satu signature dapat direferensikan oleh banyak pegawai (reusable)
+
+**Workflow:**
+1. Upload signature: `POST /api/tanda-tangan` → dapat signature ID
+2. Assign ke pegawai: `PUT /api/pegawai/{id}` dengan `tanda_tangan_id`
+3. Retrieve pegawai: Response include relasi `tandaTangan`
 
 ### Employee Signatures List Endpoint
 
@@ -727,12 +885,18 @@ curl -X GET "http://localhost:8000/api/tanda-tangan?page=1&limit=10" \
   "data": {
     "data": [
       {
-        "id": "550e8400-e29b-41d4-a716-446655440000",
-        "pegawai_id": "550e8400-e29b-41d4-a716-446655440001",
+        "id": 1,
         "url_tanda_tangan": "/uploads/signatures/sig_123abc_signature.png",
-        "deskripsi": "Tanda tangan digital utama",
         "created_at": "2025-12-30T10:00:00Z",
-        "updated_at": "2025-12-30T10:00:00Z"
+        "updated_at": "2025-12-30T10:00:00Z",
+        "pegawai": [
+          {
+            "id": "P001",
+            "nama": "Ahmad Budi",
+            "departemen_id": 1,
+            "position_id": 1
+          }
+        ]
       }
     ],
     "pagination": {
@@ -764,54 +928,40 @@ curl -X GET "http://localhost:8000/api/tanda-tangan/550e8400-e29b-41d4-a716-4466
   "status": "success",
   "message": "Success",
   "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "pegawai_id": "550e8400-e29b-41d4-a716-446655440001",
+    "id": 1,
     "url_tanda_tangan": "/uploads/signatures/sig_123abc_signature.png",
-    "deskripsi": "Tanda tangan digital utama",
     "created_at": "2025-12-30T10:00:00Z",
-    "updated_at": "2025-12-30T10:00:00Z"
+    "updated_at": "2025-12-30T10:00:00Z",
+    "pegawai": [
+      {
+        "id": "P001",
+        "nama": "Ahmad Budi"
+      }
+    ]
   }
 }
 ```
 
-### Get Tanda Tangan by Pegawai ID Endpoint
+**Note:** Field `pegawai` menunjukkan pegawai yang menggunakan signature ini.
 
-```text
-GET /api/pegawai/{pegawaiId}/tanda-tangan
-```
+---
 
-### Get Tanda Tangan by Pegawai ID Request Example
+### ~~Get Tanda Tangan by Pegawai ID Endpoint~~ [DEPRECATED]
+
+**⚠️ DEPRECATED:** Endpoint ini sudah tidak digunakan karena perubahan struktur relasi.
+
+**Alternative:** Gunakan `GET /api/pegawai/{id}` untuk mendapatkan pegawai beserta relasi `tandaTangan`.
 
 ```bash
-curl -X GET "http://localhost:8000/api/pegawai/550e8400-e29b-41d4-a716-446655440001/tanda-tangan" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+# Old way (deprecated):
+GET /api/pegawai/{pegawaiId}/tanda-tangan
+
+# New way (recommended):
+GET /api/pegawai/{id}
+# Response akan include field: tandaTangan { id, url_tanda_tangan }
 ```
 
-### Get Employee Signatures by Employee ID Response Example
-
-```json
-{
-  "status": "success",
-  "message": "Success",
-  "data": {
-    "data": [
-      {
-        "id": "550e8400-e29b-41d4-a716-446655440000",
-        "pegawai_id": "550e8400-e29b-41d4-a716-446655440001",
-        "url_tanda_tangan": "/uploads/signatures/sig_123abc_signature.png",
-        "deskripsi": "Tanda tangan digital utama",
-        "created_at": "2025-12-30T10:00:00Z",
-        "updated_at": "2025-12-30T10:00:00Z"
-      }
-    ],
-    "pagination": {
-      "current_page": 1,
-      "total": 1,
-      "per_page": 10
-    }
-  }
-}
-```
+---
 
 ### Create Employee Signature Endpoint
 
@@ -823,17 +973,15 @@ POST /api/tanda-tangan
 
 Gunakan `multipart/form-data` dengan parameter:
 
-- `pegawai_id` (string, required) - ID karyawan
 - `tanda_tangan` (file, required) - File gambar tanda tangan (PNG, JPG, GIF)
-- `deskripsi` (string, optional) - Deskripsi tanda tangan
+
+**Note:** Field `pegawai_id` dan `deskripsi` sudah tidak digunakan. Signature disimpan secara independen.
 
 ### Create Employee Signature Request Example
 
 ```bash
 curl -X POST "http://localhost:8000/api/tanda-tangan" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -F "pegawai_id=550e8400-e29b-41d4-a716-446655440001" \
-  -F "deskripsi=Tanda tangan digital utama" \
   -F "tanda_tangan=@/path/to/signature.png"
 ```
 
@@ -844,14 +992,21 @@ curl -X POST "http://localhost:8000/api/tanda-tangan" \
   "status": "success",
   "message": "Signature created",
   "data": {
-    "id": "660e8400-e29b-41d4-a716-446655440002",
-    "pegawai_id": "550e8400-e29b-41d4-a716-446655440001",
+    "id": 15,
     "url_tanda_tangan": "/uploads/signatures/sig_654def_signature.png",
-    "deskripsi": "Tanda tangan digital utama",
     "created_at": "2025-12-30T10:15:00Z",
     "updated_at": "2025-12-30T10:15:00Z"
   }
 }
+```
+
+**Next Step:** Gunakan signature ID (15) untuk assign ke pegawai:
+
+```bash
+curl -X PUT "http://localhost:8000/api/pegawai/P001" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"tanda_tangan_id": 15}'
 ```
 
 ### Update Employee Signature Endpoint
@@ -864,16 +1019,15 @@ PUT /api/tanda-tangan/{id}
 
 Gunakan `multipart/form-data` dengan parameter:
 
-- `pegawai_id` (string, optional) - ID karyawan
 - `tanda_tangan` (file, optional) - File gambar tanda tangan baru
-- `deskripsi` (string, optional) - Deskripsi tanda tangan
+
+**Note:** Update hanya menerima file baru. File lama akan dihapus otomatis.
 
 ### Update Employee Signature Request Example
 
 ```bash
-curl -X PUT "http://localhost:8000/api/tanda-tangan/660e8400-e29b-41d4-a716-446655440002" \
+curl -X PUT "http://localhost:8000/api/tanda-tangan/15" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -F "deskripsi=Tanda tangan digital utama - updated" \
   -F "tanda_tangan=@/path/to/new_signature.png"
 ```
 
@@ -884,10 +1038,8 @@ curl -X PUT "http://localhost:8000/api/tanda-tangan/660e8400-e29b-41d4-a716-4466
   "status": "success",
   "message": "Signature updated",
   "data": {
-    "id": "660e8400-e29b-41d4-a716-446655440002",
-    "pegawai_id": "550e8400-e29b-41d4-a716-446655440001",
+    "id": 15,
     "url_tanda_tangan": "/uploads/signatures/sig_789ghi_signature.png",
-    "deskripsi": "Tanda tangan digital utama - updated",
     "created_at": "2025-12-30T10:15:00Z",
     "updated_at": "2025-12-30T10:20:00Z"
   }
@@ -903,7 +1055,7 @@ DELETE /api/tanda-tangan/{id}
 ### Delete Employee Signature Request Example
 
 ```bash
-curl -X DELETE "http://localhost:8000/api/tanda-tangan/660e8400-e29b-41d4-a716-446655440002" \
+curl -X DELETE "http://localhost:8000/api/tanda-tangan/15" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -913,18 +1065,76 @@ curl -X DELETE "http://localhost:8000/api/tanda-tangan/660e8400-e29b-41d4-a716-4
 {
   "status": "success",
   "message": "Signature deleted",
-  "data": null
+  "data": []
 }
+```
+
+**Note:** File signature akan dihapus otomatis dari server. Pegawai yang menggunakan signature ini akan memiliki `tanda_tangan_id = NULL`.
+
+---
+
+### Employee Signature Integration Workflow
+
+#### Workflow 1: Create Pegawai with Signature
+
+**Step 1:** Upload signature file
+```bash
+curl -X POST "http://localhost:8000/api/tanda-tangan" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "tanda_tangan=@signature.png"
+# Response: { "data": { "id": 15 } }
+```
+
+**Step 2:** Create pegawai with signature ID
+```bash
+curl -X POST "http://localhost:8000/api/pegawai" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nama": "Ahmad Budi",
+    "email": "ahmad@example.com",
+    "tanda_tangan_id": 15
+  }'
+```
+
+#### Workflow 2: Assign Signature to Existing Pegawai
+
+**Step 1:** Upload signature
+```bash
+POST /api/tanda-tangan
+# Response: { "data": { "id": 15 } }
+```
+
+**Step 2:** Update pegawai
+```bash
+curl -X PUT "http://localhost:8000/api/pegawai/P001" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"tanda_tangan_id": 15}'
+```
+
+#### Workflow 3: Legacy - Direct Upload (Backward Compatible)
+
+```bash
+curl -X POST "http://localhost:8000/api/pegawai" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "nama=Ahmad Budi" \
+  -F "tanda_tangan=@signature.png"
+# File tersimpan di pegawai.tanda_tangan (VARCHAR)
+# Tidak create record di tabel tanda_tangan
 ```
 
 ### Employee Signature Field Descriptions
 
-- `id` - Unique identifier untuk record tanda tangan
-- `pegawai_id` - Reference ke tabel pegawai
-- `url_tanda_tangan` - URL path ke file gambar tanda tangan
-- `deskripsi` - Deskripsi atau catatan untuk tanda tangan
+- `id` - Unique identifier untuk tanda tangan (INT, auto-increment)
+- `url_tanda_tangan` - URL path ke file gambar tanda tangan (VARCHAR 255)
 - `created_at` - Timestamp pembuatan record
 - `updated_at` - Timestamp update terakhir
+
+**Relasi:**
+- Pegawai dapat reference signature via `pegawai.tanda_tangan_id`
+- Satu signature dapat digunakan oleh banyak pegawai (reusable)
+- Eager load: `GET /api/pegawai/{id}` include relasi `tandaTangan`
 
 ---
 

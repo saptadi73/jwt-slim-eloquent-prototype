@@ -2,6 +2,7 @@
     "require": {
         "slim/slim": "^4.14",
         "illuminate/database": "^12.25",
+        "illuminate/pagination": "12.25",
         "slim/psr7": "^1.7",
         "firebase/php-jwt": "^6.11",
         "vlucas/phpdotenv": "^5.6",

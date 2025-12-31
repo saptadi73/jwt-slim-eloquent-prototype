@@ -11,10 +11,20 @@ return function ($app) {
     // GET all employees
     $app->get('/api/pegawai', function (Request $request, Response $response) use ($pegawaiService) {
         try {
-            $page = (int) ($request->getQueryParams()['page'] ?? 1);
-            $limit = (int) ($request->getQueryParams()['limit'] ?? 10);
+            $params = $request->getQueryParams();
+            $page = (int) ($params['page'] ?? 1);
+            $limit = (int) ($params['limit'] ?? 10);
+            
+            // Extract filters
+            $filters = [
+                'department_id' => $params['department_id'] ?? null,
+                'group_id' => $params['group_id'] ?? null,
+                'position_id' => $params['position_id'] ?? null,
+                'search' => $params['search'] ?? null,
+                'is_active' => $params['is_active'] ?? null,
+            ];
 
-            $pegawai = $pegawaiService->getAll($page, $limit);
+            $pegawai = $pegawaiService->getAll($page, $limit, $filters);
 
             return JsonResponder::success($response, $pegawai, 'Success', 200);
         } catch (\Exception $e) {

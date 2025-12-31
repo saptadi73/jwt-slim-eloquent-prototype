@@ -3,24 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class TandaTangan extends Model
 {
-    use HasUuids;
-
     protected $table = 'tanda_tangan';
-    protected $keyType = 'string';
-    public $incrementing = false;
+    protected $primaryKey = 'id';
+    protected $keyType = 'int';
+    public $incrementing = true;
 
     protected $fillable = [
-        'pegawai_id',
         'url_tanda_tangan',
-        'deskripsi',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
     public function pegawai()
     {
-        return $this->belongsTo(Pegawai::class, 'pegawai_id');
+        return $this->hasMany(Pegawai::class, 'tanda_tangan_id');
     }
 }

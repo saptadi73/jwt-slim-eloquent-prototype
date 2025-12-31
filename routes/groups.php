@@ -22,6 +22,16 @@ return function ($app) {
         }
     });
 
+    // GET active groups
+    $app->get('/api/groups/active', function (Request $request, Response $response) use ($groupService) {
+        try {
+            $groups = $groupService->getActive();
+            return JsonResponder::success($response, $groups, 'Success', 200);
+        } catch (\Exception $e) {
+            return JsonResponder::error($response, 500, $e->getMessage());
+        }
+    });
+
     // GET group by id
     $app->get('/api/groups/{id}', function (Request $request, Response $response, $args) use ($groupService) {
         try {
@@ -71,16 +81,6 @@ return function ($app) {
             return JsonResponder::success($response, [], 'Group deleted', 200);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return JsonResponder::error($response, 404, 'Group not found');
-        } catch (\Exception $e) {
-            return JsonResponder::error($response, 500, $e->getMessage());
-        }
-    });
-
-    // GET active groups
-    $app->get('/api/groups/active', function (Request $request, Response $response) use ($groupService) {
-        try {
-            $groups = $groupService->getActive();
-            return JsonResponder::success($response, $groups, 'Success', 200);
         } catch (\Exception $e) {
             return JsonResponder::error($response, 500, $e->getMessage());
         }

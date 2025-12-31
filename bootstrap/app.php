@@ -3,6 +3,7 @@ use Pimple\Container as PimpleContainer;
 use Pimple\Psr11\Container as Psr11Container;
 use Slim\Factory\AppFactory;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Pagination\Paginator;
 use App\Middlewares\CorsMiddleware;
 use App\Middlewares\MethodOverrideMiddleware;
 use App\Services\ChartOfAccountService;
@@ -88,6 +89,15 @@ $capsule->addConnection([
 ]);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
+
+// Setup Paginator untuk mendukung pagination di Eloquent
+Paginator::currentPathResolver(function () {
+    return isset($_SERVER['REQUEST_URI']) ? strtok($_SERVER['REQUEST_URI'], '?') : '/';
+});
+
+Paginator::currentPageResolver(function ($pageName = 'page') {
+    return isset($_GET[$pageName]) ? (int) $_GET[$pageName] : 1;
+});
 
 date_default_timezone_set($_ENV['APP_TZ'] ?? 'Asia/Jakarta');
 

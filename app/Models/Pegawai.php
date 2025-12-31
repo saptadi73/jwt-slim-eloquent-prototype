@@ -8,7 +8,7 @@ class Pegawai extends Model
 {
     protected $table = 'pegawai';
     protected $primaryKey = 'id';
-    protected $fillable = ['id', 'nama', 'alamat', 'hp', 'email', 'departemen_id', 'group_id', 'position_id', 'url_foto', 'tanda_tangan', 'hire_date', 'is_active'];
+    protected $fillable = ['id', 'nama', 'alamat', 'hp', 'email', 'departemen_id', 'group_id', 'position_id', 'url_foto', 'tanda_tangan_id', 'tanda_tangan', 'hire_date', 'is_active'];
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -71,7 +71,7 @@ class Pegawai extends Model
 
     public function tandaTangan()
     {
-        return $this->hasMany(TandaTangan::class, 'pegawai_id');
+        return $this->belongsTo(TandaTangan::class, 'tanda_tangan_id');
     }
 
     public function timeOffs()
