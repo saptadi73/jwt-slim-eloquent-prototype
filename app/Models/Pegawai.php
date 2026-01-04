@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Ramsey\Uuid\Uuid;
 
 class Pegawai extends Model
 {
@@ -23,6 +24,20 @@ class Pegawai extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+
+    /**
+     * Boot method to auto-generate UUID
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (!$model->id) {
+                $model->id = Uuid::uuid4()->toString();
+            }
+        });
+    }
 
     public function departemen()
     {

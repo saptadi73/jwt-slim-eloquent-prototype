@@ -61,24 +61,40 @@ class TandaTanganService
 
     public function handleSignatureUpload(UploadedFileInterface $file): string
     {
-        $uploadDir = 'public/uploads/signatures';
+        // Use absolute path like Upload utility
+        $publicRoot = rtrim($_ENV['PUBLIC_PATH'] ?? (dirname(__DIR__, 2) . '/public'), '/\\');
+        $uploadDir = $publicRoot . '/uploads/signatures';
 
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
-        $filename = 'sig_' . uniqid() . '_' . $file->getClientFilename();
+        $ext = pathinfo($file->getClientFilename(), PATHINFO_EXTENSION);
+        $filename = 'sig_' . bin2hex(random_bytes(8)) . '_' . date('Ymd_His') . '.' . $ext;
         $filepath = $uploadDir . '/' . $filename;
 
-        $stream = $file->getStream();
-        file_put_contents($filepath, $stream);
+        try {
+            // Use moveTo directly (same as Upload utility)
+            $file->moveTo($filepath);
+            
+            // Verify file was written
+            if (!is_file($filepath)) {
+                throw new \Exception('Failed to move uploaded file');
+            }
+            
+            error_log('Signature uploaded successfully: ' . $filepath . ' (size: ' . filesize($filepath) . ')');
+        } catch (\Exception $e) {
+            error_log('Signature upload error: ' . $e->getMessage());
+            throw new \Exception('Failed to upload signature: ' . $e->getMessage());
+        }
 
         return '/uploads/signatures/' . $filename;
     }
 
     public function deleteSignature(string $url)
     {
-        $filepath = 'public' . $url;
+        $publicRoot = rtrim($_ENV['PUBLIC_PATH'] ?? (dirname(__DIR__, 2) . '/public'), '/\\');
+        $filepath = $publicRoot . '/' . ltrim($url, '/\\');
         if (file_exists($filepath)) {
             unlink($filepath);
         }
