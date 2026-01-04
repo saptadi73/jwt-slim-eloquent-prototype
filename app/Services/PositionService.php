@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Position;
 use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
+use Ramsey\Uuid\Uuid;
 
 class PositionService
 {
@@ -53,6 +54,11 @@ class PositionService
     public function store(Response $response, array $data): Response
     {
         try {
+            // Generate UUID if not provided
+            if (!isset($data['id'])) {
+                $data['id'] = Uuid::uuid4()->toString();
+            }
+            
             $position = Position::create($data);
             return JsonResponder::success($response, $position, 'Position created successfully', 201);
         } catch (\Throwable $th) {

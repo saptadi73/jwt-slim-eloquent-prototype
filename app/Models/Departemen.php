@@ -6,11 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Departemen extends Model
 {
-
-
     protected $table = 'departemen';
     protected $primaryKey = 'id';
-    protected $fillable = ['nama','id'];
+    protected $fillable = ['id', 'nama'];
     protected $keyType = 'string';
     public $incrementing = false;   // UUID
 

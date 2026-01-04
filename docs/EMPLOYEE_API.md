@@ -245,7 +245,7 @@ curl -X GET "http://localhost:8000/api/groups/active" \
 
 ## Positions
 
-API untuk mengelola data posisi/jabatan karyawan.
+API untuk mengelola data posisi/jabatan karyawan. Setiap position memiliki UUID unik yang dihasilkan secara otomatis.
 
 ### Positions List Endpoint
 
@@ -263,7 +263,7 @@ GET /api/positions
 ### Positions List Request Example
 
 ```bash
-curl -X GET "http://localhost:8000/api/positions?is_active=true&with_employee_count=true" \
+curl -X GET "http://localhost:8080/api/positions?is_active=true&with_employee_count=true" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -271,26 +271,16 @@ curl -X GET "http://localhost:8000/api/positions?is_active=true&with_employee_co
 
 ```json
 {
-  "status": "success",
+  "status": true,
   "message": "Positions retrieved successfully",
   "data": [
     {
-      "id": 1,
-      "name": "Teknisi AC",
-      "description": "Teknisi pemasangan dan perbaikan AC",
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "name": "Sales/Marketing Officer",
+      "description": "",
       "is_active": true,
-      "employees_count": 5,
-      "created_at": "2024-01-15T10:00:00.000000Z",
-      "updated_at": "2024-01-15T10:00:00.000000Z"
-    },
-    {
-      "id": 2,
-      "name": "Supervisor",
-      "description": "Supervisor lapangan",
-      "is_active": true,
-      "employees_count": 2,
-      "created_at": "2024-01-15T10:00:00.000000Z",
-      "updated_at": "2024-01-15T10:00:00.000000Z"
+      "created_at": "2026-01-04T10:00:00.000000Z",
+      "updated_at": "2026-01-04T10:00:00.000000Z"
     }
   ]
 }
@@ -306,22 +296,16 @@ GET /api/positions/{id}
 
 ```json
 {
-  "status": "success",
+  "status": true,
   "message": "Position retrieved successfully",
   "data": {
-    "id": 1,
-    "name": "Teknisi AC",
-    "description": "Teknisi pemasangan dan perbaikan AC",
+    "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+    "name": "Sales/Marketing Officer",
+    "description": "",
     "is_active": true,
-    "created_at": "2024-01-15T10:00:00.000000Z",
-    "updated_at": "2024-01-15T10:00:00.000000Z",
-    "employees": [
-      {
-        "id": 1,
-        "name": "Ahmad Budi",
-        "email": "ahmad.budi@bengkel.com"
-      }
-    ]
+    "created_at": "2026-01-04T10:00:00.000000Z",
+    "updated_at": "2026-01-04T10:00:00.000000Z",
+    "employees": []
   }
 }
 ```
@@ -334,10 +318,12 @@ POST /api/positions
 
 ### Create Position Request Body
 
+**Note:** Field `id` bersifat optional. Jika tidak disediakan, UUID akan dihasilkan secara otomatis.
+
 ```json
 {
-  "name": "Manager",
-  "description": "Manager operasional bengkel",
+  "name": "Sales/Marketing Officer",
+  "description": "",
   "is_active": true
 }
 ```
@@ -346,17 +332,30 @@ POST /api/positions
 
 ```json
 {
-  "status": "success",
+  "status": true,
   "message": "Position created successfully",
   "data": {
-    "id": 3,
-    "name": "Manager",
-    "description": "Manager operasional bengkel",
+    "name": "Sales/Marketing Officer",
+    "description": "",
     "is_active": true,
-    "created_at": "2024-12-30T10:00:00.000000Z",
-    "updated_at": "2024-12-30T10:00:00.000000Z"
+    "id": "d50b33b8-3f50-4239-8055-1e9c3476ef48",
+    "updated_at": "2026-01-04T09:46:27.000000Z",
+    "created_at": "2026-01-04T09:46:27.000000Z"
   }
 }
+```
+
+### Create Position Request Example
+
+```bash
+curl -X POST "http://localhost:8080/api/positions" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "name": "Sales/Marketing Officer",
+    "description": "",
+    "is_active": true
+  }'
 ```
 
 ### Update Position Endpoint
@@ -369,8 +368,8 @@ PUT /api/positions/{id}
 
 ```json
 {
-  "name": "Senior Manager",
-  "description": "Senior Manager operasional",
+  "name": "Senior Sales Officer",
+  "description": "Senior position for sales team",
   "is_active": true
 }
 ```
@@ -385,17 +384,19 @@ DELETE /api/positions/{id}
 
 ```json
 {
-  "status": "success",
+  "status": true,
   "message": "Position deleted successfully",
   "data": null
 }
 ```
 
+**Note:** Tidak dapat menghapus position yang masih memiliki employees/pegawai yang terikat padanya.
+
 ---
 
 ## Departments
 
-API untuk mengelola data departemen.
+API untuk mengelola data departemen. Menggunakan UUID untuk identifikasi unik.
 
 ### Departments Summary with Count Endpoint
 
@@ -504,17 +505,52 @@ POST /api/departments
 
 ### Create Department Request Body
 
+**Note:** Field `id` bersifat optional. Jika tidak disediakan, UUID akan dihasilkan secara otomatis.
+
 ```json
 {
-  "nama": "Sales",
-  "id": "unique-uuid-string"
+  "nama": "Petugas Gudang"
 }
+```
+
+### Create Department Response Example
+
+```json
+{
+  "status": true,
+  "message": "Department created successfully",
+  "data": {
+    "nama": "Petugas Gudang",
+    "id": "d50b33b8-3f50-4239-8055-1e9c3476ef48",
+    "updated_at": "2026-01-04T09:46:27.000000Z",
+    "created_at": "2026-01-04T09:46:27.000000Z"
+  }
+}
+```
+
+### Create Department Request Example
+
+```bash
+curl -X POST "http://localhost:8080/api/departments" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "nama": "Petugas Gudang"
+  }'
 ```
 
 ### Update Department Endpoint
 
 ```text
 PUT /api/departments/{id}
+```
+
+### Update Department Request Body
+
+```json
+{
+  "nama": "Petugas Gudang Utama"
+}
 ```
 
 ### Delete Department Endpoint

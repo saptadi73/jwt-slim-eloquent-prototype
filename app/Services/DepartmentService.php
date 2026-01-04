@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Departemen;
 use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
+use Ramsey\Uuid\Uuid;
 
 class DepartmentService
 {
@@ -39,7 +40,7 @@ class DepartmentService
         try {
             $query = Departemen::query();
 
-            // Filter by active status
+            // Filter by active status (if applicable)
             if (isset($params['is_active'])) {
                 $query->where('is_active', $params['is_active']);
             }
@@ -76,6 +77,11 @@ class DepartmentService
     public function store(Response $response, array $data): Response
     {
         try {
+            // Generate UUID if not provided
+            if (!isset($data['id'])) {
+                $data['id'] = Uuid::uuid4()->toString();
+            }
+            
             $department = Departemen::create($data);
             return JsonResponder::success($response, $department, 'Department created successfully', 201);
         } catch (\Throwable $th) {

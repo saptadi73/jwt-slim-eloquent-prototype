@@ -13,13 +13,23 @@ class Position extends Model
     
     protected $fillable = [
         'id',
-        'nama'
+        'name',
+        'description',
+        'is_active'
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+
+    /**
+     * Get employees with this position
+     */
+    public function employees()
+    {
+        return $this->hasMany(Employee::class, 'position_id');
+    }
 
     /**
      * Get pegawai with this position

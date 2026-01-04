@@ -53,6 +53,13 @@
    - Signature management
    - Time off tracking
    - Attendance tracking
+   - **NEW:** Positions & Departments management
+
+5. **[POSITIONS_DEPARTMENTS_FIXES.md](POSITIONS_DEPARTMENTS_FIXES.md)** ← Bug Fixes & Updates (Latest)
+   - Position API fixes
+   - Department API fixes
+   - UUID auto-generation
+   - Test results
 
 ---
 
@@ -263,7 +270,8 @@
 | REPORTS_API.md | 15 | 5,000 | Developers |
 | EMPLOYEE_API.md | 25 | 8,000 | Developers |
 | PEGAWAI_GROUPS_SIGNATURE_INTEGRATION.md | 10 | 2,500 | Developers |
-| **TOTAL** | **137 pages** | **43,000 words** | |
+| POSITIONS_DEPARTMENTS_FIXES.md | 4 | 1,500 | Developers |
+| **TOTAL** | **141 pages** | **44,500 words** | |
 
 ---
 
