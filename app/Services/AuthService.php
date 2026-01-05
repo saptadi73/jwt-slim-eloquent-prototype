@@ -20,10 +20,15 @@ class AuthService
                 throw new \Exception('JWT_SECRET not set in environment');
             }
 
+            // Extract role names untuk JWT payload
+            $roleNames = $user->roles->pluck('name')->toArray();
+
+            // Update JWT payload dengan roles
             $payload = [
                 'sub' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
+                'roles' => $roleNames,
                 'iat' => time(),
                 'exp' => time() + (12 * 3600)
             ];
@@ -39,10 +44,11 @@ class AuthService
                     'email' => $user->email,
                     'roles' => $user->roles->map(function ($role) {
                         return [
+                            'id'    => $role->id,
                             'name'  => $role->name,
                             'label' => $role->label,
                         ];
-                    })
+                    })->toArray()
                 ]
             ];
         }
