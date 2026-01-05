@@ -9,7 +9,6 @@ use App\Models\Expense;
 use App\Models\Attendance;
 use App\Models\Pegawai;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
@@ -89,11 +88,9 @@ class DashboardService
         $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
         $endDate = Carbon::now()->endOfMonth();
 
-        $salesByMonth = SaleOrder::selectRaw('DATE_TRUNC(\'month\', order_date) as month, SUM(total) as total')
-            ->whereBetween('order_date', [$startDate, $endDate])
-            ->groupBy(DB::raw('DATE_TRUNC(\'month\', order_date)'))
-            ->orderBy('month')
-            ->get();
+        // Get all sales within date range
+        $sales = SaleOrder::whereBetween('order_date', [$startDate, $endDate])
+            ->get(['order_date', 'total']);
 
         // Format data untuk chart
         $data = [];
@@ -101,16 +98,17 @@ class DashboardService
 
         for ($i = 0; $i < $months; $i++) {
             $monthLabel = $current->format('M'); // Jan, Feb, etc
-            $monthKey = $current->format('Y-m');
+            $yearMonth = $current->format('Y-m');
 
-            $sale = $salesByMonth->firstWhere('month', function ($value) use ($current) {
-                return Carbon::parse($value)->format('Y-m') === $current->format('Y-m');
-            });
+            // Sum total for this month
+            $monthTotal = $sales->filter(function ($sale) use ($yearMonth) {
+                return Carbon::parse($sale->order_date)->format('Y-m') === $yearMonth;
+            })->sum('total');
 
             $data[] = [
                 'month' => $monthLabel,
                 'monthFull' => $current->format('F'),
-                'sales' => $sale ? (float) $sale->total : 0
+                'sales' => (float) $monthTotal
             ];
 
             $current->addMonth();
@@ -128,11 +126,9 @@ class DashboardService
         $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
         $endDate = Carbon::now()->endOfMonth();
 
-        $purchasesByMonth = PurchaseOrder::selectRaw('DATE_TRUNC(\'month\', order_date) as month, SUM(total) as total')
-            ->whereBetween('order_date', [$startDate, $endDate])
-            ->groupBy(DB::raw('DATE_TRUNC(\'month\', order_date)'))
-            ->orderBy('month')
-            ->get();
+        // Get all purchases within date range
+        $purchases = PurchaseOrder::whereBetween('order_date', [$startDate, $endDate])
+            ->get(['order_date', 'total']);
 
         // Format data untuk chart
         $data = [];
@@ -140,16 +136,17 @@ class DashboardService
 
         for ($i = 0; $i < $months; $i++) {
             $monthLabel = $current->format('M');
-            $monthKey = $current->format('Y-m');
+            $yearMonth = $current->format('Y-m');
 
-            $purchase = $purchasesByMonth->firstWhere('month', function ($value) use ($current) {
-                return Carbon::parse($value)->format('Y-m') === $current->format('Y-m');
-            });
+            // Sum total for this month
+            $monthTotal = $purchases->filter(function ($purchase) use ($yearMonth) {
+                return Carbon::parse($purchase->order_date)->format('Y-m') === $yearMonth;
+            })->sum('total');
 
             $data[] = [
                 'month' => $monthLabel,
                 'monthFull' => $current->format('F'),
-                'purchases' => $purchase ? (float) $purchase->total : 0
+                'purchases' => (float) $monthTotal
             ];
 
             $current->addMonth();
@@ -167,11 +164,9 @@ class DashboardService
         $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
         $endDate = Carbon::now()->endOfMonth();
 
-        $expensesByMonth = Expense::selectRaw('DATE_TRUNC(\'month\', tanggal) as month, SUM(jumlah) as total')
-            ->whereBetween('tanggal', [$startDate, $endDate])
-            ->groupBy(DB::raw('DATE_TRUNC(\'month\', tanggal)'))
-            ->orderBy('month')
-            ->get();
+        // Get all expenses within date range
+        $expenses = Expense::whereBetween('tanggal', [$startDate, $endDate])
+            ->get(['tanggal', 'jumlah']);
 
         // Format data untuk chart
         $data = [];
@@ -179,16 +174,17 @@ class DashboardService
 
         for ($i = 0; $i < $months; $i++) {
             $monthLabel = $current->format('M');
-            $monthKey = $current->format('Y-m');
+            $yearMonth = $current->format('Y-m');
 
-            $expense = $expensesByMonth->firstWhere('month', function ($value) use ($current) {
-                return Carbon::parse($value)->format('Y-m') === $current->format('Y-m');
-            });
+            // Sum total for this month
+            $monthTotal = $expenses->filter(function ($expense) use ($yearMonth) {
+                return Carbon::parse($expense->tanggal)->format('Y-m') === $yearMonth;
+            })->sum('jumlah');
 
             $data[] = [
                 'month' => $monthLabel,
                 'monthFull' => $current->format('F'),
-                'expenses' => $expense ? (float) $expense->total : 0
+                'expenses' => (float) $monthTotal
             ];
 
             $current->addMonth();
