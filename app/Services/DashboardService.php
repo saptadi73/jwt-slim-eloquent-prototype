@@ -51,7 +51,7 @@ class DashboardService
         $today = Carbon::today();
 
         // Pegawai yang hadir hari ini
-        $presentToday = Attendance::whereDate('tanggal', $today)
+        $presentToday = Attendance::whereDate('date', $today)
             ->where('status', 'hadir')
             ->count();
 
@@ -89,9 +89,9 @@ class DashboardService
         $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
         $endDate = Carbon::now()->endOfMonth();
 
-        $salesByMonth = SaleOrder::selectRaw('DATE_TRUNC(\'month\', tanggal) as month, SUM(total) as total')
-            ->whereBetween('tanggal', [$startDate, $endDate])
-            ->groupBy(DB::raw('DATE_TRUNC(\'month\', tanggal)'))
+        $salesByMonth = SaleOrder::selectRaw('DATE_TRUNC(\'month\', order_date) as month, SUM(total) as total')
+            ->whereBetween('order_date', [$startDate, $endDate])
+            ->groupBy(DB::raw('DATE_TRUNC(\'month\', order_date)'))
             ->orderBy('month')
             ->get();
 
@@ -128,9 +128,9 @@ class DashboardService
         $startDate = Carbon::now()->subMonths($months - 1)->startOfMonth();
         $endDate = Carbon::now()->endOfMonth();
 
-        $purchasesByMonth = PurchaseOrder::selectRaw('DATE_TRUNC(\'month\', tanggal) as month, SUM(total) as total')
-            ->whereBetween('tanggal', [$startDate, $endDate])
-            ->groupBy(DB::raw('DATE_TRUNC(\'month\', tanggal)'))
+        $purchasesByMonth = PurchaseOrder::selectRaw('DATE_TRUNC(\'month\', order_date) as month, SUM(total) as total')
+            ->whereBetween('order_date', [$startDate, $endDate])
+            ->groupBy(DB::raw('DATE_TRUNC(\'month\', order_date)'))
             ->orderBy('month')
             ->get();
 
