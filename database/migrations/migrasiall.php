@@ -13,7 +13,7 @@ $c = new Capsule();
 $c->addConnection([
     'driver' => $_ENV['DB_DRIVER'] ?? 'mysql',
     'host' => $_ENV['DB_HOST'] ?? '127.0.0.1',
-    'database' => $_ENV['DB_DATABASE'] ?? 'erpmini',
+    'database' => $_ENV['DB_NAME'] ?? 'erpmini',
     'username' => $_ENV['DB_USERNAME'] ?? 'root',
     'password' => $_ENV['DB_PASSWORD'] ?? '',
     'charset' => $_ENV['DB_CHARSET'] ?? 'utf8mb4',
