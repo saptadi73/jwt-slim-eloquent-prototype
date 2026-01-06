@@ -5,7 +5,19 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 return function ($app) {
-    $departmentService = new DepartmentService();
+    // Debug route
+    $app->get('/api/departments/debug', function (Request $request, Response $response) {
+        $data = ['message' => 'Departments route is loaded!'];
+        $response->getBody()->write(json_encode($data));
+        return $response->withHeader('Content-Type', 'application/json');
+    });
+
+    try {
+        $departmentService = new DepartmentService();
+    } catch (\Throwable $e) {
+        error_log('Error instantiating DepartmentService: ' . $e->getMessage());
+        return;
+    }
 
     // Get all departments with employee count (summary)
     $app->get('/api/departments/summary/count', function (Request $request, Response $response) use ($departmentService) {
