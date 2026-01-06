@@ -2,6 +2,9 @@
 use Slim\App;
 
 return function (App $app) {
+    // Test routes
+    (require __DIR__ . '/test.php')($app);
+    
     (require __DIR__ . '/auth.php')($app);
     (require __DIR__ . '/dashboard.php')($app);
     (require __DIR__ . '/users.php')($app);

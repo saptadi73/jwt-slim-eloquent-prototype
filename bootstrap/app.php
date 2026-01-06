@@ -74,18 +74,18 @@ $app->add(new CorsMiddleware()); // atau $app->add(CorsMiddleware::class);
 
 
 
-// Koneksi ke PostgreSQL (langsung, tanpa ENV)
+// Koneksi ke PostgreSQL (menggunakan ENV)
 $capsule = new Capsule;
 $capsule->addConnection([
-    'driver'    => 'pgsql',
-    'host'      => '127.0.0.1',
-    'database'  => 'erpmini',
-    'username'  => 'openpg',
-    'password'  => 'openpgpwd',
-    'charset'   => 'utf8',
-    'prefix'    => '',
-    'schema'    => 'public',
-    'port'      => 5432,
+    'driver'    => $_ENV['DB_DRIVER'] ?? 'pgsql',
+    'host'      => $_ENV['DB_HOST'] ?? '127.0.0.1',
+    'database'  => $_ENV['DB_NAME'] ?? 'erpmini',
+    'username'  => $_ENV['DB_USERNAME'] ?? 'openpg',
+    'password'  => $_ENV['DB_PASSWORD'] ?? 'openpgpwd',
+    'charset'   => $_ENV['DB_CHARSET'] ?? 'utf8',
+    'prefix'    => $_ENV['DB_PREFIX'] ?? '',
+    'schema'    => $_ENV['DB_SCHEMA'] ?? 'public',
+    'port'      => (int)($_ENV['DB_PORT'] ?? 5432),
 ]);
 $capsule->setAsGlobal();
 $capsule->bootEloquent();
