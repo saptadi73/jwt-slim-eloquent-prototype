@@ -63,15 +63,6 @@ $app->addBodyParsingMiddleware();
 $displayError = ($_ENV['APP_DEBUG'] ?? 'false') === 'true';
 $app->addErrorMiddleware($displayError, true, true);
 
-// Method Override Middleware (untuk PUT request dengan multipart/form-data)
-$app->add(new MethodOverrideMiddleware());
-
-// Preflight CORS (optional but helpful)
-$app->options('/{routes:.+}', fn($req, $res) => $res);
-
-// CORS
-$app->add(new CorsMiddleware()); // atau $app->add(CorsMiddleware::class);
-
 
 
 // Koneksi ke PostgreSQL (menggunakan ENV)
@@ -101,5 +92,13 @@ Paginator::currentPageResolver(function ($pageName = 'page') {
 
 date_default_timezone_set($_ENV['APP_TZ'] ?? 'Asia/Jakarta');
 
+// Load routes SEBELUM middleware ditambahkan
 (require __DIR__ . '/../routes/index.php')($app);
+
+// Method Override Middleware (untuk PUT request dengan multipart/form-data)
+$app->add(new MethodOverrideMiddleware());
+
+// CORS Middleware (harus di paling akhir / luar)
+$app->add(new CorsMiddleware());
+
 return $app;
