@@ -57,6 +57,9 @@ $container = new Psr11Container($pimple);
 AppFactory::setContainer($container);
 $app = AppFactory::createFromContainer($container);
 
+// LOAD ROUTES PERTAMA (sebelum middleware)
+(require __DIR__ . '/../routes/index.php')($app);
+
 $app->addRoutingMiddleware();
 $app->addBodyParsingMiddleware();
 
@@ -91,9 +94,6 @@ Paginator::currentPageResolver(function ($pageName = 'page') {
 });
 
 date_default_timezone_set($_ENV['APP_TZ'] ?? 'Asia/Jakarta');
-
-// Load routes SEBELUM middleware ditambahkan
-(require __DIR__ . '/../routes/index.php')($app);
 
 // Method Override Middleware (untuk PUT request dengan multipart/form-data)
 $app->add(new MethodOverrideMiddleware());
