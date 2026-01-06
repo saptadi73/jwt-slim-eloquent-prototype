@@ -12,12 +12,7 @@ return function ($app) {
         return $response->withHeader('Content-Type', 'application/json');
     });
 
-    try {
-        $departmentService = new DepartmentService();
-    } catch (\Throwable $e) {
-        error_log('Error instantiating DepartmentService: ' . $e->getMessage());
-        return;
-    }
+    $departmentService = new DepartmentService();
 
     // Get all departments with employee count (summary)
     $app->get('/api/departments/summary/count', function (Request $request, Response $response) use ($departmentService) {
@@ -51,4 +46,32 @@ return function ($app) {
     $app->delete('/api/departments/{id}', function (Request $request, Response $response, array $args) use ($departmentService) {
         return $departmentService->destroy($response, $args['id']);
     });
-};
+
+    // ===== ALIAS ROUTES (backward compatibility) =====
+    // Alias: /api/departements (with extra 'e')
+    $app->get('/api/departements/summary/count', function (Request $request, Response $response) use ($departmentService) {
+        return $departmentService->getDepartmentsWithCount($response);
+    });
+
+    $app->get('/api/departements', function (Request $request, Response $response) use ($departmentService) {
+        $params = $request->getQueryParams();
+        return $departmentService->index($response, $params);
+    });
+
+    $app->get('/api/departements/{id}', function (Request $request, Response $response, array $args) use ($departmentService) {
+        return $departmentService->show($response, $args['id']);
+    });
+
+    $app->post('/api/departements', function (Request $request, Response $response) use ($departmentService) {
+        $data = $request->getParsedBody();
+        return $departmentService->store($response, $data);
+    });
+
+    $app->put('/api/departements/{id}', function (Request $request, Response $response, array $args) use ($departmentService) {
+        $data = $request->getParsedBody();
+        return $departmentService->update($response, $args['id'], $data);
+    });
+
+    $app->delete('/api/departements/{id}', function (Request $request, Response $response, array $args) use ($departmentService) {
+        return $departmentService->destroy($response, $args['id']);
+    });};
