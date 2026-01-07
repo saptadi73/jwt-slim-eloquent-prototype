@@ -9,8 +9,13 @@ Dokumentasi lengkap untuk sistem authentication (login/register) dan role manage
 1. [Authentication](#authentication)
    - [Register](#register)
    - [Login](#login)
-2. [Role Management](#role-management)
-   - [Get Users](#get-users)
+2. [User Management](#user-management)
+   - [Get All Users](#get-all-users)
+   - [Get Single User](#get-single-user)
+   - [Update User](#update-user)
+   - [Delete User](#delete-user)
+3. [Role Management](#role-management)
+   - [Get Users with Roles](#get-users-with-roles)
    - [Get Roles](#get-roles)
    - [Assign Roles](#assign-roles)
    - [Add Role](#add-role)
@@ -156,14 +161,191 @@ Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
 
 ---
 
-## Role Management
+## User Management
 
-### Get Users
+### Get All Users
 Mengambil daftar semua user dengan roles mereka.
 
 **Endpoint:**
 ```
-GET /role-management/users
+GET /users
+```
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "roles": [
+        {
+          "id": "role-uuid-1",
+          "name": "user",
+          "label": "User"
+        },
+        {
+          "id": "role-uuid-2",
+          "name": "admin",
+          "label": "Administrator"
+        }
+      ]
+    }
+  ],
+  "message": "Users retrieved"
+}
+```
+
+---
+
+### Get Single User
+Mengambil detail user berdasarkan ID dengan roles mereka.
+
+**Endpoint:**
+```
+GET /users/{id}
+```
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Parameters:**
+- `id` (path parameter): UUID dari user
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "roles": [
+      {
+        "id": "role-uuid-1",
+        "name": "user",
+        "label": "User"
+      }
+    ]
+  },
+  "message": "User retrieved"
+}
+```
+
+**Error Response (404):**
+```json
+{
+  "success": false,
+  "message": "User not found"
+}
+```
+
+---
+
+### Update User
+Mengupdate data user dan/atau roles mereka.
+
+**Endpoint:**
+```
+PUT /users/{id}
+```
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Parameters:**
+- `id` (path parameter): UUID dari user
+
+**Request Body:**
+```json
+{
+  "name": "John Updated",
+  "email": "john.updated@example.com",
+  "role_id": "role-uuid-2"
+}
+```
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "John Updated",
+    "email": "john.updated@example.com"
+  },
+  "message": "User updated"
+}
+```
+
+**Error Response (404):**
+```json
+{
+  "success": false,
+  "message": "User not found"
+}
+```
+
+---
+
+### Delete User
+Menghapus user berdasarkan ID.
+
+**Endpoint:**
+```
+DELETE /users/{id}
+```
+
+**Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Parameters:**
+- `id` (path parameter): UUID dari user
+
+**Success Response (200):**
+```json
+{
+  "success": true,
+  "data": [],
+  "message": "User deleted"
+}
+```
+
+**Error Response (404):**
+```json
+{
+  "success": false,
+  "message": "User not found"
+}
+```
+
+---
+
+## Role Management
+
+### Get Users with Roles
+Mengambil daftar semua user dengan roles mereka.
+
+**Endpoint:**
+```
+GET /roles/users
 ```
 
 **Headers:**
@@ -222,7 +404,7 @@ Mengambil daftar semua role yang tersedia.
 
 **Endpoint:**
 ```
-GET /role-management/roles
+GET /roles
 ```
 
 **Headers:**
@@ -267,7 +449,7 @@ Memberikan multiple roles ke user (mengganti roles yang ada sebelumnya).
 
 **Endpoint:**
 ```
-POST /role-management/users/{userId}/roles
+POST /roles/users/{userId}/roles
 ```
 
 **Headers:**
@@ -342,7 +524,7 @@ Menambahkan single role ke user tanpa menghapus roles yang sudah ada.
 
 **Endpoint:**
 ```
-POST /role-management/users/{userId}/roles/{roleId}
+POST /roles/users/{userId}/roles/{roleId}
 ```
 
 **Headers:**
@@ -399,7 +581,7 @@ Menghapus single role dari user.
 
 **Endpoint:**
 ```
-DELETE /role-management/users/{userId}/roles/{roleId}
+DELETE /roles/users/{userId}/roles/{roleId}
 ```
 
 **Headers:**
@@ -471,7 +653,7 @@ async function login(email, password) {
 // Contoh fetch dengan token
 async function getUsers() {
   const token = localStorage.getItem('token');
-  const response = await fetch('/role-management/users', {
+  const response = await fetch('/roles/users', {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -486,7 +668,7 @@ async function getUsers() {
 // Contoh assign roles ke user
 async function assignRolesToUser(userId, roleIds) {
   const token = localStorage.getItem('token');
-  const response = await fetch(`/role-management/users/${userId}/roles`, {
+  const response = await fetch(`/roles/users/${userId}/roles`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -509,7 +691,7 @@ async function assignRolesToUser(userId, roleIds) {
 // Populate user dropdown
 async function loadUsersDropdown() {
   const token = localStorage.getItem('token');
-  const response = await fetch('/role-management/users', {
+  const response = await fetch('/roles/users', {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   const result = await response.json();
@@ -526,7 +708,7 @@ async function loadUsersDropdown() {
 // Populate role dropdown
 async function loadRolesDropdown() {
   const token = localStorage.getItem('token');
-  const response = await fetch('/role-management/roles', {
+  const response = await fetch('/roles', {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   const result = await response.json();
@@ -555,7 +737,7 @@ async function loadRolesDropdown() {
    - Request harus dari domain yang sudah dikonfigurasi
 
 3. **JWT Middleware:**
-   - Semua endpoint role-management dilindungi JWT middleware
+   - Semua endpoint /roles dan /users dilindungi JWT middleware
    - Request tanpa token atau token invalid akan ditolak
 
 4. **Role-Based Access Control:**
@@ -601,19 +783,19 @@ curl -X POST http://localhost:8080/auth/login \
 
 ### Get Users (dengan token)
 ```bash
-curl -X GET http://localhost:8080/role-management/users \
+curl -X GET http://localhost:8080/roles/users \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Get Roles
 ```bash
-curl -X GET http://localhost:8080/role-management/roles \
+curl -X GET http://localhost:8080/roles \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Assign Roles
 ```bash
-curl -X POST http://localhost:8080/role-management/users/USER_ID/roles \
+curl -X POST http://localhost:8080/roles/users/USER_ID/roles \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -664,7 +846,13 @@ CREATE TABLE role_users (
 ---
 
 ## Last Updated
-- January 5, 2026
+- January 6, 2026
 
 ## Version
-- 1.0.0
+- 1.1.0
+
+## Changelog
+### v1.1.0 (January 6, 2026)
+- Changed role management endpoint from `/role-management/*` to `/roles/*`
+- Added `GET /users` endpoint to list all users
+- Added `GET /users/{id}` endpoint to get single user

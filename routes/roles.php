@@ -12,18 +12,18 @@ return function (App $app) {
     $container = $app->getContainer();
 
     // Role Management Endpoints
-    $app->group('/role-management', function (RouteCollectorProxy $roleGroup) use ($container) {
+    $app->group('/roles', function (RouteCollectorProxy $roleGroup) use ($container) {
+        
+        // Get all available roles
+        $roleGroup->get('', function (Request $request, Response $response) {
+            $roles = UserService::getAllRoles();
+            return JsonResponder::success($response, $roles, 'Roles retrieved');
+        });
         
         // Get all users with their roles
         $roleGroup->get('/users', function (Request $request, Response $response) {
             $users = UserService::getAllWithRoles();
             return JsonResponder::success($response, $users, 'Users retrieved with roles');
-        });
-
-        // Get all available roles
-        $roleGroup->get('/roles', function (Request $request, Response $response) {
-            $roles = UserService::getAllRoles();
-            return JsonResponder::success($response, $roles, 'Roles retrieved');
         });
 
         // Assign multiple roles to a user (replace existing)

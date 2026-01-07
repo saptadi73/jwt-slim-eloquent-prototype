@@ -55,7 +55,14 @@
    - Attendance tracking
    - **NEW:** Positions & Departments management
 
-5. **[POSITIONS_DEPARTMENTS_FIXES.md](POSITIONS_DEPARTMENTS_FIXES.md)** ← Bug Fixes & Updates (Latest)
+5. **[AUTH_AND_ROLE_MANAGEMENT.md](AUTH_AND_ROLE_MANAGEMENT.md)** ← Authentication & Role Management
+   - User registration & login
+   - JWT authentication
+   - User management (CRUD)
+   - Role management
+   - **UPDATED:** New /users and /roles endpoints
+
+6. **[POSITIONS_DEPARTMENTS_FIXES.md](POSITIONS_DEPARTMENTS_FIXES.md)** ← Bug Fixes & Updates
    - Position API fixes
    - Department API fixes
    - UUID auto-generation

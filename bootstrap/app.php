@@ -23,6 +23,7 @@ use App\Services\AccountingService;
 use App\Services\BankAccountService;
 use App\Services\ReportService;
 use App\Services\ExpenseService;
+use App\Services\UserService;
 use Dotenv\Dotenv;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -50,6 +51,7 @@ $pimple[VendorService::class] = fn($c) => new VendorService();
 $pimple[ServiceService::class] = fn($c) => new ServiceService();
 $pimple[ReportService::class] = fn($c) => new ReportService();
 $pimple[ExpenseService::class] = fn($c) => new ExpenseService();
+$pimple[UserService::class] = fn($c) => new UserService();
 // (opsional) $pimple[CorsMiddleware::class] = fn($c) => new CorsMiddleware();
 
 $container = new Psr11Container($pimple);

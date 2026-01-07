@@ -12,6 +12,24 @@ return function (App $app) {
     $container = $app->getContainer();
 
     $app->group('/users', function (RouteCollectorProxy $users) use ($container) {
+        $users->get('', function (Request $request, Response $response) use ($container) {
+            $svc = $container->get(UserService::class);
+            $usersData = $svc::getAllWithRoles();
+            return JsonResponder::success($response, $usersData, 'Users retrieved');
+        });
+
+        // Get single user by ID
+        $users->get('/{id}', function (Request $request, Response $response, array $args) use ($container) {
+            $id = $args['id'];
+            $svc = $container->get(UserService::class);
+            $user = $svc::findById($id);
+            if ($user) {
+                $user->load('roles');
+                return JsonResponder::success($response, $user, 'User retrieved');
+            }
+            return JsonResponder::error($response, 'User not found', 404);
+        });
+
         // Update user
         $users->put('/{id}', function (Request $request, Response $response, array $args) use ($container) {
             $id   = $args['id'];
