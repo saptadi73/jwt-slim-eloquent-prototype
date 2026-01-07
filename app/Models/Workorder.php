@@ -54,6 +54,6 @@ class Workorder extends Model
 
     public function workorderPenjualan()
     {
-        return $this->hasOne(\App\Models\WorkorderPenjualan::class, 'workorder_id', 'id');
+        return $this->hasOne(\App\Models\WorkOrderPenjualan::class, 'workorder_id', 'id');
     }
 }

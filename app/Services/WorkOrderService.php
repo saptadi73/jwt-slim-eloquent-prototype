@@ -11,7 +11,7 @@ use App\Utils\Upload;
 use App\Models\Pegawai;
 use App\Models\Customer;
 use App\Models\CustomerAsset;
-use App\Models\WorkorderPenjualan;
+use App\Models\WorkOrderPenjualan;
 use App\Support\JsonResponder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -127,7 +127,7 @@ class WorkOrderService
 
         try {
             // Buat entri di workorder_penjualan
-            $workorderpenjualan = WorkorderPenjualan::create([
+            $workorderpenjualan = WorkOrderPenjualan::create([
                 'workorder_id' => $workorder->id,
                 'id' => Str::uuid(),
                 'status' => 'baru',
@@ -315,7 +315,7 @@ class WorkOrderService
 
     public function getWorkOrderPenjualanById(Response $response, $workorder_id): Response
     {
-        $workOrderPenjualan = WorkorderPenjualan::with(['customerAsset.customer', 'pegawai', 'customerAsset.brand', 'customerAsset.tipe'])->where('id', $workorder_id)->first();
+        $workOrderPenjualan = WorkOrderPenjualan::with(['customerAsset.customer', 'pegawai', 'customerAsset.brand', 'customerAsset.tipe'])->where('id', $workorder_id)->first();
         if (!$workOrderPenjualan) {
             return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
         }
@@ -354,7 +354,7 @@ class WorkOrderService
 
     public function updateWorkOrderPenjualan(Response $response, array $data, $workorder_id): Response
     {
-        $workOrderPenjualan = WorkorderPenjualan::where('id', $workorder_id)->first();
+        $workOrderPenjualan = WorkOrderPenjualan::where('id', $workorder_id)->first();
         if (!$workOrderPenjualan) {
             return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
         }
@@ -406,7 +406,7 @@ class WorkOrderService
     public function  setLinkSignatureWorkorderPenjualan(Response $response, $workorder_id): Response
     {
         $customerCode = $this->random11();
-        $workOrderPenjualan = WorkorderPenjualan::where('id', $workorder_id)->first();
+        $workOrderPenjualan = WorkOrderPenjualan::where('id', $workorder_id)->first();
         if (!$workOrderPenjualan) {
             return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
         }
@@ -475,7 +475,7 @@ class WorkOrderService
     }
     public function updateSignatureWorkorderPenjualan(Response $response, File $file, $customerCode): Response
     {
-        $workOrderPenjualan = WorkorderPenjualan::where('customerCode', $customerCode)->first();
+        $workOrderPenjualan = WorkOrderPenjualan::where('customerCode', $customerCode)->first();
         if (!$workOrderPenjualan) {
             return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
         }
@@ -519,7 +519,7 @@ class WorkOrderService
 
     public function getWorkoderPenjualanByCustomerCode(Response $response, $customerCode): Response
     {
-        $workOrderPenjualan = WorkorderPenjualan::with(['customerAsset.customer', 'pegawai', 'customerAsset.brand', 'customerAsset.tipe'])->where('customerCode', $customerCode)->first();
+        $workOrderPenjualan = WorkOrderPenjualan::with(['customerAsset.customer', 'pegawai', 'customerAsset.brand', 'customerAsset.tipe'])->where('customerCode', $customerCode)->first();
         if (!$workOrderPenjualan) {
             return JsonResponder::error($response, 'Workorder Penjualan tidak ditemukan', 404);
         }
