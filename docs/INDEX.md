@@ -68,6 +68,12 @@
    - UUID auto-generation
    - Test results
 
+7. **[PRODUCT_INVENTORY_API.md](PRODUCT_INVENTORY_API.md)** ← Product & Inventory
+   - Product CRUD endpoints
+   - Product movement report (detail)
+   - Product movement summary (by period)
+   - Stock/HPP via ProductMoveHistory
+
 ---
 
 ## 📖 Complete Documentation Guide

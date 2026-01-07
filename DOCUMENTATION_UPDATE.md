@@ -3,6 +3,43 @@
 **Tanggal:** 4 Januari 2026
 **Status:** ✅ Selesai
 
+---
+
+## Tambahan: Product & Inventory Movement Reports
+
+**Tanggal:** 7 Januari 2026
+**Status:** ✅ Ditambahkan
+
+### File Baru
+- [docs/PRODUCT_INVENTORY_API.md](docs/PRODUCT_INVENTORY_API.md)
+  - Dokumentasi lengkap Product CRUD dan Laporan Pergerakan Barang
+  - Endpoint baru:
+    - `GET /api/reports/product-movements` (detail pergerakan per transaksi)
+    - `GET /api/reports/product-movements/summary` (ringkasan periode, wajib `start_date` & `end_date`)
+  - Parameter: `product_id` (opsional), `start_date`, `end_date`
+
+### Perubahan Routes
+- [routes/reports.php](routes/reports.php)
+  - Tambah route untuk laporan pergerakan barang (detail & summary)
+
+### Services
+- [app/Services/InventoryReportService.php](app/Services/InventoryReportService.php) — NEW
+  - `getProductMovements()` — laporan detail + transaksi
+  - `getProductMovementsSummary()` — laporan ringkasan periode
+- [app/Services/ProductStockService.php](app/Services/ProductStockService.php)
+  - Sumber data pergerakan via `ProductMoveHistory`
+
+### Model Terkait
+- [app/Models/ProductMoveHistory.php](app/Models/ProductMoveHistory.php)
+- [app/Models/Product.php](app/Models/Product.php)
+
+### Catatan
+- Laporan menggunakan `qty` (positif=masuk, negatif=keluar) dan `move_date` untuk filter periode.
+- Summary endpoint mewajibkan `start_date` dan `end_date`.
+- Prefix route: `/api/reports/...` (wajib, hindari 404). Jalankan dev server dari root dengan router publik: `php -S localhost:8080 -t public public/index.php`.
+
+---
+
 ## File yang Diupdate
 
 ### 1. [docs/EMPLOYEE_API.md](docs/EMPLOYEE_API.md)
