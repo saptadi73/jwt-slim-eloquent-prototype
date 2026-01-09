@@ -68,7 +68,7 @@ class WorkOrderPenyewaan extends Model
     // Relasi dengan customer asset
     public function rentalAsset()
     {
-        return $this->belongsTo(rentalAsset::class, 'rental_asset_id'); // Relasi dengan customer_asset
+        return $this->belongsTo(RentalAsset::class, 'rental_asset_id'); // Relasi dengan customer_asset
     }
 
     public function pegawai()
