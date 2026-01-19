@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Support\ImageConverter;
 
 class WorkOrderAcService extends Model
 {
@@ -10,6 +11,8 @@ class WorkOrderAcService extends Model
     protected $primaryKey = 'id';
     public $incrementing = false;   // UUID
     protected $keyType = 'string';
+
+    protected $appends = ['tanda_tangan_pelanggan_base64'];
 
     protected $fillable = [
         'id',
@@ -75,5 +78,22 @@ class WorkOrderAcService extends Model
     public function workorder()
     {
         return $this->belongsTo(Workorder::class, 'workorder_id'); // Relasi dengan workorder
+    }
+
+    /**
+     * Accessor: Konversi tanda_tangan_pelanggan ke Base64
+     */
+    public function getTandaTanganPelangganBase64Attribute()
+    {
+        if (empty($this->tanda_tangan_pelanggan)) {
+            return null;
+        }
+
+        try {
+            return ImageConverter::toBase64($this->tanda_tangan_pelanggan, false);
+        } catch (\Throwable $e) {
+            // Log error atau return null
+            return null;
+        }
     }
 }

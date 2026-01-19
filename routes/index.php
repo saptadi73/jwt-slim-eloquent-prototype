@@ -2,6 +2,9 @@
 use Slim\App;
 
 return function (App $app) {
+    // Asset routes (images, uploads, signatures) - LOAD FIRST for priority
+    (require __DIR__ . '/assets.php')($app);
+    
     // Test routes
     (require __DIR__ . '/test.php')($app);
     
