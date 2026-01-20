@@ -862,6 +862,338 @@ curl -X POST http://localhost:8080/customers/assets/update-next-service/uuid-cus
 
 ---
 
+## 7. KELUHAN CRUD
+
+### Base URL
+
+```text
+http://localhost:8080/keluhan
+```
+
+### 7.1 List Keluhan
+
+**Endpoint:** `GET /keluhan`
+
+**Description:** Mendapatkan daftar semua keluhan (ordered by newest)
+
+**Authentication:** Not required
+
+**Response:**
+
+```json
+{
+  "status": true,
+  "message": "List of all keluhan",
+  "data": [
+    {
+      "id": "uuid-string",
+      "nama": "AC Tidak Dingin",
+      "created_at": "2026-01-20T12:00:00.000000Z",
+      "updated_at": "2026-01-20T12:00:00.000000Z"
+    },
+    {
+      "id": "uuid-string",
+      "nama": "AC Bocor",
+      "created_at": "2026-01-19T10:00:00.000000Z",
+      "updated_at": "2026-01-19T10:00:00.000000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 7.2 Get Keluhan Detail
+
+**Endpoint:** `GET /keluhan/{id}`
+
+**Description:** Mendapatkan detail satu keluhan
+
+**Authentication:** Not required
+
+**URL Parameters:**
+
+- `id` (required): UUID keluhan
+
+**Response:**
+
+```json
+{
+  "status": true,
+  "message": "Keluhan detail",
+  "data": {
+    "id": "uuid-string",
+    "nama": "AC Tidak Dingin",
+    "created_at": "2026-01-20T12:00:00.000000Z",
+    "updated_at": "2026-01-20T12:00:00.000000Z"
+  }
+}
+```
+
+**Error Response (Not Found):**
+
+```json
+{
+  "status": false,
+  "message": "Keluhan not found",
+  "data": null
+}
+```
+
+---
+
+### 7.3 Create Keluhan
+
+**Endpoint:** `POST /keluhan`
+
+**Description:** Membuat keluhan baru
+
+**Authentication:** 🔒 JWT Token required
+
+**Content-Type:** `application/json`
+
+**Request Body:**
+
+```json
+{
+  "nama": "AC Berbunyi Berisik"
+}
+```
+
+**Response Success:**
+
+```json
+{
+  "status": true,
+  "message": "Keluhan created successfully",
+  "data": {
+    "id": "uuid-string",
+    "nama": "AC Berbunyi Berisik",
+    "created_at": "2026-01-20T12:00:00.000000Z",
+    "updated_at": "2026-01-20T12:00:00.000000Z"
+  }
+}
+```
+
+**Error Response (Missing Field):**
+
+```json
+{
+  "status": false,
+  "message": "nama field is required",
+  "data": null
+}
+```
+
+**Example cURL:**
+
+```bash
+curl -X POST http://localhost:8080/keluhan \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nama": "AC Berbunyi Berisik"}'
+```
+
+---
+
+### 7.4 Update Keluhan
+
+**Endpoint:** `PUT /keluhan/{id}` or `POST /keluhan/{id}`
+
+**Description:** Mengupdate keluhan yang sudah ada
+
+**Authentication:** 🔒 JWT Token required
+
+**URL Parameters:**
+
+- `id` (required): UUID keluhan
+
+**Content-Type:** `application/json`
+
+**Request Body:**
+
+```json
+{
+  "nama": "AC Tidak Dingin dan Bocor"
+}
+```
+
+**Response Success:**
+
+```json
+{
+  "status": true,
+  "message": "Keluhan updated successfully",
+  "data": {
+    "id": "uuid-string",
+    "nama": "AC Tidak Dingin dan Bocor",
+    "created_at": "2026-01-20T12:00:00.000000Z",
+    "updated_at": "2026-01-20T13:00:00.000000Z"
+  }
+}
+```
+
+**Error Response (Not Found):**
+
+```json
+{
+  "status": false,
+  "message": "Keluhan not found",
+  "data": null
+}
+```
+
+**Error Response (Missing Field):**
+
+```json
+{
+  "status": false,
+  "message": "nama field is required",
+  "data": null
+}
+```
+
+**Example cURL:**
+
+```bash
+curl -X PUT http://localhost:8080/keluhan/uuid-keluhan-id \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nama": "AC Tidak Dingin dan Bocor"}'
+```
+
+---
+
+### 7.5 Delete Keluhan
+
+**Endpoint:** `DELETE /keluhan/{id}`
+
+**Description:** Menghapus keluhan
+
+**Authentication:** 🔒 JWT Token required
+
+**URL Parameters:**
+
+- `id` (required): UUID keluhan
+
+**Response Success:**
+
+```json
+{
+  "status": true,
+  "message": "Keluhan deleted successfully",
+  "data": null
+}
+```
+
+**Error Response (Not Found):**
+
+```json
+{
+  "status": false,
+  "message": "Keluhan not found",
+  "data": null
+}
+```
+
+**Example cURL:**
+
+```bash
+curl -X DELETE http://localhost:8080/keluhan/uuid-keluhan-id \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+---
+
+## Models & Services
+
+### Keluhan Model
+
+**File:** `app/Models/Keluhan.php`
+
+**Table:** `keluhan`
+
+**Columns:**
+
+- `id` (uuid, primary key)
+- `nama` (string, required)
+- `created_at` (timestamp)
+- `updated_at` (timestamp)
+
+**Model Configuration:**
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Keluhan extends Model
+{
+    protected $table = 'keluhan';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
+    protected $fillable = [
+        'id',
+        'nama'
+    ];
+}
+```
+
+### KeluhanService
+
+**File:** `app/Services/KeluhanService.php`
+
+**Methods:**
+
+1. **`createKeluhan($data)`**
+   - Creates new keluhan
+   - Validates `nama` field
+   - Auto-generates UUID
+   - Returns JsonResponder
+
+2. **`listKeluhan()`**
+   - Lists all keluhan
+   - Ordered by `created_at` DESC (newest first)
+   - Returns JsonResponder
+
+3. **`getKeluhan($id)`**
+   - Gets single keluhan by ID
+   - Returns 404 if not found
+   - Returns JsonResponder
+
+4. **`updateKeluhan($id, $data)`**
+   - Updates existing keluhan
+   - Validates `nama` field
+   - Returns 404 if not found
+   - Returns JsonResponder
+
+5. **`deleteKeluhan($id)`**
+   - Deletes keluhan by ID
+   - Returns 404 if not found
+   - Returns JsonResponder
+
+**Service Registration:**
+
+Service registered in `bootstrap/app.php`:
+
+```php
+$container['KeluhanService'] = function ($c) {
+    return new \App\Services\KeluhanService();
+};
+```
+
+**Routes Registration:**
+
+Routes loaded in `routes/index.php`:
+
+```php
+(require __DIR__ . '/keluhan.php')($app);
+```
+
+---
+
 ## File Storage
 
 - **Upload Location:** `public/uploads/{resource}/`

@@ -24,6 +24,7 @@ return function (App $app) {
     (require __DIR__ . '/kategoris.php')($app);
     (require __DIR__ . '/brands.php')($app);
     (require __DIR__ . '/satuans.php')($app);
+    (require __DIR__ . '/keluhan.php')($app);
     (require __DIR__ . '/services.php')($app);
     (require __DIR__ . '/expenses.php')($app);
     (require __DIR__ . '/reports.php')($app);
