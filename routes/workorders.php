@@ -346,5 +346,19 @@ return function (App $app) {
             }
         })->add(new JwtMiddleware());
 
+        $wo->get('/service/history/asset/{customer_asset_id:[0-9a-fA-F-]{36}}', function (Request $req, Response $res, array $args) use ($container) {
+            try {
+                $svc = $container->get(WorkOrderService::class);
+                return $svc->getWorkOrderHistoryByCustomerAssetId($res, $args['customer_asset_id']);
+            } catch (\Exception $e) {
+                return JsonResponder::error($res, [
+                    'message' => $e->getMessage(),
+                    'type'    => get_class($e),
+                    'data'    => null,
+                    'file'    => $e->getFile() . ':' . $e->getLine(),
+                ], 500);
+            }
+        });
+
     });
 };

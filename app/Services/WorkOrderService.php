@@ -526,4 +526,18 @@ class WorkOrderService
         return JsonResponder::success($response, $workOrderPenjualan, 'Berhasil mengambil workorder penjualan', 200);
     }
 
+    public function getWorkOrderHistoryByCustomerAssetId(Response $response, string $customerAssetId): Response
+    {
+        $history = WorkOrderAcService::with(['customerAsset.customer', 'customerAsset.brand', 'customerAsset.tipe', 'pegawai'])
+            ->where('customer_asset_id', $customerAssetId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        if ($history->isEmpty()) {
+            return JsonResponder::success($response, [], 'Tidak ada history workorder untuk asset ini', 200);
+        }
+        
+        return JsonResponder::success($response, $history, 'Berhasil mengambil history workorder service', 200);
+    }
+
 }

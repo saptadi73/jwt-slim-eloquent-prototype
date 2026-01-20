@@ -677,6 +677,191 @@ curl -X DELETE http://localhost:8080/products/{id}
 
 ---
 
+## 5. WORKORDER SERVICE API
+
+### Base URL
+
+```text
+http://localhost:8080/wo
+```
+
+### 5.1 Get WorkOrder History by Customer Asset ID
+
+**Endpoint:** `GET /wo/service/history/asset/{customer_asset_id}`
+
+**Description:** Mendapatkan history semua workorder service berdasarkan customer asset ID, diurutkan dari terbaru
+
+**URL Parameters:**
+
+- `customer_asset_id` (required): UUID dari customer asset
+
+**Response:**
+
+```json
+{
+  "status": true,
+  "message": "Berhasil mengambil history workorder service",
+  "data": [
+    {
+      "id": "uuid-string",
+      "workorder_id": "uuid-workorder",
+      "customer_asset_id": "uuid-customer-asset",
+      "teknisi_id": "uuid-teknisi",
+      "keluhan": "AC tidak dingin",
+      "keterangan": "Sudah dicek dan diperbaiki",
+      "status": "selesai",
+      "nowo": "WO-00001",
+      "customerCode": "CUS123456",
+      "tanda_tangan_pelanggan": "/uploads/signatures/abc123.jpg",
+      "check_evaporator": true,
+      "keterangan_evaporator": "Normal",
+      "check_fan_indoor": true,
+      "keterangan_fan_indoor": "Berputar lancar",
+      "created_at": "2026-01-20T10:00:00.000000Z",
+      "updated_at": "2026-01-20T15:30:00.000000Z",
+      "customer_asset": {
+        "id": "uuid",
+        "kode_ac": "AC-001",
+        "customer_id": "uuid-customer",
+        "brand_id": "uuid-brand",
+        "tipe_id": "uuid-tipe",
+        "customer": {
+          "id": "uuid",
+          "nama": "PT. ABC",
+          "alamat": "Jl. Sudirman No. 123"
+        },
+        "brand": {
+          "id": "uuid",
+          "nama": "Daikin"
+        },
+        "tipe": {
+          "id": "uuid",
+          "nama": "Split 1 PK"
+        }
+      },
+      "pegawai": {
+        "id": "uuid",
+        "nama": "John Doe",
+        "nip": "12345"
+      }
+    }
+  ]
+}
+```
+
+**Success Response (No History):**
+
+```json
+{
+  "status": true,
+  "message": "Tidak ada history workorder untuk asset ini",
+  "data": []
+}
+```
+
+**Error Response:**
+
+```json
+{
+  "status": false,
+  "message": "Error message",
+  "data": null
+}
+```
+
+**Example cURL:**
+
+```bash
+curl -X GET http://localhost:8080/wo/service/history/asset/uuid-customer-asset-id
+```
+
+---
+
+## 6. CUSTOMER ASSETS API
+
+### Base URL
+
+```text
+http://localhost:8080/customers
+```
+
+### 6.1 Update Next Service Date
+
+**Endpoint:** `POST /customers/assets/update-next-service/{id}`
+
+**Description:** Mengupdate tanggal next service untuk customer asset tertentu
+
+**Authentication:** Required (JWT Token)
+
+**URL Parameters:**
+
+- `id` (required): UUID dari customer asset
+
+**Request Body:**
+
+```json
+{
+  "nextService": "2026-02-20"
+}
+```
+
+**Response Success:**
+
+```json
+{
+  "status": true,
+  "message": "Next service date updated successfully",
+  "data": {
+    "id": "uuid-customer-asset",
+    "customer_id": "uuid-customer",
+    "brand_id": "uuid-brand",
+    "tipe_id": "uuid-tipe",
+    "model": "Inverter",
+    "kapasitas": "1 PK",
+    "freon": "R32",
+    "lokasi": "Ruang Tamu",
+    "keterangan": "AC Normal",
+    "lastService": "2026-01-15",
+    "nextService": "2026-02-20",
+    "status": "aktif",
+    "gambar": "/uploads/assets/abc123.jpg",
+    "created_at": "2026-01-10T10:00:00.000000Z",
+    "updated_at": "2026-01-20T10:30:00.000000Z"
+  }
+}
+```
+
+**Error Response (Asset Not Found):**
+
+```json
+{
+  "status": false,
+  "message": "Customer Asset not found",
+  "data": null
+}
+```
+
+**Error Response (Missing Field):**
+
+```json
+{
+  "status": false,
+  "message": "nextService field is required",
+  "data": null
+}
+```
+
+**Example cURL:**
+
+```bash
+curl -X POST http://localhost:8080/customers/assets/update-next-service/uuid-customer-asset-id \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"nextService": "2026-02-20"}'
+```
+
+---
+
 ## File Storage
 
 - **Upload Location:** `public/uploads/{resource}/`

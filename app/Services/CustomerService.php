@@ -203,32 +203,43 @@ class CustomerService
 
     public function listCustomerAssetsAll(Response $response)
     {
-        $customerassets = Customer::select(
-            'customers.id',
-            'customers.kode_pelanggan',
-            'customers.nama',
-            'customers.gambar as gambar_customer',
-            'customers.hp',
-            'brand.nama as brand',
-            'tipe.nama as tipe',
-            'customer_assets.gambar as gambar_ac',
-            'customer_assets.id as asset_id',
-            'customer_assets.model',
-            'customer_assets.kapasitas',
-            'customer_assets.lastService',
-            'customer_assets.nextService',
-            'customer_assets.freon',
-            'customer_assets.status',
-            'customer_assets.lokasi'
-        )
-            ->join('customer_assets', 'customers.id', '=', 'customer_assets.customer_id')
-            ->join('brand', 'customer_assets.brand_id', '=', 'brand.id')
-            ->join('tipe', 'customer_assets.tipe_id', '=', 'tipe.id')
-            ->get();
-        if (!$customerassets) {
-            return JsonResponder::error($response, 'Customer Assets not found', 404);
+        try {
+            $customerassets = CustomerAsset::select(
+                'customer_assets.id as asset_id',
+                'customer_assets.customer_id',
+                'customer_assets.brand_id',
+                'customer_assets.tipe_id',
+                'customer_assets.model',
+                'customer_assets.kapasitas',
+                'customer_assets.lastService',
+                'customer_assets.nextService',
+                'customer_assets.freon',
+                'customer_assets.status',
+                'customer_assets.lokasi',
+                'customer_assets.gambar as gambar_ac',
+                'customer_assets.created_at',
+                'customer_assets.updated_at',
+                'customers.id as customer_id_detail',
+                'customers.kode_pelanggan',
+                'customers.nama as customer_nama',
+                'customers.gambar as gambar_customer',
+                'customers.hp',
+                'brand.nama as brand',
+                'tipe.nama as tipe'
+            )
+                ->join('customers', 'customer_assets.customer_id', '=', 'customers.id')
+                ->join('brand', 'customer_assets.brand_id', '=', 'brand.id')
+                ->join('tipe', 'customer_assets.tipe_id', '=', 'tipe.id')
+                ->orderBy('customer_assets.updated_at', 'desc')
+                ->get();
+            
+            if ($customerassets->isEmpty()) {
+                return JsonResponder::success($response, [], 'No customer assets found');
+            }
+            return JsonResponder::success($response, $customerassets, 'List of Customer Assets retrieved');
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to retrieve customer assets: ' . $th->getMessage(), 500);
         }
-        return JsonResponder::success($response, $customerassets, 'List of Customer Assets retrieved');
     }
 
     public function listCustomer(Response $response)
@@ -352,6 +363,27 @@ class CustomerService
             return JsonResponder::success($response, $assets, 'List of Rental Assets retrieved');
         } catch (\Throwable $th) {
             return JsonResponder::error($response, 'Failed to retrieve Rental Assets: ' . $th->getMessage(), 500);
+        }
+    }
+
+    public function updateNextService(Response $response, string $customerAssetId, array $data)
+    {
+        try {
+            $asset = CustomerAsset::find($customerAssetId);
+            if (!$asset) {
+                return JsonResponder::error($response, 'Customer Asset not found', 404);
+            }
+            
+            if (!isset($data['nextService'])) {
+                return JsonResponder::error($response, 'nextService field is required', 400);
+            }
+            
+            $asset->nextService = $data['nextService'];
+            $asset->save();
+            
+            return JsonResponder::success($response, $asset, 'Next service date updated successfully');
+        } catch (\Throwable $th) {
+            return JsonResponder::error($response, 'Failed to update next service date: ' . $th->getMessage(), 500);
         }
     }
 }

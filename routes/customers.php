@@ -216,6 +216,16 @@ return function (App $app) {
             }
         })->add(new JwtMiddleware());
 
+        $cust->post('/assets/update-next-service/{id:[0-9a-fA-F-]{36}}', function (Request $request, Response $response, array $args) use ($container) {
+            $data = RequestHelper::getJsonBody($request) ?? ($request->getParsedBody() ?? []);
+            try {
+                $svc = $container->get(CustomerService::class);
+                return $svc->updateNextService($response, $args['id'], $data);
+            } catch (\Throwable $th) {
+                return JsonResponder::error($response, 'Failed to update next service date: ' . $th->getMessage(), 500);
+            }
+        })->add(new JwtMiddleware());
+
         // Tambah endpoints lain: index/show/update/delete kalau diperlukan
         // $cust->get('',  [CustomerController::class, 'index']);
         // $cust->get('/{id}', [CustomerController::class, 'show']);
