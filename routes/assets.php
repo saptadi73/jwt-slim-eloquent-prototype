@@ -12,6 +12,74 @@ return function (App $app) {
      */
 
     // ===========================================================================
+    // PENTING: Routes untuk tanda_tangan HARUS didefinisikan SEBELUM routes umum
+    // karena Slim routing adalah sequential - route yang didefinisikan lebih dulu
+    // akan di-match lebih dulu
+    // ===========================================================================
+    
+    /**
+     * GET /uploads/tanda_tangan/:filename
+     * Serve tanda_tangan (signature) files dengan CORS headers
+     */
+    $app->get('/uploads/tanda_tangan/{filename:.+}', function (Request $request, Response $response, array $args) {
+        $filename = $args['filename'] ?? '';
+        
+        if (strpos($filename, '..') !== false || strpos($filename, '\\') !== false) {
+            return $response->withStatus(403);
+        }
+
+        $filePath = __DIR__ . '/../public/uploads/tanda_tangan/' . $filename;
+
+        if (!is_file($filePath)) {
+            return $response->withStatus(404);
+        }
+
+        if (!is_readable($filePath)) {
+            return $response->withStatus(403);
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $filePath);
+        finfo_close($finfo);
+
+        if (!$mimeType) {
+            $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+            $mimeMap = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+            ];
+            $mimeType = $mimeMap[$ext] ?? 'image/png';
+        }
+
+        $content = file_get_contents($filePath);
+        $response->getBody()->write($content);
+
+        return $response
+            ->withHeader('Content-Type', $mimeType)
+            ->withHeader('Content-Length', strlen($content))
+            ->withHeader('Cache-Control', 'public, max-age=3600')
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+            ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    });
+
+    /**
+     * OPTIONS /uploads/tanda_tangan/:filename
+     * Preflight untuk CORS
+     */
+    $app->options('/uploads/tanda_tangan/{filename:.+}', function (Request $request, Response $response) {
+        return $response
+            ->withStatus(204)
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+            ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            ->withHeader('Access-Control-Max-Age', '86400');
+    });
+
+    // ===========================================================================
     // IMAGES & UPLOADS - With CORS Headers
     // ===========================================================================
     
